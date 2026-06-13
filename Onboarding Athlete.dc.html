@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+@font-face { font-family:"Trenda"; src:url("fonts/Trenda-Regular.otf") format("opentype"); font-weight:400; font-style:normal; font-display:swap; }
+@font-face { font-family:"Trenda"; src:url("fonts/Trenda-Semibold.otf") format("opentype"); font-weight:600; font-style:normal; font-display:swap; }
+@font-face { font-family:"Trenda"; src:url("fonts/Trenda-Bold.otf") format("opentype"); font-weight:700; font-style:normal; font-display:swap; }
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body { margin:0; padding:0; }
+@keyframes om-fade { from{opacity:0} to{opacity:1} }
+@keyframes om-rise { from{transform:translateY(100%)} to{transform:translateY(0)} }
+@keyframes om-pop { 0%{transform:scale(.92);opacity:0} 100%{transform:scale(1);opacity:1} }
+@keyframes om-burst { 0%{transform:scale(.3);opacity:.55} 100%{transform:scale(2.4);opacity:0} }
+@keyframes om-drop { 0%{transform:translateY(-14px) scale(.96);opacity:0} 60%{opacity:1} 100%{transform:translateY(0) scale(1);opacity:1} }
+.om-scroll::-webkit-scrollbar{ width:0; height:0; }
+</style>
+<script src="image-slot.js"></script>
+</helmet>
+
+<div style="min-height:100vh; width:100%; background:#E9E9E6; display:flex; align-items:center; justify-content:center; padding:32px 16px; font-family:'Trenda',sans-serif;">
+  <div style="width:375px; height:812px; background:#FFFFFF; border-radius:42px; box-shadow:0 30px 80px -20px rgba(20,24,10,.45), 0 0 0 11px #111315, 0 0 0 13px #2a2d30; position:relative; overflow:hidden; display:flex; flex-direction:column;">
+
+    <!-- status bar -->
+    <div style="height:48px; flex:none; display:flex; align-items:center; justify-content:space-between; padding:14px 28px 0; font-family:'Sora',sans-serif; font-weight:600; font-size:14px; color:#1C1C1C;">
+      <span>9:41</span>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span style="font-size:11px; letter-spacing:1px;">●●●</span>
+        <span style="font-size:12px;">5G</span>
+        <span style="display:inline-block; width:22px; height:11px; border:1.5px solid #1C1C1C; border-radius:3px; position:relative;"><span style="position:absolute; inset:1.5px; right:5px; background:#1C1C1C; border-radius:1px;"></span></span>
+      </div>
+    </div>
+
+    <!-- header: back + progress -->
+    <div style="flex:none; display:flex; align-items:center; gap:14px; padding:10px 22px 6px;">
+      <sc-if value="{{ canGoBack }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ onBack }}" aria-label="Revenir en arrière" style="flex:none; width:34px; height:34px; border-radius:50%; border:none; background:#F2F2F2; color:#1C1C1C; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg></button>
+      </sc-if>
+      <sc-if value="{{ showProgress }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:1; display:flex; gap:6px; align-items:center;">
+          <sc-for list="{{ segments }}" as="seg" hint-placeholder-count="4">
+            <div style="{{ seg.style }}"></div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="om-scroll" style="flex:1; overflow-y:auto; overflow-x:hidden; padding:0;">
+
+      <!-- ===== PHRASE SCREENS ===== -->
+      <sc-if value="{{ isPhrase }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:30px 24px 28px;">
+          <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:#9A9A92; margin-bottom:6px;">{{ kicker }}</div>
+          <div style="font-family:'Sora',sans-serif; font-weight:600; font-size:15px; color:#454643; margin-bottom:30px;">{{ phraseTitle }}</div>
+
+          <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:23px; line-height:2; color:#1C1C1C; text-wrap:pretty;">
+            <sc-for list="{{ tokens }}" as="tok" hint-placeholder-count="7">
+              <sc-if value="{{ tok.isText }}" hint-placeholder-val="{{ true }}"><span>{{ tok.text }}</span></sc-if>
+              <sc-if value="{{ tok.isChip }}">
+                <button onClick="{{ tok.onTap }}" aria-label="{{ tok.aria }}" style="{{ tok.style }}" style-focus="outline:2px solid #245453; outline-offset:2px;"><sc-if value="{{ tok.isEmpty }}"><span style="opacity:.85; font-weight:700;">+ </span></sc-if><sc-if value="{{ tok.hasEmoji }}"><span style="font-size:18px;">{{ tok.emoji }}</span></sc-if><span>{{ tok.display }}</span></button>
+              </sc-if>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ showHint }}">
+            <div style="margin-top:26px; display:flex; align-items:center; gap:8px; color:#9A9A92; font-family:'Trenda',sans-serif; font-weight:400; font-size:14px;">
+              <span style="display:inline-flex; flex:none; width:22px; height:22px; border-radius:50%; background:#F3FAC3; align-items:center; justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5E7A1F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 14a8 8 0 0 1-8 8"></path><path d="M18 11v-1a2 2 0 0 0-2-2a2 2 0 0 0-2 2"></path><path d="M14 10V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v1"></path><path d="M10 9.5V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v10"></path><path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path></svg></span>
+              Touche les mots en pointillés pour les remplir.
+            </div>
+          </sc-if>
+
+          <div style="margin-top:30px; background:#F7F7F5; border-radius:16px; padding:16px;">
+            <div style="display:flex; align-items:center; gap:13px;">
+              <div style="{{ ringStyle }}"><div style="width:34px; height:34px; border-radius:50%; background:#FFFFFF; display:flex; align-items:center; justify-content:center; font-size:18px;">{{ goalEmoji }}</div></div>
+              <div style="flex:1; min-width:0;">
+                <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:14px; color:#1C1C1C;">Ton profil d'athlète</div>
+                <div style="font-family:'Trenda',sans-serif; font-weight:400; font-size:12.5px; color:#8A8B86; margin-top:1px;">{{ profileSub }}</div>
+              </div>
+              <div style="font-family:'Sora',sans-serif; font-weight:700; font-size:17px; color:#5E7A1F;">{{ profilePct }}%</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== RECAP SCREEN ===== -->
+      <sc-if value="{{ isRecap }}">
+        <div style="padding:20px 24px 36px;">
+          <div style="width:60px; height:60px; border-radius:50%; background:#DDF247; display:flex; align-items:center; justify-content:center; font-size:28px; margin-bottom:18px; box-shadow:0 8px 22px -6px rgba(190,210,40,.7);"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .962 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.962 0z"></path><path d="M20 3v4"></path><path d="M22 5h-4"></path><path d="M4 17v2"></path><path d="M5 18H3"></path></svg></div>
+          <div style="font-family:'Sora',sans-serif; font-weight:700; font-size:27px; line-height:1.2; color:#1C1C1C; letter-spacing:-.01em;">Ton profil est prêt.</div>
+          <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:16px; line-height:1.5; color:#1C1C1C; margin-top:10px;">{{ identityPre }} <span style="color:#5E7A1F;">{{ identityNum }}</span> {{ identityPost }}</div>
+
+          <div style="margin-top:16px;">
+            <div style="font-family:'Sora',sans-serif; font-weight:600; font-size:15px; line-height:1.5; color:#454643;">« Chaque action est un vote pour la personne que tu veux devenir. »</div>
+            <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:12px; letter-spacing:.02em; color:#9A9A92; margin-top:7px;">James Clear · <span style="font-style:italic;">Atomic Habits</span></div>
+          </div>
+
+          <!-- HERO habit card -->
+          <div style="margin-top:24px; background:#FBFDEA; border:1.5px solid #DDF247; border-radius:18px; padding:20px; position:relative; overflow:hidden;">
+            <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#7E8B36;">Ta première habitude</div>
+            {{ habitEl }}
+
+            <div style="display:flex; align-items:center; gap:7px; margin-top:16px;">
+              <sc-for list="{{ dots }}" as="d" hint-placeholder-count="3">
+                <span style="{{ d.style }}"></span>
+              </sc-for>
+              <span style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; color:#7E8B36; margin-left:6px;">{{ daysLabel }}</span>
+            </div>
+            <div style="margin-top:16px; padding-top:15px; border-top:1px solid rgba(126,139,54,.2);">
+              <button onClick="{{ onToggleNotif }}" style="display:flex; width:100%; align-items:center; justify-content:space-between; background:none; border:none; cursor:pointer; padding:0;">
+                <span style="display:flex; align-items:center; gap:9px;">
+                  <span style="display:inline-flex;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg></span>
+                  <span style="font-family:'Trenda',sans-serif; font-weight:600; font-size:14.5px; color:#1C1C1C;">Me rappeler mon habitude</span>
+                </span>
+                <span style="{{ switchTrackStyle }}"><span style="{{ switchKnobStyle }}"></span></span>
+              </button>
+              <sc-if value="{{ notif }}">
+                <div style="margin-top:14px; animation:om-fade .25s ease;">
+                  <div style="font-family:'Trenda',sans-serif; font-weight:400; font-size:12.5px; color:#7E8B36; margin-bottom:9px;">Combien de temps avant te prévenir ?</div>
+                  <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                    <sc-for list="{{ leadOptions }}" as="lo" hint-placeholder-count="4">
+                      <button onClick="{{ lo.onClick }}" style="{{ lo.style }}">{{ lo.label }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+
+            <button onPointerDown="{{ onHoldStart }}" onPointerUp="{{ onHoldEnd }}" onPointerLeave="{{ onHoldEnd }}" onClick="{{ onHabitTap }}" aria-label="{{ habitBtnLabel }}" style="{{ habitBtnStyle }}" style-focus="outline:2px solid #1C1C1C; outline-offset:2px;"><span style="{{ holdFillStyle }}"></span><span style="position:relative; z-index:1;">{{ habitBtnLabel }}</span></button>
+            <sc-if value="{{ showHoldHint }}">
+              <div style="font-family:'Trenda',sans-serif; font-weight:400; font-size:12.5px; color:#9A9A92; margin-top:9px; text-align:center;">Appuie et maintiens une seconde pour t'engager</div>
+            </sc-if>
+            <sc-if value="{{ todayDone }}">
+              <div style="font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#7E8B36; margin-top:10px; text-align:center; animation:om-fade .3s ease;">Bravo, reviens demain pour tenir ta série.</div>
+            </sc-if>
+          </div>
+
+          <!-- mini week plan -->
+          <div style="margin-top:14px; background:#FFFFFF; border:1.5px solid #ECECEC; border-radius:16px; padding:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:13px;">
+              <span style="font-family:'Trenda',sans-serif; font-weight:600; font-size:14px; color:#1C1C1C;">Ta semaine type</span>
+              <button onClick="{{ onAddCalendar }}" style="background:none; border:none; color:#5E7A1F; font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; cursor:pointer; padding:0; display:flex; align-items:center; gap:5px;"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5E7A1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M21 13V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"></path><path d="M3 10h18"></path><path d="M16 19h6"></path><path d="M19 16v6"></path></svg>Agenda</button>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <sc-for list="{{ weekPlan }}" as="d" hint-placeholder-count="7">
+                <button onClick="{{ d.onClick }}" aria-label="{{ d.label }}" style="{{ d.style }}" style-focus="outline:2px solid #245453; outline-offset:2px;">{{ d.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+
+          <!-- secondary -->
+          <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; letter-spacing:.04em; color:#9A9A92; margin:26px 0 12px;">Et quand tu veux, à ton rythme</div>
+
+          <div onClick="{{ onCoach }}" style="width:100%; text-align:left; background:#FFFFFF; border:1.5px solid #ECECEC; border-radius:14px; padding:13px 16px; display:flex; align-items:center; gap:13px; cursor:pointer; margin-bottom:10px;">
+            <sc-if value="{{ coachHasPhoto }}"><image-slot id="coach-photo" shape="circle" fit="cover" src="coach-avatar.png" placeholder="Coach" style="width:48px; height:48px; flex:none;"></image-slot></sc-if>
+            <sc-if value="{{ coachNoPhoto }}"><span style="{{ recapCoachAvatarStyle }}">{{ coachMono }}</span></sc-if>
+            <span style="flex:1;">
+              <span style="display:block; font-family:'Trenda',sans-serif; font-weight:600; font-size:15px; color:#1C1C1C;">{{ coachName }} · {{ coachSpec }}</span>
+              <span style="display:block; font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#8A8B86; margin-top:2px;">Ton coach le plus compatible. Fais connaissance.</span>
+            </span>
+            <span style="flex:none; display:inline-flex;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C5C5C0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></span>
+          </div>
+
+          <button onClick="{{ onFittest }}" style="width:100%; text-align:left; background:#FFFFFF; border:1.5px solid #ECECEC; border-radius:14px; padding:15px 16px; display:flex; align-items:center; gap:13px; cursor:pointer;">
+            <span style="flex:none; width:40px; height:40px; border-radius:11px; background:#F2F2F2; display:flex; align-items:center; justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#245453" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path></svg></span>
+            <span style="flex:1;">
+              <span style="display:block; font-family:'Trenda',sans-serif; font-weight:600; font-size:15px; color:#1C1C1C;">Mesurer ton point de départ</span>
+              <span style="display:block; font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#8A8B86; margin-top:2px;">Quelques tests pour bâtir sur tes forces.</span>
+            </span>
+            <span style="flex:none; display:inline-flex;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C5C5C0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></span>
+          </button>
+
+          <div style="text-align:center; margin-top:22px;">
+            <button onClick="{{ onRestart }}" style="background:none; border:none; color:#9A9A92; font-family:'Trenda',sans-serif; font-weight:600; font-size:14px; cursor:pointer; padding:8px; display:inline-flex; align-items:center; gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9A92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>Recommencer la démo</button>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+
+    <!-- FOOTER CTA -->
+    <sc-if value="{{ isPhrase }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:none; padding:14px 22px 30px; background:linear-gradient(to top, #FFFFFF 70%, rgba(255,255,255,0));">
+        <button onClick="{{ onCta }}" style="{{ ctaStyle }}">{{ ctaLabel }}</button>
+      </div>
+    </sc-if>
+
+    <!-- toast -->
+    <sc-if value="{{ toast }}">
+      <div style="position:absolute; left:50%; bottom:108px; transform:translateX(-50%); background:#1C1C1C; color:#FFFFFF; font-family:'Trenda',sans-serif; font-weight:600; font-size:14px; padding:11px 18px; border-radius:30px; white-space:nowrap; animation:om-pop .25s ease; box-shadow:0 10px 30px -8px rgba(0,0,0,.5);">{{ toast }}</div>
+    </sc-if>
+
+    <!-- celebration burst (anchored under the progress bar) -->
+    <sc-if value="{{ celebrate }}">
+      <div style="position:absolute; left:0; right:0; top:104px; display:flex; justify-content:center; pointer-events:none; z-index:30;">
+        <div style="position:relative; display:flex; align-items:center; justify-content:center;">
+          <div style="position:absolute; width:104px; height:104px; border-radius:50%; border:3px solid #DDF247; animation:om-burst .9s ease-out forwards;"></div>
+          <div style="background:#1C1C1C; color:#FFFFFF; font-family:'Trenda',sans-serif; font-weight:700; font-size:18px; padding:13px 22px; border-radius:40px; animation:om-drop .4s cubic-bezier(.22,1,.36,1); box-shadow:0 14px 36px -10px rgba(0,0,0,.5); white-space:nowrap;">{{ celebrate }}</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===== BOTTOM SHEET PICKER ===== -->
+    <sc-if value="{{ pickerOpen }}">
+      <div onClick="{{ onClosePicker }}" style="position:absolute; inset:0; background:rgba(18,18,18,.46); animation:om-fade .2s ease; z-index:20;"></div>
+      <div style="position:absolute; left:0; right:0; bottom:0; background:#FFFFFF; border-radius:24px 24px 0 0; padding:8px 22px 30px; max-height:78%; display:flex; flex-direction:column; animation:om-rise .3s cubic-bezier(.22,1,.36,1); z-index:21; box-shadow:0 -16px 40px -10px rgba(0,0,0,.18);">
+        <div style="width:38px; height:4px; border-radius:4px; background:#E2E2E2; margin:6px auto 16px;"></div>
+        <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:18px; color:#1C1C1C; margin-bottom:12px;">{{ pickerTitle }}</div>
+        <sc-if value="{{ socialText }}">
+          <div style="display:flex; align-items:center; gap:9px; background:#F3FAC3; border-radius:11px; padding:10px 13px; margin-bottom:14px;">
+            <span style="display:inline-flex;">{{ socialIconEl }}</span>
+            <span style="font-family:'Trenda',sans-serif; font-weight:600; font-size:12.5px; color:#5E7A1F; line-height:1.35;">{{ socialText }}</span>
+          </div>
+        </sc-if>
+
+        <!-- LIST -->
+        <sc-if value="{{ isList }}">
+          <div class="om-scroll" style="overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-bottom:4px;">
+            <sc-for list="{{ pickerOptions }}" as="opt" hint-placeholder-count="5">
+              <button onClick="{{ opt.onClick }}" aria-label="{{ opt.label }}" style="{{ opt.style }}" style-focus="outline:2px solid #245453; outline-offset:2px;">
+                <sc-if value="{{ opt.hasEmoji }}"><span style="font-size:20px; margin-right:11px;">{{ opt.emoji }}</span></sc-if>
+                <span style="flex:1; text-align:left;">{{ opt.label }}</span>
+                <sc-if value="{{ opt.selected }}"><span style="color:#5E7A1F; font-size:17px; font-weight:700;">✓</span></sc-if>
+              </button>
+            </sc-for>
+          </div>
+          <sc-if value="{{ listCustom }}">
+            <div style="margin-top:12px; padding-top:14px; border-top:1px solid #F0F0F0;">
+              <div style="font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#8A8B86; margin-bottom:9px;">Une échéance sur-mesure</div>
+              <div style="display:flex; gap:8px; align-items:stretch;">
+                <input value="{{ delaiNum }}" onInput="{{ onCustomNum }}" inputmode="numeric" placeholder="1" style="width:62px; flex:none; text-align:center; padding:0 8px; height:46px; border-radius:12px; border:1.5px solid #E6E6E6; font-family:'Trenda',sans-serif; font-weight:600; font-size:16px; color:#1C1C1C; outline:none;">
+                <div style="flex:1; display:flex; gap:4px; background:#F2F2F2; border-radius:12px; padding:4px;">
+                  <sc-for list="{{ unitOptions }}" as="u" hint-placeholder-count="3">
+                    <button onClick="{{ u.onClick }}" style="{{ u.style }}">{{ u.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <button onClick="{{ onSubmitDelai }}" style="{{ delaiBtnStyle }}">Valider l'échéance</button>
+            </div>
+          </sc-if>
+        </sc-if>
+
+        <!-- GRID -->
+        <sc-if value="{{ isGrid }}">
+          <div class="om-scroll" style="overflow-y:auto; display:grid; grid-template-columns:{{ gridCols }}; gap:10px; padding-bottom:4px;">
+            <sc-for list="{{ pickerOptions }}" as="opt" hint-placeholder-count="6">
+              <button onClick="{{ opt.onClick }}" aria-label="{{ opt.label }}" style="{{ opt.style }}" style-focus="outline:2px solid #245453; outline-offset:2px;">
+                <sc-if value="{{ opt.hasEmoji }}"><span style="font-size:26px;">{{ opt.emoji }}</span></sc-if>
+                <sc-if value="{{ opt.hasMono }}"><span style="{{ opt.monoStyle }}">{{ opt.mono }}</span></sc-if>
+                <span style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13.5px; text-align:center; line-height:1.2;">{{ opt.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <sc-if value="{{ gridCustom }}">
+            <div style="margin-top:14px; padding-top:14px; border-top:1px solid #F0F0F0; animation:om-fade .25s ease;">
+              <div style="font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#8A8B86; margin-bottom:8px;">Quel appareil utilises-tu ?</div>
+              <div style="display:flex; gap:8px;">
+                <input value="{{ customText }}" onInput="{{ onCustomText }}" onKeyDown="{{ onCustomKey }}" placeholder="{{ customPlaceholder }}" style="flex:1; min-width:0; padding:0 14px; height:48px; border-radius:12px; border:1.5px solid #E6E6E6; font-family:'Trenda',sans-serif; font-size:15px; color:#1C1C1C; outline:none;">
+                <button onClick="{{ onCustomSubmit }}" style="{{ customBtnStyle }}">OK</button>
+              </div>
+            </div>
+          </sc-if>
+        </sc-if>
+
+        <!-- STEPPER -->
+        <sc-if value="{{ isStepper }}">
+          <div style="padding:8px 0 4px;">
+            <div style="display:flex; align-items:center; justify-content:center; gap:28px; margin:8px 0 24px;">
+              <button onClick="{{ onStepDec }}" aria-label="Moins" style="width:56px; height:56px; border-radius:50%; border:1.5px solid #E2E2E2; background:#FFFFFF; font-size:28px; color:#1C1C1C; cursor:pointer; display:flex; align-items:center; justify-content:center;">−</button>
+              <div style="text-align:center; min-width:96px;">
+                <div style="font-family:'Sora',sans-serif; font-weight:700; font-size:52px; line-height:1; color:#1C1C1C;">{{ stepperValue }}</div>
+                <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; color:#8A8B86; margin-top:4px;">jours / semaine</div>
+              </div>
+              <button onClick="{{ onStepInc }}" aria-label="Plus" style="width:56px; height:56px; border-radius:50%; border:none; background:#DDF247; font-size:28px; color:#245453; cursor:pointer; display:flex; align-items:center; justify-content:center;">+</button>
+            </div>
+            <button onClick="{{ onClosePicker }}" style="width:100%; height:54px; border:none; border-radius:14px; background:#DDF247; color:#245453; font-family:'Trenda',sans-serif; font-weight:700; font-size:16px; cursor:pointer;">Valider</button>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    screen: 0,
+    answers: { goal:'', delai:'', target:'', freq:'', place:'', level:'', blocker:'', limitation:'', device:'', days:3, micro:'', anchor:'' },
+    picker: null,
+    todayDone: false,
+    toast: '',
+    customText: '',
+    customMode: false,
+    customNum: '',
+    customUnit: 'semaines',
+    notif: false,
+    notifLead: 'on_time',
+    celebrate: '',
+    holdProgress: 0,
+    weekDays: null
+  };
+
+  coaches = {
+    strength: { name:'Marina L.', spec:'Force & mobilité', mono:'ML', photo:'coach-avatar.png' },
+    weight_loss: { name:'Tom R.', spec:'Recomposition', mono:'TR' },
+    energy: { name:'Léa P.', spec:'Énergie & souffle', mono:'LP', photo:'coach-avatar.png' },
+    endurance: { name:'Karim B.', spec:'Endurance', mono:'KB' },
+    sleep: { name:'Nina S.', spec:'Récup & sommeil', mono:'NS', photo:'coach-avatar.png' },
+    event: { name:'Hugo M.', spec:'Prépa événement', mono:'HM' },
+    move_more: { name:'Sam D.', spec:'Remise en mouvement', mono:'SD' }
+  };
+  affirm = ['Beau départ', 'Tu te connais bien', 'On y est presque'];
+  socialTip = { goal:1, freq:1, micro:1, anchor:1 };
+  social = {
+    goal: 'Écrire son objectif, c\u2019est déjà se donner plus de chances de s\u2019y tenir.',
+    freq: 'La régularité compte plus que la fréquence : commence où tu peux.',
+    place: '1 athlète sur 2 s\u2019entraîne surtout à la maison.',
+    level: '4 athlètes sur 10 repartent aussi de zéro, tu n\u2019es pas seul.',
+    blocker: 'Le manque de temps est le frein le plus souvent cité.',
+    micro: 'Commencer tout petit, c\u2019est ce qui fait tenir une habitude dans la durée.',
+    anchor: 'Rattacher son habitude à un moment déjà ancré aide à la tenir.'
+  };
+  spreadMap = { 1:[2], 2:[1,4], 3:[0,2,4], 4:[0,2,4,6], 5:[0,1,3,4,6], 6:[0,1,2,3,4,5], 7:[0,1,2,3,4,5,6] };
+  ICONMAP = {
+    goal: { strength:'dumbbell', weight_loss:'scale', energy:'zap', endurance:'activity', sleep:'moon', event:'target', move_more:'sprout' },
+    level: { zero:'sprout', stopped:'rotateccw', occasional:'smile', regular:'dumbbell', competitor:'flame' },
+    place: { home:'house', gym:'dumbbell', outdoor:'trees', mixed:'shuffle' },
+    device: { apple_watch:'watch' }
+  };
+  LUCIDE = {
+    dumbbell: ['M14.4 14.4 9.6 9.6','M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z','m21.5 21.5-1.4-1.4','M3.9 3.9 2.5 2.5','M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z'],
+    scale: ['m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z','m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z','M7 21h10','M12 3v18','M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2'],
+    zap: ['M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z'],
+    activity: ['M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2'],
+    moon: ['M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z'],
+    target: [['circle',{cx:12,cy:12,r:10}],['circle',{cx:12,cy:12,r:6}],['circle',{cx:12,cy:12,r:2}]],
+    sprout: ['M7 20h10','M10 20c5.5-2.5.8-6.4 3-10','M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z','M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z'],
+    rotateccw: ['M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8','M3 3v5h5'],
+    smile: [['circle',{cx:12,cy:12,r:10}],'M8 14s1.5 2 4 2 4-2 4-2',['line',{x1:9,x2:'9.01',y1:9,y2:9}],['line',{x1:15,x2:'15.01',y1:9,y2:9}]],
+    flame: ['M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z'],
+    house: ['M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8','M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'],
+    trees: ['M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z','M7 16v6','M13 19v3','M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5'],
+    shuffle: ['M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22','m18 2 4 4-4 4','M2 6h1.9c1.5 0 2.9.9 3.6 2.2','M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8','m18 14 4 4-4 4'],
+    watch: [['circle',{cx:12,cy:12,r:6}],'M16.51 17.35l-.35 3.83a2 2 0 0 1-2 1.82H9.83a2 2 0 0 1-2-1.82l-.35-3.83m.01-10.7l.35-3.83A2 2 0 0 1 9.83 1h4.35a2 2 0 0 1 2 1.82l.35 3.83'],
+    bell: ['M10.268 21a2 2 0 0 0 3.464 0','M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326'],
+    sparkles: ['M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .962 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.962 0z','M20 3v4','M22 5h-4','M4 17v2','M5 18H3'],
+    barchart: ['M3 3v16a2 2 0 0 0 2 2h16','M18 17V9','M13 17V5','M8 17v-3'],
+    trendingup: ['M16 7h6v6','m22 7-8.5 8.5-5-5L2 17'],
+    lightbulb: ['M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5','M9 18h6','M10 22h4'],
+    chevronright: ['m9 18 6-6-6-6'],
+    calendarplus: ['M8 2v4','M16 2v4','M21 13V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8','M3 10h18','M16 19h6','M19 16v6'],
+    arrowleft: ['m12 19-7-7 7-7','M19 12H5'],
+    user: ['M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2',['circle',{cx:12,cy:7,r:4}]],
+    pencil: ['M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z','m15 5 4 4']
+  };
+  ic(name, size, color, sw) {
+    const defs = this.LUCIDE[name] || [];
+    const els = defs.map((e, i) => typeof e === 'string'
+      ? React.createElement('path', { key:i, d:e })
+      : React.createElement(e[0], { key:i, ...e[1] }));
+    return React.createElement('svg', { xmlns:'http://www.w3.org/2000/svg', width:size||20, height:size||20, viewBox:'0 0 24 24', fill:'none', stroke:color||'currentColor', strokeWidth:sw||2, strokeLinecap:'round', strokeLinejoin:'round' }, els);
+  }
+  iconFor(key, value) {
+    const v = value !== undefined ? value : this.state.answers[key];
+    return ((this.ICONMAP[key] || {})[v]) || null;
+  }
+
+  data = {
+    goal: [
+      { value:'strength', label:'devenir plus fort', emoji:'💪' },
+      { value:'weight_loss', label:'perdre du poids', emoji:'⚖️' },
+      { value:'energy', label:'avoir plus d\u2019énergie', emoji:'⚡' },
+      { value:'endurance', label:'gagner en endurance', emoji:'🏃' },
+      { value:'sleep', label:'mieux dormir', emoji:'😴' },
+      { value:'event', label:'préparer un événement', emoji:'🎯' },
+      { value:'move_more', label:'bouger plus, simplement', emoji:'🌱' }
+    ],
+    delai: [
+      { value:'3w', label:'3 semaines' },
+      { value:'6w', label:'6 semaines' },
+      { value:'3m', label:'3 mois' },
+      { value:'6m', label:'6 mois' },
+      { value:'1y', label:'1 an' }
+    ],
+    target: {
+      strength: [ {value:'t1',label:'faire 10 tractions'}, {value:'t2',label:'soulever 100 kg au deadlift'}, {value:'t3',label:'tenir 30 pompes d\u2019affilée'} ],
+      weight_loss: [ {value:'t1',label:'perdre 5 kg'}, {value:'t2',label:'rentrer dans mon ancien jean'}, {value:'t3',label:'réduire mon tour de taille'} ],
+      energy: [ {value:'t1',label:'tenir mes journées à fond'}, {value:'t2',label:'me réveiller en forme'}, {value:'t3',label:'zéro coup de barre à 16 h'} ],
+      endurance: [ {value:'t1',label:'courir 10 km d\u2019une traite'}, {value:'t2',label:'tenir 1 h de vélo'}, {value:'t3',label:'monter mes étages sans souffler'} ],
+      sleep: [ {value:'t1',label:'m\u2019endormir en moins de 15 min'}, {value:'t2',label:'dormir 7 h par nuit'}, {value:'t3',label:'me réveiller reposé'} ],
+      event: [ {value:'t1',label:'finir mon premier semi'}, {value:'t2',label:'être prêt le jour J'}, {value:'t3',label:'tenir un trek de plusieurs jours'} ],
+      move_more: [ {value:'t1',label:'bouger un peu chaque jour'}, {value:'t2',label:'atteindre 8 000 pas par jour'}, {value:'t3',label:'rester moins assis'} ]
+    },
+    freq: [
+      { value:'rare', label:'rarement' },
+      { value:'1-2', label:'1 à 2 fois par semaine' },
+      { value:'3-4', label:'3 à 4 fois par semaine' },
+      { value:'5+', label:'5 fois et plus' }
+    ],
+    place: [
+      { value:'home', label:'à la maison', emoji:'🏠' },
+      { value:'gym', label:'en salle', emoji:'🏋️' },
+      { value:'outdoor', label:'dehors', emoji:'🌳' },
+      { value:'mixed', label:'un peu partout', emoji:'🔀' }
+    ],
+    level: [
+      { value:'zero', label:'je pars de zéro', emoji:'🌱' },
+      { value:'stopped', label:'je m\u2019y remets', emoji:'🔄' },
+      { value:'occasional', label:'je m\u2019entraîne par moments', emoji:'🙂' },
+      { value:'regular', label:'je suis régulier', emoji:'💪' },
+      { value:'competitor', label:'je suis un compétiteur', emoji:'🔥' }
+    ],
+    blocker: [
+      { value:'time', label:'le manque de temps' },
+      { value:'motivation', label:'le manque de motivation' },
+      { value:'know_how', label:'ne pas savoir quoi faire' },
+      { value:'consistency', label:'tenir dans la durée' },
+      { value:'injury_fatigue', label:'les blessures et la fatigue' }
+    ],
+    limitation: [
+      { value:'none', label:'tout va bien' },
+      { value:'injury_recovery', label:'je récupère d\u2019une blessure' },
+      { value:'chronic_pain', label:'j\u2019ai une douleur chronique' },
+      { value:'mobility', label:'ma mobilité est limitée' }
+    ],
+    device: [
+      { value:'none', label:'aucun objet', mono:'•' },
+      { value:'apple_watch', label:'Apple Watch', mono:'⌚' },
+      { value:'garmin', label:'Garmin', mono:'G' },
+      { value:'suunto', label:'Suunto', mono:'S' },
+      { value:'whoop', label:'Whoop', mono:'W' },
+      { value:'polar', label:'Polar', mono:'P' },
+      { value:'fitbit', label:'Fitbit', mono:'F' },
+      { value:'oura', label:'Oura', mono:'O' },
+      { value:'other', label:'autre', mono:'+' }
+    ],
+    micro: {
+      strength: [ {value:'m1',label:'10 pompes'}, {value:'m2',label:'une suspension à la barre 20 s'}, {value:'m3',label:'15 squats au poids du corps'} ],
+      weight_loss: [ {value:'m1',label:'10 min de marche rapide'}, {value:'m2',label:'un grand verre d\u2019eau'}, {value:'m3',label:'20 squats'} ],
+      energy: [ {value:'m1',label:'5 min d\u2019étirements'}, {value:'m2',label:'une marche au grand air'}, {value:'m3',label:'10 respirations profondes'} ],
+      endurance: [ {value:'m1',label:'10 min de course légère'}, {value:'m2',label:'20 montées de genoux'}, {value:'m3',label:'2 min de corde à sauter'} ],
+      sleep: [ {value:'m1',label:'10 min sans écran'}, {value:'m2',label:'5 respirations lentes'}, {value:'m3',label:'des étirements doux'} ],
+      event: [ {value:'m1',label:'15 min de cardio'}, {value:'m2',label:'1 min de gainage'}, {value:'m3',label:'10 montées d\u2019escaliers'} ],
+      move_more: [ {value:'m1',label:'5 min de marche'}, {value:'m2',label:'me lever toutes les heures'}, {value:'m3',label:'20 squats'} ]
+    },
+    anchor: [
+      { value:'wake', label:'après le réveil' },
+      { value:'coffee', label:'après le café' },
+      { value:'work', label:'après le travail' },
+      { value:'lunch', label:'après le déjeuner' },
+      { value:'sleep', label:'avant de dormir' }
+    ]
+  };
+
+  meta = {
+    titles: ['Ton ambition', 'Où tu en es', 'Ce qui compte pour bien t\u2019aider', 'Ta première habitude'],
+    pickerTitles: {
+      goal:'Quel est ton objectif ?', delai:'Sur quelle échéance ?', target:'Ton premier objectif concret',
+      freq:'Tu t\u2019entraînes combien ?', place:'Où t\u2019entraînes-tu ?', level:'Où en es-tu aujourd\u2019hui ?',
+      blocker:'Qu\u2019est-ce qui te freine ?', limitation:'Côté corps ?', device:'Quel objet connecté ?',
+      days:'Combien de jours par semaine ?', micro:'Ta micro-habitude pour démarrer', anchor:'À quel moment ?'
+    },
+    req: { 0:['goal','delai','target'], 1:['freq','place','level'], 2:['blocker','limitation','device'], 3:['micro','anchor'] }
+  };
+
+  optsFor(key) {
+    const g = this.state.answers.goal;
+    if (key === 'target') return this.data.target[g] || [];
+    if (key === 'micro') return this.data.micro[g] || [];
+    return this.data[key] || [];
+  }
+  labelFor(key) {
+    const v = this.state.answers[key];
+    if (!v) return '';
+    const o = this.optsFor(key).find(x => x.value === v);
+    return o ? o.label : v;
+  }
+  emojiFor(key) {
+    const v = this.state.answers[key];
+    const o = this.optsFor(key).find(x => x.value === v);
+    return o && o.emoji ? o.emoji : '';
+  }
+
+  open = (key) => this.setState({ picker: key, customText: '', customMode: false, customNum: '', customUnit: 'semaines' });
+  closePicker = () => this.setState({ picker: null });
+  pick = (key, value) => this.setState(s => {
+    const a = { ...s.answers, [key]: value };
+    if (key === 'goal' && s.answers.goal !== value) { a.target = ''; a.micro = ''; }
+    return { answers: a, picker: null, customMode: false, customText: '' };
+  });
+  onCustomText = (e) => this.setState({ customText: e.target.value });
+  onCustomKey = (e) => { if (e.key === 'Enter') this.submitCustom(); };
+  submitCustom = () => { const t = (this.state.customText || '').trim(); if (t) this.pick(this.state.picker, t); };
+  onCustomNum = (e) => this.setState({ customNum: e.target.value.replace(/[^0-9]/g, '').slice(0, 3) });
+  setCustomUnit = (u) => this.setState({ customUnit: u });
+  unitWord = (n, u) => u === 'jours' ? (n > 1 ? 'jours' : 'jour') : u === 'mois' ? 'mois' : (n > 1 ? 'semaines' : 'semaine');
+  submitDelai = () => { const n = parseInt(this.state.customNum, 10); if (!n || n < 1) return; this.pick('delai', n + ' ' + this.unitWord(n, this.state.customUnit)); };
+  startDeviceOther = () => this.setState({ customMode: true, customText: '' });
+  toggleNotif = () => this.setState(s => ({ notif: !s.notif }));
+  setNotifLead = (v) => this.setState({ notifLead: v });
+  lockedTap = () => this.showToast('Choisis d\u2019abord ton objectif');
+  step = (delta) => this.setState(s => ({ answers: { ...s.answers, days: Math.max(1, Math.min(7, s.answers.days + delta)) }, weekDays: null }));
+  toggleWeekDay = (i) => this.setState(s => {
+    const base = s.weekDays !== null ? s.weekDays.slice() : (this.spreadMap[s.answers.days] || []).slice();
+    const idx = base.indexOf(i);
+    if (idx === -1) base.push(i); else if (base.length > 1) base.splice(idx, 1);
+    base.sort((x, y) => x - y);
+    return { weekDays: base, answers: { ...s.answers, days: base.length } };
+  });
+  celebrate = (msg) => { this.setState({ celebrate: msg }); clearTimeout(this._cel); this._cel = setTimeout(() => this.setState({ celebrate: '' }), 1100); };
+  next = () => { const cur = this.state.screen; if (cur <= 2) this.celebrate(this.affirm[cur]); this.setState(s => ({ screen: Math.min(4, s.screen + 1) })); };
+  holdStart = () => {
+    if (this.state.todayDone) return;
+    this._t0 = Date.now();
+    clearInterval(this._iv);
+    this._iv = setInterval(() => {
+      const p = Math.min(100, (Date.now() - this._t0) / 850 * 100);
+      this.setState({ holdProgress: p });
+      if (p >= 100) this.commitHabit();
+    }, 16);
+  };
+  holdEnd = () => { clearInterval(this._iv); if (this.state.todayDone) return; this.setState({ holdProgress: 0 }); };
+  commitHabit = () => { clearInterval(this._iv); this.setState({ todayDone: true, holdProgress: 0 }); this.celebrate('Engagement pris'); };
+  back = () => this.setState(s => ({ screen: Math.max(0, s.screen - 1) }));
+  restart = () => this.setState({ screen:0, todayDone:false, weekDays:null, answers:{ goal:'', delai:'', target:'', freq:'', place:'', level:'', blocker:'', limitation:'', device:'', days:3, micro:'', anchor:'' } });
+  toggleHabit = () => this.setState(s => ({ todayDone: !s.todayDone }));
+  showToast = (msg) => { this.setState({ toast: msg }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: '' }), 2200); };
+
+  buildTokens() {
+    const a = this.state.answers, screen = this.state.screen;
+    const base = { display:'inline-flex', alignItems:'center', gap:'4px', padding:'3px 11px', margin:'0 1px', borderRadius:'8px', fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'22px', lineHeight:'1.2', verticalAlign:'middle', cursor:'pointer', transition:'all .15s ease', whiteSpace:'nowrap' };
+    const filledStyle = { ...base, background:'#F3FAC3', border:'1.5px solid #C7DF3F', color:'#245453' };
+    const emptyStyle = { ...base, background:'#FBFDF0', border:'1.5px dashed #C2D87A', color:'#6E8A2B' };
+    const disabledStyle = { ...base, background:'transparent', border:'1.5px dashed #E4E4E4', color:'#C2C2C2', cursor:'not-allowed' };
+
+    const t = (text) => ({ isText:true, isChip:false, text });
+    const chip = (key, placeholder, dependsGoal) => {
+      const isDays = key === 'days';
+      const filled = isDays ? true : !!a[key];
+      const disabled = !!dependsGoal && !a.goal;
+      let display, emoji = '';
+      if (isDays) display = a.days + (a.days > 1 ? ' jours' : ' jour');
+      else if (filled) { display = this.labelFor(key); emoji = this.emojiFor(key); }
+      else display = placeholder;
+      const style = disabled ? disabledStyle : (filled ? filledStyle : emptyStyle);
+      return {
+        isText:false, isChip:true, key, filled, isEmpty: !filled && !disabled, disabled,
+        hasEmoji: filled && !!emoji, emoji, display, showChevron: filled && !isDays,
+        style, aria: disabled ? ('Verrouillé : ' + (placeholder || key) + ', choisis d\u2019abord ton objectif') : ((filled ? 'Modifier ' : 'Choisir ') + (placeholder || key) + (filled ? ' : ' + display : '')),
+        onTap: disabled ? this.lockedTap : () => this.open(key)
+      };
+    };
+
+    if (screen === 0) return [ t('Je veux '), chip('goal','un objectif'), t('. D\u2019ici '), chip('delai','un délai'), t(', mon premier objectif c\u2019est '), chip('target','un résultat', true), t('.') ];
+    if (screen === 1) return [ t('Aujourd\u2019hui je m\u2019entraîne '), chip('freq','une fréquence'), t(', surtout '), chip('place','un lieu'), t(', et je dirais que '), chip('level','mon niveau'), t('.') ];
+    if (screen === 2) return [ t('Ce qui me freine souvent, c\u2019est '), chip('blocker','mon frein'), t('. Côté corps, '), chip('limitation','mon état'), t('. Je suis mes données avec '), chip('device','un objet'), t('.') ];
+    return [ t('Je m\u2019engage sur '), chip('days'), t(' par semaine. Pour démarrer en douceur, je ferai '), chip('micro','une habitude', true), t(', '), chip('anchor','un moment'), t('.') ];
+  }
+
+  renderVals() {
+    const s = this.state, a = s.answers;
+    const isRecap = s.screen === 4;
+    const isPhrase = !isRecap;
+
+    const segments = [0,1,2,3].map(i => {
+      const done = isRecap || i <= s.screen;
+      return { style: { height:'5px', borderRadius:'32px', flex:1, background: done ? '#DDF247' : '#ECECEC', transition:'background .25s ease' } };
+    });
+
+    const enabled = (this.meta.req[s.screen] || []).every(k => !!a[k]);
+    const ctaActive = { width:'100%', height:'56px', border:'none', borderRadius:'14px', background:'#DDF247', color:'#245453', fontFamily:'"Trenda",sans-serif', fontWeight:700, fontSize:'17px', cursor:'pointer', transition:'all .2s ease', boxShadow:'0 10px 24px -10px rgba(190,210,40,.9)' };
+    const ctaDisabled = { width:'100%', height:'56px', border:'none', borderRadius:'14px', background:'#EFEFEF', color:'#BcBcBc', fontFamily:'"Trenda",sans-serif', fontWeight:700, fontSize:'17px', cursor:'not-allowed' };
+
+    // picker
+    const pk = s.picker;
+    let pickerTitle='', socialText='', socialIconEl=null, isList=false, isGrid=false, isStepper=false, gridCols='', pickerOptions=[];
+    if (pk) {
+      pickerTitle = this.meta.pickerTitles[pk];
+      socialText = (pk === 'device' && s.customMode) ? '' : (this.social[pk] || '');
+      socialIconEl = socialText ? this.ic(this.socialTip[pk] ? 'lightbulb' : 'barchart', 16, '#5E7A1F') : null;
+      if (pk === 'days') isStepper = true;
+      else if (pk === 'place') { isGrid = true; gridCols = 'repeat(2,1fr)'; }
+      else if (pk === 'device') { isGrid = true; gridCols = 'repeat(3,1fr)'; }
+      else isList = true;
+
+      const tileBase = { display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'8px', minHeight: pk==='device'?'88px':'96px', padding:'14px 8px', borderRadius:'14px', cursor:'pointer', fontFamily:'"Trenda",sans-serif', background:'#F7F7F5', border:'1.5px solid transparent', transition:'all .15s ease' };
+      const rowBase = { display:'flex', alignItems:'center', width:'100%', padding:'15px 16px', borderRadius:'13px', cursor:'pointer', fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'16px', color:'#1C1C1C', background:'#F7F7F5', border:'1.5px solid transparent', transition:'all .15s ease' };
+      const monoBase = { width:'34px', height:'34px', borderRadius:'9px', background:'#FFFFFF', border:'1px solid #E6E6E6', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'"Sora",sans-serif', fontWeight:700, fontSize:'15px', color:'#454643' };
+
+      pickerOptions = this.optsFor(pk).map((o, idx) => {
+        const selected = a[pk] === o.value || (pk === 'device' && o.value === 'other' && this.state.customMode);
+        const style = isGrid
+          ? { ...tileBase, background: selected ? '#F3FAC3' : '#F7F7F5', border: '1.5px solid ' + (selected ? '#C7DF3F' : 'transparent') }
+          : { ...rowBase, background: selected ? '#F3FAC3' : '#F7F7F5', border: '1.5px solid ' + (selected ? '#C7DF3F' : 'transparent'), color: selected ? '#245453' : '#1C1C1C' };
+        return {
+          value:o.value, label:o.label, emoji:o.emoji || '', hasEmoji: !!o.emoji,
+          mono:o.mono || '', hasMono: !!o.mono, monoStyle: { ...monoBase, background: '#FFFFFF', borderColor: selected ? '#C7DF3F' : '#E6E6E6' },
+          selected, style, onClick: (pk === 'device' && o.value === 'other') ? this.startDeviceOther : () => this.pick(pk, o.value)
+        };
+      });
+    }
+
+    // free-text inputs (modular period + "autre" device) and reminders
+    const customText = s.customText || '';
+    const customEnabled = customText.trim().length > 0;
+    const listCustom = pk === 'delai';
+    const gridCustom = pk === 'device' && s.customMode;
+    const customPlaceholder = pk === 'device' ? 'Ex : Coros, Withings…' : 'Ex : 8 semaines, d\u2019ici l\u2019été…';
+    const customBtnStyle = { flex:'none', padding:'0 18px', height:'48px', borderRadius:'12px', border:'none', background: customEnabled ? '#DDF247' : '#EFEFEF', color: customEnabled ? '#245453' : '#BcBcBc', fontFamily:'"Trenda",sans-serif', fontWeight:700, fontSize:'15px', cursor: customEnabled ? 'pointer' : 'not-allowed' };
+
+    // structured custom deadline (number + unit)
+    const delaiNum = s.customNum || '';
+    const delaiUnit = s.customUnit || 'semaines';
+    const delaiEnabled = parseInt(delaiNum, 10) >= 1;
+    const unitSegBase = { flex:1, height:'38px', borderRadius:'9px', border:'none', cursor:'pointer', fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'13px', transition:'all .15s ease' };
+    const unitOptions = [{ key:'jours', label:'Jours' }, { key:'semaines', label:'Semaines' }, { key:'mois', label:'Mois' }].map(u => ({
+      label:u.label, selected: delaiUnit === u.key,
+      style: { ...unitSegBase, background: delaiUnit === u.key ? '#FFFFFF' : 'transparent', color: delaiUnit === u.key ? '#245453' : '#8A8B86', boxShadow: delaiUnit === u.key ? '0 1px 3px rgba(0,0,0,.12)' : 'none' },
+      onClick: () => this.setCustomUnit(u.key)
+    }));
+    const delaiBtnStyle = { width:'100%', height:'48px', marginTop:'12px', border:'none', borderRadius:'12px', background: delaiEnabled ? '#DDF247' : '#EFEFEF', color: delaiEnabled ? '#245453' : '#BcBcBc', fontFamily:'"Trenda",sans-serif', fontWeight:700, fontSize:'15px', cursor: delaiEnabled ? 'pointer' : 'not-allowed' };
+
+    const switchTrackStyle = { flex:'none', width:'46px', height:'28px', borderRadius:'28px', background: s.notif ? '#DDF247' : '#E2E2E2', display:'inline-flex', alignItems:'center', padding:'3px', transition:'background .2s ease' };
+    const switchKnobStyle = { width:'22px', height:'22px', borderRadius:'50%', background:'#FFFFFF', boxShadow:'0 1px 3px rgba(0,0,0,.25)', transform: s.notif ? 'translateX(18px)' : 'translateX(0)', transition:'transform .2s ease' };
+    const leadDefs = [ {value:'on_time',label:'À ce moment'}, {value:'10',label:'10 min avant'}, {value:'30',label:'30 min avant'}, {value:'60',label:'1 h avant'} ];
+    const leadBase = { padding:'9px 15px', borderRadius:'30px', fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'13px', cursor:'pointer', transition:'all .15s ease' };
+    const leadOptions = leadDefs.map(l => ({
+      label:l.label, selected: s.notifLead === l.value,
+      style: { ...leadBase, background: s.notifLead === l.value ? '#F3FAC3' : '#F7F7F5', border: '1.5px solid ' + (s.notifLead === l.value ? '#C7DF3F' : 'transparent'), color: s.notifLead === l.value ? '#245453' : '#56574F' },
+      onClick: () => this.setNotifLead(l.value)
+    }));
+    const leadLabel = (leadDefs.find(l => l.value === s.notifLead) || leadDefs[0]).label;
+    const reminderText = s.notifLead === 'on_time' ? 'Rappel à l\u2019heure dite' : ('Rappel ' + leadLabel);
+
+    // recap
+    const anchorL = this.labelFor('anchor');
+    const anchorCap = anchorL ? anchorL.charAt(0).toUpperCase() + anchorL.slice(1) : '';
+    const microL = this.labelFor('micro');
+    const habitText = anchorCap + ', je ferai ' + microL + '.';
+    const effectiveDays = s.weekDays !== null ? s.weekDays : (this.spreadMap[a.days] || []);
+    const daysCount = effectiveDays.length || a.days;
+    const habitTapStyle = { borderBottom:'1.5px dashed #C2D87A', cursor:'pointer', paddingBottom:'1px' };
+    const habitEl = React.createElement('div', { style:{ fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'22px', lineHeight:1.3, color:'#1C1C1C', marginTop:'8px' } }, [
+      React.createElement('span', { key:'a', style:habitTapStyle, onClick:()=>this.open('anchor') }, anchorCap || '…'),
+      ', je ferai ',
+      React.createElement('span', { key:'m', style:habitTapStyle, onClick:()=>this.open('micro') }, microL || '…'),
+      '.'
+    ]);
+    const dots = Array.from({ length: daysCount }).map((_, i) => ({
+      style: { width:'10px', height:'10px', borderRadius:'50%', background: (s.todayDone && i === 0) ? '#5E7A1F' : '#DCE89A', transition:'background .2s ease' }
+    }));
+    const habitBtnStyle = { position:'relative', overflow:'hidden', width:'100%', height:'52px', marginTop:'18px', border:'none', borderRadius:'13px', cursor:'pointer', fontFamily:'"Trenda",sans-serif', fontWeight:700, fontSize:'16px', transition:'background .2s ease, color .2s ease', background: s.todayDone ? '#245453' : '#DDF247', color: s.todayDone ? '#DDF247' : '#245453' };
+
+    // engagement: profile build, coach reveal, identity, hold-to-commit
+    const dimKeys = ['goal','limitation','level','target','blocker','freq','place','device','micro','anchor','days'];
+    const filledCount = dimKeys.filter(k => k === 'days' ? true : !!a[k]).length;
+    const profilePct = Math.round(filledCount / dimKeys.length * 100);
+    const goalEmoji = a.goal ? this.emojiFor('goal') : '👤';
+    const ringStyle = { width:'46px', height:'46px', borderRadius:'50%', background:'conic-gradient(#DDF247 ' + profilePct + '%, #E6E6E6 0)', display:'flex', alignItems:'center', justifyContent:'center', flex:'none', transition:'background .4s ease' };
+    const profileSub = filledCount + ' / ' + dimKeys.length + ' réponses';
+    const coach = this.coaches[a.goal] || { name:'On matche…', spec:'', mono:'?' };
+    const coachReveal = isRecap || filledCount >= dimKeys.length;
+    const coachBlur = coachReveal ? 0 : (filledCount >= 8 ? 1.5 : filledCount >= 5 ? 3 : filledCount >= 2 ? 6 : 9);
+    const coachAvatarStyle = { width:'38px', height:'38px', borderRadius:'50%', background:'#245453', color:'#DDF247', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'"Sora",sans-serif', fontWeight:700, fontSize:'14px', flex:'none', filter:'blur(' + coachBlur + 'px)', transition:'filter .5s ease' };
+    const coachStatus = coachReveal ? (coach.name + (coach.spec ? ' · ' + coach.spec : '')) : (filledCount < 2 ? 'Réponds pour le révéler' : filledCount < 5 ? 'On cherche ton match…' : 'Profil compatible repéré');
+    const recapCoachAvatarStyle = { flex:'none', width:'48px', height:'48px', borderRadius:'50%', background:'#245453', color:'#DDF247', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'"Sora",sans-serif', fontWeight:700, fontSize:'16px' };
+    const coachHasPhoto = !!coach.photo;
+    const coachAvatarImgStyle = { width:'38px', height:'38px', borderRadius:'50%', objectFit:'cover', flex:'none', filter:'blur(' + coachBlur + 'px)', transition:'filter .5s ease' };
+    const holdFillStyle = { position:'absolute', left:'0', top:'0', bottom:'0', width: (s.todayDone ? 0 : s.holdProgress) + '%', background:'rgba(36,84,83,.20)', transition: s.holdProgress === 0 ? 'width .25s ease' : 'none' };
+    const identityPre = 'Tu es désormais quelqu\u2019un qui s\u2019entraîne';
+    const identityNum = daysCount + '×';
+    const identityPost = 'par semaine.';
+
+    // mini week plan (tappable recurring days)
+    const weekPlan = ['L','M','M','J','V','S','D'].map((d, i) => {
+      const on = effectiveDays.indexOf(i) !== -1;
+      return { label:d, onClick: () => this.toggleWeekDay(i), style:{ flex:1, height:'40px', borderRadius:'11px', border:'none', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'"Trenda",sans-serif', fontWeight:700, fontSize:'13px', cursor:'pointer', background: on ? '#DDF247' : '#F2F2F2', color: on ? '#245453' : '#B6B6B0', transition:'all .2s ease' } };
+    });
+
+    return {
+      isPhrase, isRecap,
+      showProgress: isPhrase,
+      canGoBack: s.screen > 0,
+      onBack: this.back,
+      segments,
+      kicker: 'Étape ' + (s.screen + 1) + ' sur 4',
+      phraseTitle: this.meta.titles[s.screen] || '',
+      tokens: this.buildTokens(),
+      showHint: s.screen === 0,
+      ctaLabel: s.screen === 3 ? 'Voir ma routine' : 'Continuer',
+      ctaStyle: enabled ? ctaActive : ctaDisabled,
+      onCta: enabled ? this.next : undefined,
+      // picker
+      pickerOpen: !!pk,
+      pickerTitle, socialText, socialIconEl, isList, isGrid, isStepper, gridCols, pickerOptions,
+      weekPlan, onAddCalendar: () => this.showToast('Ajouté à ton agenda'),
+      onClosePicker: this.closePicker,
+      stepperValue: a.days,
+      onStepDec: () => this.step(-1),
+      onStepInc: () => this.step(1),
+      // free-text + reminders
+      listCustom, gridCustom, customText, customPlaceholder, customBtnStyle,
+      onCustomText: this.onCustomText, onCustomSubmit: this.submitCustom, onCustomKey: this.onCustomKey,
+      delaiNum, delaiUnit, delaiEnabled, unitOptions, delaiBtnStyle, onCustomNum: this.onCustomNum, onSubmitDelai: this.submitDelai,
+      notif: s.notif, onToggleNotif: this.toggleNotif, switchTrackStyle, switchKnobStyle, leadOptions,
+      showReminder: s.notif, reminderText,
+      // recap
+      habitText, habitEl,
+      daysLabel: daysCount + (daysCount > 1 ? ' jours par semaine' : ' jour par semaine'),
+      dots,
+      todayDone: s.todayDone,
+      habitBtnStyle, coachAvatarImgStyle,
+      habitBtnLabel: s.todayDone ? 'C\u2019est fait pour aujourd\u2019hui ✓' : 'Maintiens pour t\u2019engager',
+      onToggleHabit: this.toggleHabit,
+      onHoldStart: this.holdStart, onHoldEnd: this.holdEnd, onHabitTap: s.todayDone ? undefined : this.commitHabit,
+      holdFillStyle, showHoldHint: !s.todayDone,
+      filledCount, profilePct, goalEmoji, ringStyle, profileSub,
+      coachMono: coach.mono, coachStatus, coachAvatarStyle, coachReveal, coachName: coach.name, coachSpec: coach.spec, recapCoachAvatarStyle,
+      coachHasPhoto, coachNoPhoto: !coachHasPhoto,
+      identityPre, identityNum, identityPost,
+      celebrate: s.celebrate,
+      onCoach: () => this.showToast('On prépare tes coachs recommandés…'),
+      onFittest: () => this.showToast('Le fittest arrive juste après'),
+      onRestart: this.restart,
+      toast: s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>
