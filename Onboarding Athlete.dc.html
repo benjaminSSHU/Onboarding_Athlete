@@ -1,331 +1,635 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./support.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="./support.js"></script>
 </head>
+
 <body>
-<x-dc>
-<helmet>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&amp;display=swap" rel="stylesheet">
-<style>
-@font-face { font-family:"Trenda"; src:url("fonts/Trenda-Regular.otf") format("opentype"); font-weight:400; font-style:normal; font-display:swap; }
-@font-face { font-family:"Trenda"; src:url("fonts/Trenda-Semibold.otf") format("opentype"); font-weight:600; font-style:normal; font-display:swap; }
-@font-face { font-family:"Trenda"; src:url("fonts/Trenda-Bold.otf") format("opentype"); font-weight:700; font-style:normal; font-display:swap; }
-* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html,body { margin:0; padding:0; }
-@keyframes om-fade { from{opacity:1} to{opacity:1} }
-@keyframes om-rise { from{transform:translateY(100%)} to{transform:translateY(0)} }
-@keyframes om-pop { 0%{transform:scale(1);opacity:1} 100%{transform:scale(1);opacity:1} }
-@keyframes om-burst { 0%{transform:scale(.3);opacity:.55} 100%{transform:scale(2.4);opacity:0} }
-@keyframes om-drop { 0%{transform:none;opacity:1} 100%{transform:none;opacity:1} }
-@keyframes om-sheen { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-@keyframes om-popin { 0%{transform:scale(1)} 35%{transform:scale(1.13)} 100%{transform:scale(1)} }
-.om-scroll::-webkit-scrollbar{ width:0; height:0; }
-</style>
-<script src="image-slot.js"></script>
-</helmet>
+  <x-dc>
+    <helmet>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+      <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&amp;display=swap" rel="stylesheet">
+      <style>
+        @font-face {
+          font-family: "Trenda";
+          src: url("fonts/Trenda-Regular.otf") format("opentype");
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
 
-<div style="min-height:100vh; width:100%; background:#E9E9E6; display:flex; align-items:center; justify-content:center; padding:32px 16px; font-family:'Trenda',sans-serif;">
-  <div style="width:375px; height:812px; background:#FFFFFF; border-radius:42px; box-shadow:0 30px 80px -20px rgba(20,24,10,.45), 0 0 0 11px #111315, 0 0 0 13px #2a2d30; position:relative; overflow:hidden; display:flex; flex-direction:column;">
+        @font-face {
+          font-family: "Trenda";
+          src: url("fonts/Trenda-Semibold.otf") format("opentype");
+          font-weight: 600;
+          font-style: normal;
+          font-display: swap;
+        }
 
-    <!-- status bar -->
-    <div style="height:48px; flex:none; display:flex; align-items:center; justify-content:space-between; padding:14px 28px 0; font-family:'Sora',sans-serif; font-weight:600; font-size:14px; color:#1C1C1C;">
-      <span>9:41</span>
-      <div style="display:flex; align-items:center; gap:6px;">
-        <span style="font-size:11px; letter-spacing:1px;">●●●</span>
-        <span style="font-size:12px;">5G</span>
-        <span style="display:inline-block; width:22px; height:11px; border:1.5px solid #1C1C1C; border-radius:3px; position:relative;"><span style="position:absolute; inset:1.5px; right:5px; background:#1C1C1C; border-radius:1px;"></span></span>
-      </div>
-    </div>
+        @font-face {
+          font-family: "Trenda";
+          src: url("fonts/Trenda-Bold.otf") format("opentype");
+          font-weight: 700;
+          font-style: normal;
+          font-display: swap;
+        }
 
-    <!-- header: back + progress -->
-    <div style="flex:none; display:flex; align-items:center; gap:14px; padding:10px 22px 6px;">
-      <sc-if value="{{ canGoBack }}" hint-placeholder-val="{{ true }}">
-        <button onClick="{{ onBack }}" aria-label="Revenir en arrière" style="flex:none; width:34px; height:34px; border-radius:50%; border:none; background:#F2F2F2; color:#1C1C1C; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg></button>
-      </sc-if>
-      <sc-if value="{{ showProgress }}" hint-placeholder-val="{{ true }}">
-        <div style="flex:1; display:flex; gap:6px; align-items:center;">
-          <sc-for list="{{ segments }}" as="seg" hint-placeholder-count="6">
-            <div style="{{ seg.style }}"></div>
-          </sc-for>
-        </div>
-      </sc-if>
-    </div>
+        * {
+          box-sizing: border-box;
+          -webkit-tap-highlight-color: transparent;
+        }
 
-    <!-- CONTENT -->
-    <div class="om-scroll" style="flex:1; overflow-y:auto; overflow-x:hidden; padding:0;">
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+        }
 
-      <!-- ===== PHRASE SCREENS ===== -->
-      <sc-if value="{{ isPhrase }}" hint-placeholder-val="{{ true }}">
-        <div style="padding:30px 24px 28px;">
-          <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:#9A9A92; margin-bottom:6px;">{{ kicker }}</div>
-          <div style="font-family:'Sora',sans-serif; font-weight:600; font-size:15px; color:#454643; margin-bottom:30px;">{{ phraseTitle }}</div>
+        @keyframes om-fade {
+          from {
+            opacity: 1
+          }
 
-          <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:23px; line-height:2; color:#1C1C1C; text-wrap:pretty;">
-            <sc-for list="{{ tokens }}" as="tok" hint-placeholder-count="7">
-              <sc-if value="{{ tok.isText }}" hint-placeholder-val="{{ true }}"><span>{{ tok.text }}</span></sc-if>
-              <sc-if value="{{ tok.isChip }}">
-                <button onClick="{{ tok.onTap }}" aria-label="{{ tok.aria }}" style="{{ tok.style }}" style-focus="box-shadow: inset 0 0 0 2px #245453;"><sc-if value="{{ tok.isEmpty }}"><span style="opacity:.85; font-weight:700;">+ </span></sc-if><sc-if value="{{ tok.hasEmoji }}"><span style="font-size:18px;">{{ tok.emoji }}</span></sc-if><span>{{ tok.display }}</span></button>
-              </sc-if>
-            </sc-for>
+          to {
+            opacity: 1
+          }
+        }
+
+        @keyframes om-rise {
+          from {
+            transform: translateY(100%)
+          }
+
+          to {
+            transform: translateY(0)
+          }
+        }
+
+        @keyframes om-pop {
+          0% {
+            transform: scale(1);
+            opacity: 1
+          }
+
+          100% {
+            transform: scale(1);
+            opacity: 1
+          }
+        }
+
+        @keyframes om-burst {
+          0% {
+            transform: scale(.3);
+            opacity: .55
+          }
+
+          100% {
+            transform: scale(2.4);
+            opacity: 0
+          }
+        }
+
+        @keyframes om-drop {
+          0% {
+            transform: none;
+            opacity: 1
+          }
+
+          100% {
+            transform: none;
+            opacity: 1
+          }
+        }
+
+        @keyframes om-sheen {
+          0% {
+            background-position: 200% 0
+          }
+
+          100% {
+            background-position: -200% 0
+          }
+        }
+
+        @keyframes om-popin {
+          0% {
+            transform: scale(1)
+          }
+
+          35% {
+            transform: scale(1.13)
+          }
+
+          100% {
+            transform: scale(1)
+          }
+        }
+
+        .om-scroll::-webkit-scrollbar {
+          width: 0;
+          height: 0;
+        }
+      </style>
+      <script src="image-slot.js"></script>
+    </helmet>
+
+    <div
+      style="min-height:100vh; width:100%; background:#E9E9E6; display:flex; align-items:center; justify-content:center; padding:32px 16px; font-family:'Trenda',sans-serif;">
+      <div
+        style="width:375px; height:812px; background:#FFFFFF; border-radius:42px; box-shadow:0 30px 80px -20px rgba(20,24,10,.45), 0 0 0 11px #111315, 0 0 0 13px #2a2d30; position:relative; overflow:hidden; display:flex; flex-direction:column;">
+
+        <!-- status bar -->
+        <div
+          style="height:48px; flex:none; display:flex; align-items:center; justify-content:space-between; padding:14px 28px 0; font-family:'Sora',sans-serif; font-weight:600; font-size:14px; color:#1C1C1C;">
+          <span>9:41</span>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="font-size:11px; letter-spacing:1px;">●●●</span>
+            <span style="font-size:12px;">5G</span>
+            <span
+              style="display:inline-block; width:22px; height:11px; border:1.5px solid #1C1C1C; border-radius:3px; position:relative;"><span
+                style="position:absolute; inset:1.5px; right:5px; background:#1C1C1C; border-radius:1px;"></span></span>
           </div>
-
-          <!-- reaction to last selection -->
-          <sc-if value="{{ reactionText }}">
-            <div style="margin-top:22px; display:flex; align-items:flex-start; gap:10px; background:#F3FAC3; border-radius:14px; padding:12px 14px; animation:om-drop .38s cubic-bezier(.22,1,.36,1);">
-              <span style="flex:none; display:inline-flex; width:24px; height:24px; border-radius:50%; background:#DDF247; align-items:center; justify-content:center; margin-top:1px;">{{ reactionIconEl }}</span>
-              <span style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13.5px; line-height:1.4; color:#4A5E1B;">{{ reactionText }}</span>
-            </div>
-          </sc-if>
-
-          <sc-if value="{{ showHint }}">
-            <div style="margin-top:24px; display:flex; align-items:center; gap:8px; color:#9A9A92; font-family:'Trenda',sans-serif; font-weight:400; font-size:14px;">
-              <span style="display:inline-flex; flex:none; width:22px; height:22px; border-radius:50%; background:#F3FAC3; align-items:center; justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5E7A1F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 14a8 8 0 0 1-8 8"></path><path d="M18 11v-1a2 2 0 0 0-2-2a2 2 0 0 0-2 2"></path><path d="M14 10V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v1"></path><path d="M10 9.5V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v10"></path><path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path></svg></span>
-              Touche les mots en pointillés pour les remplir.
-            </div>
-          </sc-if>
-
-          <div style="margin-top:28px; background:#F7F7F5; border-radius:16px; padding:16px;">
-            <div style="display:flex; align-items:center; gap:13px;">
-              <div style="{{ ringStyle }}"><div style="width:34px; height:34px; border-radius:50%; background:#FFFFFF; display:flex; align-items:center; justify-content:center; font-size:18px;">{{ goalEmoji }}</div></div>
-              <div style="flex:1; min-width:0;">
-                <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:14px; color:#1C1C1C;">Ton profil d'athlète</div>
-                <div style="font-family:'Trenda',sans-serif; font-weight:400; font-size:12.5px; color:#8A8B86; margin-top:1px;">{{ profileSub }}</div>
-              </div>
-              <div style="font-family:'Sora',sans-serif; font-weight:700; font-size:17px; color:#5E7A1F;">{{ profilePct }}%</div>
-            </div>
-          </div>
         </div>
-      </sc-if>
 
-      <!-- ===== ENGAGE SCREEN (habit card) ===== -->
-      <sc-if value="{{ isEngage }}">
-        <div style="padding:30px 24px 24px;">
-          <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:#9A9A92; margin-bottom:6px;">Presque fini</div>
-          <div style="font-family:'Sora',sans-serif; font-weight:700; font-size:25px; line-height:1.2; color:#1C1C1C; letter-spacing:-.01em;">Ton engagement</div>
-          <div style="font-family:'Trenda',sans-serif; font-weight:400; font-size:14.5px; line-height:1.5; color:#56574F; margin-top:8px;">Un geste tenu chaque jour, c'est ça qui crée le changement.</div>
-
-          <!-- HERO habit card -->
-          <div style="margin-top:20px; background:#FBFDEA; border:1.5px solid #DDF247; border-radius:18px; padding:20px; position:relative; overflow:hidden;">
-            <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#7E8B36;">Ta première habitude</div>
-            {{ habitEl }}
-
-            <div style="display:flex; align-items:center; gap:7px; margin-top:16px;">
-              <sc-for list="{{ dots }}" as="d" hint-placeholder-count="3">
-                <span style="{{ d.style }}"></span>
+        <!-- header: back + progress -->
+        <div style="flex:none; display:flex; align-items:center; gap:14px; padding:10px 22px 6px;">
+          <sc-if value="{{ canGoBack }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ onBack }}" aria-label="Revenir en arrière"
+              style="flex:none; width:34px; height:34px; border-radius:50%; border:none; background:#F2F2F2; color:#1C1C1C; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;"><svg
+                xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none"
+                stroke="#1C1C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12 19-7-7 7-7"></path>
+                <path d="M19 12H5"></path>
+              </svg></button>
+          </sc-if>
+          <sc-if value="{{ showProgress }}" hint-placeholder-val="{{ true }}">
+            <div style="flex:1; display:flex; gap:6px; align-items:center;">
+              <sc-for list="{{ segments }}" as="seg" hint-placeholder-count="6">
+                <div style="{{ seg.style }}"></div>
               </sc-for>
-              <span style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; color:#7E8B36; margin-left:6px;">{{ daysLabel }}</span>
             </div>
-            <div style="margin-top:16px; padding-top:15px; border-top:1px solid rgba(126,139,54,.2);">
-              <button onClick="{{ onToggleNotif }}" style="display:flex; width:100%; align-items:center; justify-content:space-between; background:none; border:none; cursor:pointer; padding:0;">
-                <span style="display:flex; align-items:center; gap:9px;">
-                  <span style="display:inline-flex;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg></span>
-                  <span style="font-family:'Trenda',sans-serif; font-weight:600; font-size:14.5px; color:#1C1C1C;">Me rappeler mon habitude</span>
-                </span>
-                <span style="{{ switchTrackStyle }}"><span style="{{ switchKnobStyle }}"></span></span>
-              </button>
-              <sc-if value="{{ notif }}">
-                <div style="margin-top:14px; animation:om-fade .25s ease;">
-                  <div style="font-family:'Trenda',sans-serif; font-weight:400; font-size:12.5px; color:#7E8B36; margin-bottom:9px;">Combien de temps avant te prévenir ?</div>
-                  <div style="display:flex; flex-wrap:wrap; gap:8px;">
-                    <sc-for list="{{ leadOptions }}" as="lo" hint-placeholder-count="4">
-                      <button onClick="{{ lo.onClick }}" style="{{ lo.style }}">{{ lo.label }}</button>
-                    </sc-for>
-                  </div>
+          </sc-if>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="om-scroll" style="flex:1; overflow-y:auto; overflow-x:hidden; padding:0;">
+
+          <!-- ===== PHRASE SCREENS ===== -->
+          <sc-if value="{{ isPhrase }}" hint-placeholder-val="{{ true }}">
+            <div style="padding:30px 24px 28px;">
+              <div
+                style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:#9A9A92; margin-bottom:6px;">
+                {{ kicker }}</div>
+              <div
+                style="font-family:'Sora',sans-serif; font-weight:600; font-size:15px; color:#454643; margin-bottom:30px;">
+                {{ phraseTitle }}</div>
+
+              <div
+                style="font-family:'Trenda',sans-serif; font-weight:600; font-size:23px; line-height:2; color:#1C1C1C; text-wrap:pretty;">
+                <sc-for list="{{ tokens }}" as="tok" hint-placeholder-count="7">
+                  <sc-if value="{{ tok.isText }}" hint-placeholder-val="{{ true }}"><span>{{ tok.text }}</span></sc-if>
+                  <sc-if value="{{ tok.isChip }}">
+                    <button onClick="{{ tok.onTap }}" aria-label="{{ tok.aria }}" style="{{ tok.style }}"
+                      style-focus="box-shadow: inset 0 0 0 2px #245453;"><sc-if value="{{ tok.isEmpty }}"><span
+                          style="opacity:.85; font-weight:700;">+ </span></sc-if><sc-if value="{{ tok.hasEmoji }}"><span
+                          style="font-size:18px;">{{ tok.emoji }}</span></sc-if><span>{{ tok.display }}</span></button>
+                  </sc-if>
+                </sc-for>
+              </div>
+
+              <!-- reaction to last selection -->
+              <sc-if value="{{ reactionText }}">
+                <div
+                  style="margin-top:22px; display:flex; align-items:flex-start; gap:10px; background:#F3FAC3; border-radius:14px; padding:12px 14px; animation:om-drop .38s cubic-bezier(.22,1,.36,1);">
+                  <span
+                    style="flex:none; display:inline-flex; width:24px; height:24px; border-radius:50%; background:#DDF247; align-items:center; justify-content:center; margin-top:1px;">{{
+                    reactionIconEl }}</span>
+                  <span
+                    style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13.5px; line-height:1.4; color:#4A5E1B;">{{
+                    reactionText }}</span>
                 </div>
               </sc-if>
-            </div>
 
-            <button onPointerDown="{{ onHoldStart }}" onPointerUp="{{ onHoldEnd }}" onPointerLeave="{{ onHoldEnd }}" onClick="{{ onHabitTap }}" aria-label="{{ habitBtnLabel }}" style="{{ habitBtnStyle }}" style-focus="box-shadow: inset 0 0 0 2px #1C1C1C;"><span style="{{ holdFillStyle }}"></span><span style="position:relative; z-index:1;">{{ habitBtnLabel }}</span></button>
-            <sc-if value="{{ showHoldHint }}">
-              <div style="font-family:'Trenda',sans-serif; font-weight:400; font-size:12.5px; color:#9A9A92; margin-top:9px; text-align:center;">Appuie et maintiens une seconde pour t'engager</div>
-            </sc-if>
-            <sc-if value="{{ todayDone }}">
-              <div style="font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#7E8B36; margin-top:10px; text-align:center; animation:om-fade .3s ease;">Bravo, reviens demain pour tenir ta série.</div>
-            </sc-if>
-          </div>
+              <sc-if value="{{ showHint }}">
+                <div
+                  style="margin-top:24px; display:flex; align-items:center; gap:8px; color:#9A9A92; font-family:'Trenda',sans-serif; font-weight:400; font-size:14px;">
+                  <span
+                    style="display:inline-flex; flex:none; width:22px; height:22px; border-radius:50%; background:#F3FAC3; align-items:center; justify-content:center;"><svg
+                      xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+                      stroke="#5E7A1F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 14a8 8 0 0 1-8 8"></path>
+                      <path d="M18 11v-1a2 2 0 0 0-2-2a2 2 0 0 0-2 2"></path>
+                      <path d="M14 10V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v1"></path>
+                      <path d="M10 9.5V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v10"></path>
+                      <path
+                        d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15">
+                      </path>
+                    </svg></span>
+                  Touche les mots en pointillés pour les remplir.
+                </div>
+              </sc-if>
 
-          <!-- mini week plan -->
-          <div style="margin-top:14px; background:#FFFFFF; border:1.5px solid #ECECEC; border-radius:16px; padding:16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:13px;">
-              <span style="font-family:'Trenda',sans-serif; font-weight:600; font-size:14px; color:#1C1C1C;">Ta semaine type</span>
-              <button onClick="{{ onAddCalendar }}" style="background:none; border:none; color:#5E7A1F; font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; cursor:pointer; padding:0; display:flex; align-items:center; gap:5px;"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5E7A1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M21 13V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"></path><path d="M3 10h18"></path><path d="M16 19h6"></path><path d="M19 16v6"></path></svg>Agenda</button>
-            </div>
-            <div style="display:flex; gap:6px;">
-              <sc-for list="{{ weekPlan }}" as="d" hint-placeholder-count="7">
-                <button onClick="{{ d.onClick }}" aria-label="{{ d.label }}" style="{{ d.style }}" style-focus="box-shadow: inset 0 0 0 2px #245453;">{{ d.label }}</button>
-              </sc-for>
-            </div>
-          </div>
-        </div>
-      </sc-if>
-
-      <!-- ===== RECAP SCREEN ===== -->
-      <sc-if value="{{ isRecap }}">
-        <div style="padding:20px 24px 32px;">
-          <div style="position:relative; width:60px; height:60px; margin-bottom:18px;">
-            <div style="position:absolute; inset:-16px; border-radius:50%; background:radial-gradient(circle, rgba(221,242,71,.6), rgba(221,242,71,0) 70%); filter:blur(7px);"></div>
-            <div style="position:relative; width:60px; height:60px; border-radius:50%; background:#DDF247; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 22px -6px rgba(190,210,40,.7);"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .962 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.962 0z"></path><path d="M20 3v4"></path><path d="M22 5h-4"></path><path d="M4 17v2"></path><path d="M5 18H3"></path></svg></div>
-          </div>
-          <div style="font-family:'Sora',sans-serif; font-weight:700; font-size:27px; line-height:1.2; color:#1C1C1C; letter-spacing:-.01em;">Ton profil est prêt.</div>
-          <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:16px; line-height:1.5; color:#1C1C1C; margin-top:10px;">{{ identityPre }} <span style="color:#5E7A1F;">{{ identityNum }}</span> {{ identityPost }}</div>
-
-          <div style="display:flex; flex-wrap:wrap; gap:7px; margin-top:14px;">
-            <sc-for list="{{ recapChips }}" as="rc" hint-placeholder-count="3">
-              <span style="display:inline-flex; align-items:center; gap:5px; background:#F2F2F2; border-radius:8px; padding:5px 11px; font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; color:#454643;"><sc-if value="{{ rc.hasEmoji }}"><span style="font-size:14px;">{{ rc.emoji }}</span></sc-if>{{ rc.label }}</span>
-            </sc-for>
-          </div>
-
-          <!-- compact habit summary -->
-          <sc-if value="{{ hasHabit }}">
-            <div style="margin-top:18px; background:#FBFDEA; border:1.5px solid #DDF247; border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:12px;">
-              <span style="flex:none; width:38px; height:38px; border-radius:11px; background:#DDF247; display:flex; align-items:center; justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#245453" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
-              <span style="flex:1; min-width:0;">
-                <span style="display:block; font-family:'Trenda',sans-serif; font-weight:600; font-size:14.5px; color:#1C1C1C;">{{ habitSummary }}</span>
-                <span style="display:block; font-family:'Trenda',sans-serif; font-weight:400; font-size:12.5px; color:#7E8B36; margin-top:1px;">{{ daysLabel }}</span>
-              </span>
+              <div style="margin-top:28px; background:#F7F7F5; border-radius:16px; padding:16px;">
+                <div style="display:flex; align-items:center; gap:13px;">
+                  <div style="{{ ringStyle }}">
+                    <div
+                      style="width:34px; height:34px; border-radius:50%; background:#FFFFFF; display:flex; align-items:center; justify-content:center; font-size:18px;">
+                      {{ goalEmoji }}</div>
+                  </div>
+                  <div style="flex:1; min-width:0;">
+                    <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:14px; color:#1C1C1C;">Ton
+                      profil d'athlète</div>
+                    <div
+                      style="font-family:'Trenda',sans-serif; font-weight:400; font-size:12.5px; color:#8A8B86; margin-top:1px;">
+                      {{ profileSub }}</div>
+                  </div>
+                  <div style="font-family:'Sora',sans-serif; font-weight:700; font-size:17px; color:#5E7A1F;">{{
+                    profilePct }}%</div>
+                </div>
+              </div>
             </div>
           </sc-if>
 
-          <!-- secondary -->
-          <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; letter-spacing:.04em; color:#9A9A92; margin:26px 0 12px;">Et quand tu veux, à ton rythme</div>
+          <!-- ===== ENGAGE SCREEN (habit card) ===== -->
+          <sc-if value="{{ isEngage }}">
+            <div style="padding:30px 24px 24px;">
+              <div
+                style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:#9A9A92; margin-bottom:6px;">
+                Presque fini</div>
+              <div
+                style="font-family:'Sora',sans-serif; font-weight:700; font-size:25px; line-height:1.2; color:#1C1C1C; letter-spacing:-.01em;">
+                Ton engagement</div>
+              <div
+                style="font-family:'Trenda',sans-serif; font-weight:400; font-size:14.5px; line-height:1.5; color:#56574F; margin-top:8px;">
+                Un geste tenu chaque jour, c'est ça qui crée le changement.</div>
 
-          <div onClick="{{ onCoach }}" style="width:100%; text-align:left; background:#FFFFFF; border:1.5px solid #ECECEC; border-radius:14px; padding:13px 16px; display:flex; align-items:center; gap:13px; cursor:pointer; margin-bottom:10px;">
-            <sc-if value="{{ coachHasPhoto }}"><image-slot id="coach-photo" shape="circle" fit="cover" src="coach-avatar.png" placeholder="Coach" style="width:48px; height:48px; flex:none;"></image-slot></sc-if>
-            <sc-if value="{{ coachNoPhoto }}"><span style="{{ recapCoachAvatarStyle }}">{{ coachMono }}</span></sc-if>
-            <span style="flex:1;">
-              <span style="display:block; font-family:'Trenda',sans-serif; font-weight:600; font-size:15px; color:#1C1C1C;">{{ coachName }} · {{ coachSpec }}</span>
-              <span style="display:block; font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#8A8B86; margin-top:2px;">Ton coach le plus compatible. Fais connaissance.</span>
-            </span>
-            <span style="flex:none; display:inline-flex;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C5C5C0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></span>
-          </div>
+              <!-- HERO habit card -->
+              <div
+                style="margin-top:20px; background:#FBFDEA; border:1.5px solid #DDF247; border-radius:18px; padding:20px; position:relative; overflow:hidden;">
+                <div
+                  style="font-family:'Trenda',sans-serif; font-weight:600; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#7E8B36;">
+                  Ta première habitude</div>
+                {{ habitEl }}
 
-          <button onClick="{{ onFittest }}" style="width:100%; text-align:left; background:#FFFFFF; border:1.5px solid #ECECEC; border-radius:14px; padding:15px 16px; display:flex; align-items:center; gap:13px; cursor:pointer;">
-            <span style="flex:none; width:40px; height:40px; border-radius:11px; background:#F2F2F2; display:flex; align-items:center; justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#245453" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path></svg></span>
-            <span style="flex:1;">
-              <span style="display:block; font-family:'Trenda',sans-serif; font-weight:600; font-size:15px; color:#1C1C1C;">Mesurer ton point de départ</span>
-              <span style="display:block; font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#8A8B86; margin-top:2px;">Quelques tests pour bâtir sur tes forces.</span>
-            </span>
-            <span style="flex:none; display:inline-flex;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C5C5C0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></span>
-          </button>
+                <div style="display:flex; align-items:center; gap:7px; margin-top:16px;">
+                  <sc-for list="{{ dots }}" as="d" hint-placeholder-count="3">
+                    <span style="{{ d.style }}"></span>
+                  </sc-for>
+                  <span
+                    style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; color:#7E8B36; margin-left:6px;">{{
+                    daysLabel }}</span>
+                </div>
+                <div style="margin-top:16px; padding-top:15px; border-top:1px solid rgba(126,139,54,.2);">
+                  <button onClick="{{ onToggleNotif }}"
+                    style="display:flex; width:100%; align-items:center; justify-content:space-between; background:none; border:none; cursor:pointer; padding:0;">
+                    <span style="display:flex; align-items:center; gap:9px;">
+                      <span style="display:inline-flex;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                          viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" stroke-width="2" stroke-linecap="round"
+                          stroke-linejoin="round">
+                          <path d="M10.268 21a2 2 0 0 0 3.464 0"></path>
+                          <path
+                            d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326">
+                          </path>
+                        </svg></span>
+                      <span
+                        style="font-family:'Trenda',sans-serif; font-weight:600; font-size:14.5px; color:#1C1C1C;">Me
+                        rappeler mon habitude</span>
+                    </span>
+                    <span style="{{ switchTrackStyle }}"><span style="{{ switchKnobStyle }}"></span></span>
+                  </button>
+                  <sc-if value="{{ notif }}">
+                    <div style="margin-top:14px; animation:om-fade .25s ease;">
+                      <div
+                        style="font-family:'Trenda',sans-serif; font-weight:400; font-size:12.5px; color:#7E8B36; margin-bottom:9px;">
+                        À quelle heure veux-tu ton rappel ?</div>
+                      <div style="display:flex; align-items:center;">
+                        <input type="time" value="{{ notifTime }}" onInput="{{ onNotifTime }}"
+                          style="padding:0 14px; height:44px; border-radius:12px; border:1.5px solid #E6E6E6; font-family:'Trenda',sans-serif; font-weight:600; font-size:16px; color:#1C1C1C; outline:none; background:#FFFFFF;">
+                      </div>
+                    </div>
+                  </sc-if>
+                </div>
 
-          <!-- primary CTA -->
-          <button onClick="{{ onAppCta }}" style="width:100%; height:56px; margin-top:24px; border:none; border-radius:14px; background:#DDF247; color:#245453; font-family:'Trenda',sans-serif; font-weight:700; font-size:17px; cursor:pointer; box-shadow:0 10px 24px -10px rgba(190,210,40,.9); display:flex; align-items:center; justify-content:center; gap:8px;">Se rendre sur l'app<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#245453" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button>
-
-          <div style="text-align:center; margin-top:14px;">
-            <button onClick="{{ onRestart }}" style="background:none; border:none; color:#B6B6B0; font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; cursor:pointer; padding:8px; display:inline-flex; align-items:center; gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B6B6B0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>Recommencer la démo</button>
-          </div>
-        </div>
-      </sc-if>
-    </div>
-
-    <!-- FOOTER CTA -->
-    <sc-if value="{{ showFooter }}" hint-placeholder-val="{{ true }}">
-      <div style="flex:none; padding:12px 22px 22px; background:linear-gradient(to top, #FFFFFF 70%, rgba(255,255,255,0));">
-        <button onClick="{{ onCta }}" style="{{ ctaStyle }}">{{ ctaLabel }}</button>
-        <sc-if value="{{ showSkip }}">
-          <div style="text-align:center; margin-top:8px;">
-            <button onClick="{{ onSkip }}" style="background:none; border:none; color:#A8A8A2; font-family:'Trenda',sans-serif; font-weight:600; font-size:13.5px; cursor:pointer; padding:6px 10px;">{{ skipLabel }}</button>
-          </div>
-        </sc-if>
-      </div>
-    </sc-if>
-
-    <!-- toast -->
-    <sc-if value="{{ toast }}">
-      <div style="position:absolute; left:50%; bottom:118px; transform:translateX(-50%); background:#1C1C1C; color:#FFFFFF; font-family:'Trenda',sans-serif; font-weight:600; font-size:14px; padding:11px 18px; border-radius:30px; white-space:nowrap; animation:om-pop .25s ease; box-shadow:0 10px 30px -8px rgba(0,0,0,.5);">{{ toast }}</div>
-    </sc-if>
-
-    <!-- celebration burst -->
-    <sc-if value="{{ celebrate }}">
-      <div style="position:absolute; left:0; right:0; top:104px; display:flex; justify-content:center; pointer-events:none; z-index:30;">
-        <div style="position:relative; display:flex; align-items:center; justify-content:center;">
-          <div style="position:absolute; width:104px; height:104px; border-radius:50%; border:3px solid #DDF247; animation:om-burst .9s ease-out forwards;"></div>
-          <div style="background:#1C1C1C; color:#FFFFFF; font-family:'Trenda',sans-serif; font-weight:700; font-size:18px; padding:13px 22px; border-radius:40px; animation:om-drop .4s cubic-bezier(.22,1,.36,1); box-shadow:0 14px 36px -10px rgba(0,0,0,.5); white-space:nowrap;">{{ celebrate }}</div>
-        </div>
-      </div>
-    </sc-if>
-
-    <!-- ===== BOTTOM SHEET PICKER ===== -->
-    <sc-if value="{{ pickerOpen }}">
-      <div onClick="{{ onClosePicker }}" style="position:absolute; inset:0; background:rgba(18,18,18,.46); animation:om-fade .2s ease; z-index:20;"></div>
-      <div style="position:absolute; left:0; right:0; bottom:0; background:#FFFFFF; border-radius:24px 24px 0 0; padding:8px 22px 30px; max-height:78%; display:flex; flex-direction:column; animation:om-rise .3s cubic-bezier(.22,1,.36,1); z-index:21; box-shadow:0 -16px 40px -10px rgba(0,0,0,.18);">
-        <div style="width:38px; height:4px; border-radius:4px; background:#E2E2E2; margin:6px auto 16px;"></div>
-        <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:18px; color:#1C1C1C; margin-bottom:16px;">{{ pickerTitle }}</div>
-
-        <!-- LIST -->
-        <sc-if value="{{ isList }}">
-          <div class="om-scroll" style="overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-bottom:4px;">
-            <sc-for list="{{ pickerOptions }}" as="opt" hint-placeholder-count="5">
-              <button onClick="{{ opt.onClick }}" aria-label="{{ opt.label }}" style="{{ opt.style }}" style-focus="box-shadow: inset 0 0 0 2px #245453;">
-                <sc-if value="{{ opt.hasEmoji }}"><span style="font-size:20px; margin-right:11px;">{{ opt.emoji }}</span></sc-if>
-                <span style="flex:1; text-align:left;">{{ opt.label }}</span>
-                <sc-if value="{{ opt.selected }}"><span style="color:#5E7A1F; font-size:17px; font-weight:700;">✓</span></sc-if>
-              </button>
-            </sc-for>
-          </div>
-        </sc-if>
-
-        <!-- GRID -->
-        <sc-if value="{{ isGrid }}">
-          <div class="om-scroll" style="overflow-y:auto; display:grid; grid-template-columns:{{ gridCols }}; gap:10px; padding-bottom:4px;">
-            <sc-for list="{{ pickerOptions }}" as="opt" hint-placeholder-count="6">
-              <button onClick="{{ opt.onClick }}" aria-label="{{ opt.label }}" style="{{ opt.style }}" style-focus="box-shadow: inset 0 0 0 2px #245453;">
-                <sc-if value="{{ opt.hasEmoji }}"><span style="font-size:26px;">{{ opt.emoji }}</span></sc-if>
-                <sc-if value="{{ opt.hasMono }}"><span style="{{ opt.monoStyle }}">{{ opt.mono }}</span></sc-if>
-                <span style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13.5px; text-align:center; line-height:1.2;">{{ opt.label }}</span>
-              </button>
-            </sc-for>
-          </div>
-        </sc-if>
-
-        <!-- numeric custom (target amount) -->
-        <sc-if value="{{ numCustom }}">
-          <div style="margin-top:12px; padding-top:14px; border-top:1px solid #F0F0F0;">
-            <div style="font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#8A8B86; margin-bottom:9px;">Une valeur précise</div>
-            <div style="display:flex; gap:8px;">
-              <input value="{{ amtNum }}" onInput="{{ onAmtNum }}" onKeyDown="{{ onAmtKey }}" inputmode="numeric" placeholder="{{ amtPlaceholder }}" style="flex:1; min-width:0; padding:0 14px; height:48px; border-radius:12px; border:1.5px solid #E6E6E6; font-family:'Trenda',sans-serif; font-weight:600; font-size:16px; color:#1C1C1C; outline:none;">
-              <button onClick="{{ onAmtSubmit }}" style="{{ amtBtnStyle }}">OK</button>
-            </div>
-          </div>
-        </sc-if>
-
-        <!-- text custom (device / event other) -->
-        <sc-if value="{{ textCustom }}">
-          <div style="margin-top:12px; padding-top:14px; border-top:1px solid #F0F0F0; animation:om-fade .25s ease;">
-            <div style="font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#8A8B86; margin-bottom:8px;">{{ customLabel }}</div>
-            <div style="display:flex; gap:8px;">
-              <input value="{{ customText }}" onInput="{{ onCustomText }}" onKeyDown="{{ onCustomKey }}" placeholder="{{ customPlaceholder }}" style="flex:1; min-width:0; padding:0 14px; height:48px; border-radius:12px; border:1.5px solid #E6E6E6; font-family:'Trenda',sans-serif; font-size:15px; color:#1C1C1C; outline:none;">
-              <button onClick="{{ onCustomSubmit }}" style="{{ customBtnStyle }}">OK</button>
-            </div>
-          </div>
-        </sc-if>
-
-        <!-- STEPPER -->
-        <sc-if value="{{ isStepper }}">
-          <div style="padding:8px 0 4px;">
-            <div style="display:flex; align-items:center; justify-content:center; gap:28px; margin:8px 0 24px;">
-              <button onClick="{{ onStepDec }}" aria-label="Moins" style="width:56px; height:56px; border-radius:50%; border:1.5px solid #E2E2E2; background:#FFFFFF; font-size:28px; color:#1C1C1C; cursor:pointer; display:flex; align-items:center; justify-content:center;">−</button>
-              <div style="text-align:center; min-width:96px;">
-                <div style="font-family:'Sora',sans-serif; font-weight:700; font-size:52px; line-height:1; color:#1C1C1C;">{{ stepperValue }}</div>
-                <div style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; color:#8A8B86; margin-top:4px;">jours / semaine</div>
+                <button onPointerDown="{{ onHoldStart }}" onPointerUp="{{ onHoldEnd }}" onPointerLeave="{{ onHoldEnd }}"
+                  onClick="{{ onHabitTap }}" aria-label="{{ habitBtnLabel }}" style="{{ habitBtnStyle }}"
+                  style-focus="box-shadow: inset 0 0 0 2px #1C1C1C;"><span style="{{ holdFillStyle }}"></span><span
+                    style="position:relative; z-index:1;">{{ habitBtnLabel }}</span></button>
+                <sc-if value="{{ showHoldHint }}">
+                  <div
+                    style="font-family:'Trenda',sans-serif; font-weight:400; font-size:12.5px; color:#9A9A92; margin-top:9px; text-align:center;">
+                    Appuie et maintiens une seconde pour t'engager</div>
+                </sc-if>
+                <sc-if value="{{ todayDone }}">
+                  <div
+                    style="font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#7E8B36; margin-top:10px; text-align:center; animation:om-fade .3s ease;">
+                    Bravo, reviens demain pour tenir ta série.</div>
+                </sc-if>
               </div>
-              <button onClick="{{ onStepInc }}" aria-label="Plus" style="width:56px; height:56px; border-radius:50%; border:none; background:#DDF247; font-size:28px; color:#245453; cursor:pointer; display:flex; align-items:center; justify-content:center;">+</button>
+
+              <!-- mini week plan -->
+              <div
+                style="margin-top:14px; background:#FFFFFF; border:1.5px solid #ECECEC; border-radius:16px; padding:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:13px;">
+                  <span style="font-family:'Trenda',sans-serif; font-weight:600; font-size:14px; color:#1C1C1C;">Ta
+                    semaine type</span>
+                  <button onClick="{{ onAddCalendar }}"
+                    style="background:none; border:none; color:#5E7A1F; font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; cursor:pointer; padding:0; display:flex; align-items:center; gap:5px;"><svg
+                      xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                      stroke="#5E7A1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M8 2v4"></path>
+                      <path d="M16 2v4"></path>
+                      <path d="M21 13V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"></path>
+                      <path d="M3 10h18"></path>
+                      <path d="M16 19h6"></path>
+                      <path d="M19 16v6"></path>
+                    </svg>Agenda</button>
+                </div>
+                <div style="display:flex; gap:6px;">
+                  <sc-for list="{{ weekPlan }}" as="d" hint-placeholder-count="7">
+                    <button onClick="{{ d.onClick }}" aria-label="{{ d.label }}" style="{{ d.style }}"
+                      style-focus="box-shadow: inset 0 0 0 2px #245453;">{{ d.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
             </div>
-            <button onClick="{{ onConfirmDays }}" style="width:100%; height:54px; border:none; border-radius:14px; background:#DDF247; color:#245453; font-family:'Trenda',sans-serif; font-weight:700; font-size:16px; cursor:pointer;">Valider</button>
+          </sc-if>
+
+          <!-- ===== RECAP SCREEN ===== -->
+          <sc-if value="{{ isRecap }}">
+            <div style="padding:20px 24px 32px;">
+              <div style="position:relative; width:60px; height:60px; margin-bottom:18px;">
+                <div
+                  style="position:absolute; inset:-16px; border-radius:50%; background:radial-gradient(circle, rgba(221,242,71,.6), rgba(221,242,71,0) 70%); filter:blur(7px);">
+                </div>
+                <div
+                  style="position:relative; width:60px; height:60px; border-radius:50%; background:#DDF247; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 22px -6px rgba(190,210,40,.7);">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                    stroke="#1C1C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                      d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .962 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.962 0z">
+                    </path>
+                    <path d="M20 3v4"></path>
+                    <path d="M22 5h-4"></path>
+                    <path d="M4 17v2"></path>
+                    <path d="M5 18H3"></path>
+                  </svg></div>
+              </div>
+              <div
+                style="font-family:'Sora',sans-serif; font-weight:700; font-size:27px; line-height:1.2; color:#1C1C1C; letter-spacing:-.01em;">
+                Ton profil est prêt.</div>
+              <div
+                style="font-family:'Trenda',sans-serif; font-weight:600; font-size:16px; line-height:1.5; color:#1C1C1C; margin-top:10px;">
+                {{ identityPre }} <span style="color:#5E7A1F;">{{ identityNum }}</span> {{ identityPost }}</div>
+
+              <div style="display:flex; flex-wrap:wrap; gap:7px; margin-top:14px;">
+                <sc-for list="{{ recapChips }}" as="rc" hint-placeholder-count="3">
+                  <span
+                    style="display:inline-flex; align-items:center; gap:5px; background:#F2F2F2; border-radius:8px; padding:5px 11px; font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; color:#454643;"><sc-if
+                      value="{{ rc.hasEmoji }}"><span style="font-size:14px;">{{ rc.emoji }}</span></sc-if>{{ rc.label
+                    }}</span>
+                </sc-for>
+              </div>
+
+              <!-- compact habit summary -->
+              <sc-if value="{{ hasHabit }}">
+                <div
+                  style="margin-top:18px; background:#FBFDEA; border:1.5px solid #DDF247; border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:12px;">
+                  <span
+                    style="flex:none; width:38px; height:38px; border-radius:11px; background:#DDF247; display:flex; align-items:center; justify-content:center;"><svg
+                      xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none"
+                      stroke="#245453" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20 6 9 17l-5-5"></path>
+                    </svg></span>
+                  <span style="flex:1; min-width:0;">
+                    <span
+                      style="display:block; font-family:'Trenda',sans-serif; font-weight:600; font-size:14.5px; color:#1C1C1C;">{{
+                      habitSummary }}</span>
+                    <span
+                      style="display:block; font-family:'Trenda',sans-serif; font-weight:400; font-size:12.5px; color:#7E8B36; margin-top:1px;">{{
+                      daysLabel }}</span>
+                  </span>
+                </div>
+              </sc-if>
+
+              <!-- secondary -->
+              <div
+                style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; letter-spacing:.04em; color:#9A9A92; margin:26px 0 12px;">
+                Et quand tu veux, à ton rythme</div>
+
+              <div onClick="{{ onCoach }}"
+                style="width:100%; text-align:left; background:#FFFFFF; border:1.5px solid #ECECEC; border-radius:14px; padding:13px 16px; display:flex; align-items:center; gap:13px; cursor:pointer; margin-bottom:10px;">
+                <sc-if value="{{ coachHasPhoto }}"><image-slot id="coach-photo" shape="circle" fit="cover"
+                    src="coach-avatar.png" placeholder="Coach"
+                    style="width:48px; height:48px; flex:none;"></image-slot></sc-if>
+                <sc-if value="{{ coachNoPhoto }}"><span style="{{ recapCoachAvatarStyle }}">{{ coachMono
+                    }}</span></sc-if>
+                <span style="flex:1;">
+                  <span
+                    style="display:block; font-family:'Trenda',sans-serif; font-weight:600; font-size:15px; color:#1C1C1C;">{{
+                    coachName }} · {{ coachSpec }}</span>
+                  <span
+                    style="display:block; font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#8A8B86; margin-top:2px;">Ton
+                    coach le plus compatible. Fais connaissance.</span>
+                </span>
+                <span style="flex:none; display:inline-flex;"><svg xmlns="http://www.w3.org/2000/svg" width="18"
+                    height="18" viewBox="0 0 24 24" fill="none" stroke="#C5C5C0" stroke-width="2.2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m9 18 6-6-6-6"></path>
+                  </svg></span>
+              </div>
+
+              <button onClick="{{ onFittest }}"
+                style="width:100%; text-align:left; background:#FFFFFF; border:1.5px solid #ECECEC; border-radius:14px; padding:15px 16px; display:flex; align-items:center; gap:13px; cursor:pointer;">
+                <span
+                  style="flex:none; width:40px; height:40px; border-radius:11px; background:#F2F2F2; display:flex; align-items:center; justify-content:center;"><svg
+                    xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="#245453" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 7h6v6"></path>
+                    <path d="m22 7-8.5 8.5-5-5L2 17"></path>
+                  </svg></span>
+                <span style="flex:1;">
+                  <span
+                    style="display:block; font-family:'Trenda',sans-serif; font-weight:600; font-size:15px; color:#1C1C1C;">Mesurer
+                    ton point de départ</span>
+                  <span
+                    style="display:block; font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#8A8B86; margin-top:2px;">Quelques
+                    tests pour bâtir sur tes forces.</span>
+                </span>
+                <span style="flex:none; display:inline-flex;"><svg xmlns="http://www.w3.org/2000/svg" width="18"
+                    height="18" viewBox="0 0 24 24" fill="none" stroke="#C5C5C0" stroke-width="2.2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m9 18 6-6-6-6"></path>
+                  </svg></span>
+              </button>
+
+              <!-- primary CTA -->
+              <button onClick="{{ onAppCta }}"
+                style="width:100%; height:56px; margin-top:24px; border:none; border-radius:14px; background:#DDF247; color:#245453; font-family:'Trenda',sans-serif; font-weight:700; font-size:17px; cursor:pointer; box-shadow:0 10px 24px -10px rgba(190,210,40,.9); display:flex; align-items:center; justify-content:center; gap:8px;">Se
+                rendre sur l'app<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24"
+                  fill="none" stroke="#245453" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12h14"></path>
+                  <path d="m12 5 7 7-7 7"></path>
+                </svg></button>
+
+              <div style="text-align:center; margin-top:14px;">
+                <button onClick="{{ onRestart }}"
+                  style="background:none; border:none; color:#B6B6B0; font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; cursor:pointer; padding:8px; display:inline-flex; align-items:center; gap:6px;"><svg
+                    xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="#B6B6B0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 3v5h5"></path>
+                  </svg>Recommencer la démo</button>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+
+        <!-- FOOTER CTA -->
+        <sc-if value="{{ showFooter }}" hint-placeholder-val="{{ true }}">
+          <div
+            style="flex:none; padding:12px 22px 22px; background:linear-gradient(to top, #FFFFFF 70%, rgba(255,255,255,0));">
+            <button onClick="{{ onCta }}" style="{{ ctaStyle }}">{{ ctaLabel }}</button>
+            <sc-if value="{{ showSkip }}">
+              <div style="text-align:center; margin-top:8px;">
+                <button onClick="{{ onSkip }}"
+                  style="background:none; border:none; color:#A8A8A2; font-family:'Trenda',sans-serif; font-weight:600; font-size:13.5px; cursor:pointer; padding:6px 10px;">{{
+                  skipLabel }}</button>
+              </div>
+            </sc-if>
           </div>
         </sc-if>
-      </div>
-    </sc-if>
 
-  </div>
-</div>
-</x-dc>
-<script type="text/x-dc" data-dc-script>
+        <!-- toast -->
+        <sc-if value="{{ toast }}">
+          <div
+            style="position:absolute; left:50%; bottom:118px; transform:translateX(-50%); background:#1C1C1C; color:#FFFFFF; font-family:'Trenda',sans-serif; font-weight:600; font-size:14px; padding:11px 18px; border-radius:30px; white-space:nowrap; animation:om-pop .25s ease; box-shadow:0 10px 30px -8px rgba(0,0,0,.5);">
+            {{ toast }}</div>
+        </sc-if>
+
+        <!-- celebration burst -->
+        <sc-if value="{{ celebrate }}">
+          <div
+            style="position:absolute; left:0; right:0; top:104px; display:flex; justify-content:center; pointer-events:none; z-index:30;">
+            <div style="position:relative; display:flex; align-items:center; justify-content:center;">
+              <div
+                style="position:absolute; width:104px; height:104px; border-radius:50%; border:3px solid #DDF247; animation:om-burst .9s ease-out forwards;">
+              </div>
+              <div
+                style="background:#1C1C1C; color:#FFFFFF; font-family:'Trenda',sans-serif; font-weight:700; font-size:18px; padding:13px 22px; border-radius:40px; animation:om-drop .4s cubic-bezier(.22,1,.36,1); box-shadow:0 14px 36px -10px rgba(0,0,0,.5); white-space:nowrap;">
+                {{ celebrate }}</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== BOTTOM SHEET PICKER ===== -->
+        <sc-if value="{{ pickerOpen }}">
+          <div onClick="{{ onClosePicker }}"
+            style="position:absolute; inset:0; background:rgba(18,18,18,.46); animation:om-fade .2s ease; z-index:20;">
+          </div>
+          <div
+            style="position:absolute; left:0; right:0; bottom:0; background:#FFFFFF; border-radius:24px 24px 0 0; padding:8px 22px 30px; max-height:78%; display:flex; flex-direction:column; animation:om-rise .3s cubic-bezier(.22,1,.36,1); z-index:21; box-shadow:0 -16px 40px -10px rgba(0,0,0,.18);">
+            <div style="width:38px; height:4px; border-radius:4px; background:#E2E2E2; margin:6px auto 16px;"></div>
+            <div
+              style="font-family:'Trenda',sans-serif; font-weight:600; font-size:18px; color:#1C1C1C; margin-bottom:16px;">
+              {{ pickerTitle }}</div>
+
+            <!-- LIST -->
+            <sc-if value="{{ isList }}">
+              <div class="om-scroll"
+                style="overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-bottom:4px;">
+                <sc-for list="{{ pickerOptions }}" as="opt" hint-placeholder-count="5">
+                  <button onClick="{{ opt.onClick }}" aria-label="{{ opt.label }}" style="{{ opt.style }}"
+                    style-focus="box-shadow: inset 0 0 0 2px #245453;">
+                    <sc-if value="{{ opt.hasEmoji }}"><span style="font-size:20px; margin-right:11px;">{{ opt.emoji
+                        }}</span></sc-if>
+                    <span style="flex:1; text-align:left;">{{ opt.label }}</span>
+                    <sc-if value="{{ opt.selected }}"><span
+                        style="color:#5E7A1F; font-size:17px; font-weight:700;">✓</span></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <!-- GRID -->
+            <sc-if value="{{ isGrid }}">
+              <div class="om-scroll"
+                style="overflow-y:auto; display:grid; grid-template-columns:{{ gridCols }}; gap:10px; padding-bottom:4px;">
+                <sc-for list="{{ pickerOptions }}" as="opt" hint-placeholder-count="6">
+                  <button onClick="{{ opt.onClick }}" aria-label="{{ opt.label }}" style="{{ opt.style }}"
+                    style-focus="box-shadow: inset 0 0 0 2px #245453;">
+                    <sc-if value="{{ opt.hasEmoji }}"><span style="font-size:26px;">{{ opt.emoji }}</span></sc-if>
+                    <sc-if value="{{ opt.hasMono }}"><span style="{{ opt.monoStyle }}">{{ opt.mono }}</span></sc-if>
+                    <span
+                      style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13.5px; text-align:center; line-height:1.2;">{{
+                      opt.label }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <!-- numeric custom (target amount) -->
+            <sc-if value="{{ numCustom }}">
+              <div style="margin-top:12px; padding-top:14px; border-top:1px solid #F0F0F0;">
+                <div
+                  style="font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#8A8B86; margin-bottom:9px;">
+                  Une valeur précise</div>
+                <div style="display:flex; gap:8px;">
+                  <input value="{{ amtNum }}" onInput="{{ onAmtNum }}" onKeyDown="{{ onAmtKey }}" inputmode="numeric"
+                    placeholder="{{ amtPlaceholder }}"
+                    style="flex:1; min-width:0; padding:0 14px; height:48px; border-radius:12px; border:1.5px solid #E6E6E6; font-family:'Trenda',sans-serif; font-weight:600; font-size:16px; color:#1C1C1C; outline:none;">
+                  <button onClick="{{ onAmtSubmit }}" style="{{ amtBtnStyle }}">OK</button>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- text custom (device / event other) -->
+            <sc-if value="{{ textCustom }}">
+              <div
+                style="margin-top:12px; padding-top:14px; border-top:1px solid #F0F0F0; animation:om-fade .25s ease;">
+                <div
+                  style="font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#8A8B86; margin-bottom:8px;">
+                  {{ customLabel }}</div>
+                <div style="display:flex; gap:8px;">
+                  <input value="{{ customText }}" onInput="{{ onCustomText }}" onKeyDown="{{ onCustomKey }}"
+                    placeholder="{{ customPlaceholder }}"
+                    style="flex:1; min-width:0; padding:0 14px; height:48px; border-radius:12px; border:1.5px solid #E6E6E6; font-family:'Trenda',sans-serif; font-size:15px; color:#1C1C1C; outline:none;">
+                  <button onClick="{{ onCustomSubmit }}" style="{{ customBtnStyle }}">OK</button>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- STEPPER -->
+            <sc-if value="{{ isStepper }}">
+              <div style="padding:8px 0 4px;">
+                <div style="display:flex; align-items:center; justify-content:center; gap:28px; margin:8px 0 24px;">
+                  <button onClick="{{ onStepDec }}" aria-label="Moins"
+                    style="width:56px; height:56px; border-radius:50%; border:1.5px solid #E2E2E2; background:#FFFFFF; font-size:28px; color:#1C1C1C; cursor:pointer; display:flex; align-items:center; justify-content:center;">−</button>
+                  <div style="text-align:center; min-width:96px;">
+                    <div
+                      style="font-family:'Sora',sans-serif; font-weight:700; font-size:52px; line-height:1; color:#1C1C1C;">
+                      {{ stepperValue }}</div>
+                    <div
+                      style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; color:#8A8B86; margin-top:4px;">
+                      jours / semaine</div>
+                  </div>
+                  <button onClick="{{ onStepInc }}" aria-label="Plus"
+                    style="width:56px; height:56px; border-radius:50%; border:none; background:#DDF247; font-size:28px; color:#245453; cursor:pointer; display:flex; align-items:center; justify-content:center;">+</button>
+                </div>
+                <button onClick="{{ onConfirmDays }}"
+                  style="width:100%; height:54px; border:none; border-radius:14px; background:#DDF247; color:#245453; font-family:'Trenda',sans-serif; font-weight:700; font-size:16px; cursor:pointer;">Valider</button>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </x-dc>
+  <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
     screen: 0,
@@ -337,7 +641,7 @@ class Component extends DCLogic {
     customMode: false,
     customNum: '',
     notif: false,
-    notifLead: 'on_time',
+    notifTime: '08:00',
     celebrate: '',
     reaction: '',
     holdProgress: 0,
@@ -377,30 +681,30 @@ class Component extends DCLogic {
   // → fun facts & stats instead of generic motivation
   react = {
     goal: {
-      strength: '💡 Les gens qui soulèvent des poids brûlent plus de calories même au repos. Le muscle, ça consomme.',
-      weight_loss: '💡 Le corps continue de brûler des calories jusqu\u2019à 48 h après un entraînement intense. C\u2019est l\u2019effet afterburn.',
-      endurance: '💡 Le cœur d\u2019un athlète endurant bat 40 fois par minute au repos, contre 72 pour un sédentaire.',
-      event: '💡 93 % des finishers de marathon disent que la préparation a changé d\u2019autres habitudes dans leur vie.',
-      move_more: '💡 30 minutes de marche par jour réduisent le risque de maladie cardiovasculaire de 35 %.'
+      strength: 'Les gens qui soulèvent des poids brûlent plus de calories même au repos. Le muscle, ça consomme.',
+      weight_loss: 'Le corps continue de brûler des calories jusqu\u2019à 48 h après un entraînement intense. C\u2019est l\u2019effet afterburn.',
+      endurance: 'Le cœur d\u2019un athlète endurant bat 40 fois par minute au repos, contre 72 pour un sédentaire.',
+      event: '93 % des finishers de marathon disent que la préparation a changé d\u2019autres habitudes dans leur vie.',
+      move_more: '30 minutes de marche par jour réduisent le risque de maladie cardiovasculaire de 35 %.'
     },
     limitation: {
-      none: '💡 Seulement 23 % des adultes atteignent les recommandations d\u2019activité physique de l\u2019OMS.',
-      injury_recovery: '💡 Bouger doucement après une blessure accélère la guérison de 30 % par rapport au repos total.',
-      chronic_pain: '💡 L\u2019exercice régulier réduit la douleur chronique de 20 à 30 %, parfois autant que certains médicaments.',
-      mobility: '💡 10 min d\u2019étirements par jour, et en 4 semaines tu gagnes 20 % de souplesse.'
+      none: 'Seulement 23 % des adultes atteignent les recommandations d\u2019activité physique de l\u2019OMS.',
+      injury_recovery: 'Bouger doucement après une blessure accélère la guérison de 30 % par rapport au repos total.',
+      chronic_pain: 'L\u2019exercice régulier réduit la douleur chronique de 20 à 30 %, parfois autant que certains médicaments.',
+      mobility: '10 min d\u2019étirements par jour, et en 4 semaines tu gagnes 20 % de souplesse.'
     },
-    freq: { rare:'💡 Même 1 séance par semaine réduit le risque de dépression de 26 %.', '1-2':'💡 2 séances par semaine suffisent pour gagner en force dès les 6 premières semaines.', '3-4':'💡 À 3-4 séances par semaine, ta capacité cardio progresse de 15 à 20 % en 3 mois.', '5+':'💡 Les athlètes qui s\u2019entraînent 5 fois par semaine doivent 20 % de leur performance à leurs jours de repos.' },
-    place: { home:'💡 L\u2019entraînement à domicile a explosé de 170 % depuis 2020, et les résultats sont équivalents à la salle.', gym:'💡 Avoir accès à du matériel augmente les chances de tenir son programme de 38 % sur un an.', outdoor:'💡 S\u2019entraîner dehors réduit le stress de 21 % par rapport à un entraînement en intérieur.', mixed:'💡 Varier les lieux réduit la sensation de routine de 47 % et aide à tenir sur le long terme.' },
-    level: { zero:'💡 Les débutants progressent 2 à 3 fois plus vite que les sportifs confirmés. C\u2019est le meilleur moment.', stopped:'💡 Bonne nouvelle : la mémoire musculaire existe. Tu récupères tes acquis 40 % plus vite qu\u2019un débutant.', occasional:'💡 Passer d\u2019occasionnel à régulier divise le risque de blessure par 2.', regular:'💡 Les sportifs réguliers ont un âge biologique inférieur de 9 ans en moyenne à leur âge réel.', competitor:'💡 Les 1 % les plus entraînés voient encore des gains de 2 à 4 % par an. Chaque détail compte.' },
-    context: '💡 Les plans personnalisés ont un taux de réussite 2 fois supérieur aux programmes génériques.',
-    tgAmount: '💡 Se fixer un chiffre précis augmente les chances d\u2019atteindre son objectif de 42 %.',
-    tgKind: '💡 Les objectifs précis sont atteints 33 % plus souvent que les objectifs vagues.',
-    tgWhen: '💡 Se donner une date limite booste naturellement la motivation. Le cerveau adore les deadlines.',
-    blocker: { time:'💡 20 min d\u2019exercice intense apportent les mêmes bénéfices cardio qu\u2019une heure à rythme modéré.', motivation:'💡 La motivation chute après 6 semaines chez 80 % des gens. C\u2019est normal, le système prend le relais.', know_how:'💡 Les athlètes guidés par un coach progressent 44 % plus vite que ceux qui s\u2019entraînent seuls.', consistency:'💡 Il faut en moyenne 66 jours pour qu\u2019un comportement devienne automatique.', injury_fatigue:'💡 80 % des blessures sportives viennent d\u2019une montée en charge trop rapide. On dosera.' },
-    device: '💡 Les utilisateurs de montres connectées font en moyenne 1 850 pas de plus par jour.',
-    micro: '💡 D\u2019après Stanford, une habitude de 2 min par jour crée autant de changement qu\u2019une longue séance.',
-    anchor: '💡 Accrocher une habitude à un moment fixe augmente la réussite de 90 % par rapport à un simple rappel.',
-    days: '💡 3 à 4 jours par semaine, c\u2019est le sweet spot : 80 % des bénéfices pour la moitié de l\u2019effort.'
+    freq: { rare:'Même 1 séance par semaine réduit le risque de dépression de 26 %.', '1-2':'2 séances par semaine suffisent pour gagner en force dès les 6 premières semaines.', '3-4':'À 3-4 séances par semaine, ta capacité cardio progresse de 15 à 20 % en 3 mois.', '5+':'Les athlètes qui s\u2019entraînent 5 fois par semaine doivent 20 % de leur performance à leurs jours de repos.' },
+    place: { home:'L\u2019entraînement à domicile a explosé de 170 % depuis 2020, et les résultats sont équivalents à la salle.', gym:'Avoir accès à du matériel augmente les chances de tenir son programme de 38 % sur un an.', outdoor:'S\u2019entraîner dehors réduit le stress de 21 % par rapport à un entraînement en intérieur.', mixed:'Varier les lieux réduit la sensation de routine de 47 % et aide à tenir sur le long terme.' },
+    level: { zero:'Les débutants progressent 2 à 3 fois plus vite que les sportifs confirmés. C\u2019est le meilleur moment.', stopped:'Bonne nouvelle : la mémoire musculaire existe. Tu récupères tes acquis 40 % plus vite qu\u2019un débutant.', occasional:'Passer d\u2019occasionnel à régulier divise le risque de blessure par 2.', regular:'Les sportifs réguliers ont un âge biologique inférieur de 9 ans en moyenne à leur âge réel.', competitor:'Les 1 % les plus entraînés voient encore des gains de 2 à 4 % par an. Chaque détail compte.' },
+    context: 'Les plans personnalisés ont un taux de réussite 2 fois supérieur aux programmes génériques.',
+    tgAmount: 'Se fixer un chiffre précis augmente les chances d\u2019atteindre son objectif de 42 %.',
+    tgKind: 'Les objectifs précis sont atteints 33 % plus souvent que les objectifs vagues.',
+    tgWhen: 'Se donner une date limite booste naturellement la motivation. Le cerveau adore les deadlines.',
+    blocker: { time:'20 min d\u2019exercice intense apportent les mêmes bénéfices cardio qu\u2019une heure à rythme modéré.', motivation:'La motivation chute après 6 semaines chez 80 % des gens. C\u2019est normal, le système prend le relais.', know_how:'Les athlètes guidés par un coach progressent 44 % plus vite que ceux qui s\u2019entraînent seuls.', consistency:'Il faut en moyenne 66 jours pour qu\u2019un comportement devienne automatique.', injury_fatigue:'80 % des blessures sportives viennent d\u2019une montée en charge trop rapide. On dosera.' },
+    device: 'Les utilisateurs de montres connectées font en moyenne 1 850 pas de plus par jour.',
+    micro: 'D\u2019après Stanford, une habitude de 2 min par jour crée autant de changement qu\u2019une longue séance.',
+    anchor: 'Accrocher une habitude à un moment fixe augmente la réussite de 90 % par rapport à un simple rappel.',
+    days: '3 à 4 jours par semaine, c\u2019est le sweet spot : 80 % des bénéfices pour la moitié de l\u2019effort.'
   };
   reactFor(key, value) {
     const m = this.react[key];
@@ -412,7 +716,8 @@ class Component extends DCLogic {
   spreadMap = { 1:[2], 2:[1,4], 3:[0,2,4], 4:[0,2,4,6], 5:[0,1,3,4,6], 6:[0,1,2,3,4,5], 7:[0,1,2,3,4,5,6] };
 
   LUCIDE = {
-    sparkles: ['M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .962 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.962 0z','M20 3v4','M22 5h-4','M4 17v2','M5 18H3']
+    sparkles: ['M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .962 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.962 0z','M20 3v4','M22 5h-4','M4 17v2','M5 18H3'],
+    lightbulb: ['M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5','M9 18h6','M10 22h4']
   };
   ic(name, size, color, sw) {
     const defs = this.LUCIDE[name] || [];
@@ -574,7 +879,12 @@ class Component extends DCLogic {
     this.setState(s => {
       const a = { ...s.answers, [key]: value };
       if (key === 'goal' && s.answers.goal !== value) { a.context = ''; a.tgAmount = ''; a.tgKind = ''; a.tgWhen = ''; a.micro = ''; }
-      return { answers: a, picker: null, customMode: false, customText: '', justFilled: key, reaction: this.reactFor(key, value) };
+      const extra = {};
+      if (key === 'anchor') {
+        const defaults = { wake:'07:00', coffee:'08:30', lunch:'13:00', work:'18:00', sleep:'21:00' };
+        extra.notifTime = defaults[value] || '08:00';
+      }
+      return { answers: a, picker: null, customMode: false, customText: '', justFilled: key, reaction: this.reactFor(key, value), ...extra };
     });
   };
   onCustomText = (e) => this.setState({ customText: e.target.value });
@@ -738,13 +1048,6 @@ class Component extends DCLogic {
     // notifications
     const switchTrackStyle = { flex:'none', width:'46px', height:'28px', borderRadius:'28px', background: s.notif ? '#DDF247' : '#E2E2E2', display:'inline-flex', alignItems:'center', padding:'3px', transition:'background .2s ease' };
     const switchKnobStyle = { width:'22px', height:'22px', borderRadius:'50%', background:'#FFFFFF', boxShadow:'0 1px 3px rgba(0,0,0,.25)', transform: s.notif ? 'translateX(18px)' : 'translateX(0)', transition:'transform .2s ease' };
-    const leadDefs = [ {value:'on_time',label:'À ce moment'}, {value:'10',label:'10 min avant'}, {value:'30',label:'30 min avant'}, {value:'60',label:'1 h avant'} ];
-    const leadBase = { padding:'9px 15px', borderRadius:'30px', fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'13px', cursor:'pointer', transition:'all .15s ease' };
-    const leadOptions = leadDefs.map(l => ({
-      label:l.label, selected: s.notifLead === l.value,
-      style: { ...leadBase, background: s.notifLead === l.value ? '#F3FAC3' : '#F7F7F5', border: '1.5px solid ' + (s.notifLead === l.value ? '#C7DF3F' : 'transparent'), color: s.notifLead === l.value ? '#245453' : '#56574F' },
-      onClick: () => this.setNotifLead(l.value)
-    }));
 
     // habit card
     const anchorL = this.labelFor('anchor');
@@ -788,7 +1091,7 @@ class Component extends DCLogic {
       tokens: this.buildTokens(),
       showHint: s.screen === 0,
       reactionText: isPhrase ? (s.reaction || '') : '',
-      reactionIconEl: this.ic('sparkles', 13, '#3D5310', 2),
+      reactionIconEl: this.ic('lightbulb', 13, '#3D5310', 2),
       // footer
       showFooter: isPhrase || isEngage,
       ctaLabel,
@@ -807,7 +1110,7 @@ class Component extends DCLogic {
       // habit / engage
       habitEl, dots,
       daysLabel: daysCount + (daysCount > 1 ? ' jours par semaine' : ' jour par semaine'),
-      notif: s.notif, onToggleNotif: this.toggleNotif, switchTrackStyle, switchKnobStyle, leadOptions,
+      notif: s.notif, onToggleNotif: this.toggleNotif, switchTrackStyle, switchKnobStyle, notifTime: s.notifTime, onNotifTime: (e) => this.setState({ notifTime: e.target.value }),
       todayDone: s.todayDone, habitBtnStyle, holdFillStyle,
       habitBtnLabel: s.todayDone ? 'C\u2019est fait pour aujourd\u2019hui ✓' : 'Maintiens pour t\u2019engager',
       onHoldStart: this.holdStart, onHoldEnd: this.holdEnd, onHabitTap: s.todayDone ? undefined : this.commitHabit, showHoldHint: !s.todayDone,
@@ -835,4 +1138,5 @@ class Component extends DCLogic {
 }
 </script>
 </body>
+
 </html>
