@@ -650,9 +650,18 @@ class Component extends DCLogic {
     justFilled: ''
   };
 
-  _dims = ['goal','limitation','freq','place','level','context','tgKind','tgWhen','blocker','device','micro','anchor','days'];
-  fc() { const a = this.state.answers; return this._dims.filter(k => k === 'days' ? true : !!a[k]).length; }
-  targetPct() { return Math.round(this.fc() / this._dims.length * 100); }
+  activeChips() {
+    const a = this.state.answers;
+    let chips = ['goal','limitation','freq','place','level','blocker','device','micro','anchor','days'];
+    if (a.goal) {
+      this.buildTargetTokens().forEach(t => { if (t.chip) chips.push(t.chip); });
+    } else {
+      chips.push('context','tgAmount','tgKind','tgWhen');
+    }
+    return chips;
+  }
+  fc() { const a = this.state.answers; return this.activeChips().filter(k => k === 'days' ? true : !!a[k]).length; }
+  targetPct() { return Math.round(this.fc() / this.activeChips().length * 100); }
   componentDidMount() { this.setState({ animPct: this.targetPct() }); }
   componentDidUpdate() { this.tweenPct(); }
   tweenPct() {
@@ -675,7 +684,7 @@ class Component extends DCLogic {
     event: { name:'Hugo M.', spec:'Prépa événement', mono:'HM' },
     move_more: { name:'Sam D.', spec:'Remise en mouvement', mono:'SD' }
   };
-  affirm = ['Beau départ', 'Tu te connais bien', 'Ça prend forme', 'Objectif posé', 'On y est presque', 'Dernière ligne droite'];
+  affirm = ['Beau départ', 'Tu te connais bien', 'Objectif posé', 'On y est presque', 'Dernière ligne droite'];
 
   // reactions shown UNDER the sentence when a choice is made
   // → fun facts & stats instead of generic motivation
@@ -799,22 +808,45 @@ class Component extends DCLogic {
     strength: [ {value:'0',label:'0 fois'}, {value:'1-2',label:'1 à 2 fois'}, {value:'3-4',label:'3 à 4 fois'}, {value:'5+',label:'5 fois et plus'} ],
     weight_loss: [ {value:'sedentary',label:'plutôt sédentaire'}, {value:'walk',label:'je marche parfois'}, {value:'sport12',label:'actif 1 à 2× / semaine'}, {value:'regular',label:'actif régulièrement'} ],
     endurance: [ {value:'run',label:'la course'}, {value:'bike',label:'le vélo'}, {value:'row',label:'le rameur'}, {value:'mixed',label:'un peu de tout'} ],
-    event: [ {value:'hyrox',label:'un Hyrox'}, {value:'marathon',label:'un marathon'}, {value:'triathlon',label:'un triathlon'}, {value:'compet',label:'une compétition'}, {value:'pro',label:'une sélection pro'}, {value:'trail',label:'un trail'}, {value:'col',label:'un col'}, {value:'other',label:'autre'} ],
+    event: [ {value:'hyrox',label:'un Hyrox'}, {value:'marathon',label:'un marathon'}, {value:'triathlon',label:'un triathlon'}, {value:'trail',label:'un trail'}, {value:'ultra_trail',label:'un ultra trail'}, {value:'compet',label:'une compétition'}, {value:'pro',label:'une sélection pro'}, {value:'col',label:'un col'}, {value:'other',label:'autre'} ],
     move_more: [ {value:'little',label:'bouger un peu plus'}, {value:'weekly',label:'faire du sport chaque semaine'}, {value:'routine',label:'construire une vraie routine'} ]
   };
   contextQ = { strength:'À quelle fréquence t\u2019entraînes-tu en ce moment ?', weight_loss:'Quel est ton niveau d\u2019activité ?', endurance:'Quel sport pratiques-tu le plus ?', event:'Pour quel événement te prépares-tu ?', move_more:'Jusqu\u2019où veux-tu aller ?' };
 
-  // fill-in-the-blank "premier objectif" (points 2 & 3)
-  targetTpl = {
-    strength: [ {t:'Faire '}, {chip:'tgAmount', ph:'combien'}, {t:' '}, {chip:'tgKind', ph:'quel mouvement'}, {t:' d\u2019ici '}, {chip:'tgWhen', ph:'quand'}, {t:'.'} ],
-    weight_loss: [ {t:'Perdre '}, {chip:'tgAmount', ph:'combien'}, {t:' '}, {chip:'tgKind', ph:'unité'}, {t:' d\u2019ici '}, {chip:'tgWhen', ph:'quand'}, {t:'.'} ],
-    endurance: [ {t:'Parcourir '}, {chip:'tgAmount', ph:'combien'}, {t:' '}, {chip:'tgKind', ph:'unité'}, {t:' d\u2019ici '}, {chip:'tgWhen', ph:'quand'}, {t:'.'} ],
-    event: [ {t:'Finir '}, {chip:'tgKind', ph:'quel événement'}, {t:' d\u2019ici '}, {chip:'tgWhen', ph:'quand'}, {t:'.'} ],
-    move_more: [ {t:'Atteindre '}, {chip:'tgAmount', ph:'combien'}, {t:' '}, {chip:'tgKind', ph:'quoi'}, {t:' d\u2019ici '}, {chip:'tgWhen', ph:'quand'}, {t:'.'} ]
-  };
+  // fill-in-the-blank "premier objectif"
+  buildTargetTokens() {
+    const a = this.state.answers;
+    const g = a.goal;
+    const t = (text) => ({ t: text });
+    const c = (chip, ph) => ({ chip, ph });
+    
+    if (g === 'strength') {
+      const isWeight = a.tgKind === 'deadlift' || a.tgKind === 'bench' || a.tgKind === 'squat_barre';
+      if (isWeight) {
+        return [ t('Aujourd\u2019hui, je m\u2019entraîne '), c('context','à préciser'), t(' et je veux soulever '), c('tgAmount','combien'), t(' kg '), c('tgKind','quel mouvement'), t(' d\u2019ici '), c('tgWhen','quand'), t('.') ];
+      }
+      return [ t('Aujourd\u2019hui, je m\u2019entraîne '), c('context','à préciser'), t(' et je veux faire '), c('tgAmount','combien'), t(' '), c('tgKind','quel mouvement'), t(' d\u2019ici '), c('tgWhen','quand'), t('.') ];
+    }
+    if (g === 'weight_loss') {
+      let verb = 'perdre';
+      if (a.tgKind === 'pct') verb = 'atteindre';
+      if (a.tgKind === 'kcal') verb = 'brûler';
+      return [ t('En ce moment, je suis '), c('context','à préciser'), t(' et je veux ' + verb + ' '), c('tgAmount','combien'), t(' '), c('tgKind','unité'), t(' d\u2019ici '), c('tgWhen','quand'), t('.') ];
+    }
+    if (g === 'endurance') return [ t('Mon sport principal, c\u2019est '), c('context','à préciser'), t(' et je veux parcourir '), c('tgAmount','combien'), t(' '), c('tgKind','unité'), t(' d\u2019ici '), c('tgWhen','quand'), t('.') ];
+    if (g === 'move_more') return [ t('Je veux '), c('context','à préciser'), t(' pour atteindre '), c('tgAmount','combien'), t(' '), c('tgKind','quoi'), t(' d\u2019ici '), c('tgWhen','quand'), t('.') ];
+    if (g === 'event') {
+      const evt = a.context;
+      if (!evt) return [ t('Je prépare '), c('context','un événement'), t(' d\u2019ici '), c('tgWhen','quand'), t('.') ];
+      if (evt === 'trail' || evt === 'ultra_trail') return [ t('Je prépare '), c('context','un événement'), t(' de '), c('tgAmount','distance'), t(' km d\u2019ici '), c('tgWhen','quand'), t('.') ];
+      if (evt === 'hyrox') return [ t('Je prépare '), c('context','un événement'), t(' en moins de '), c('tgAmount','temps'), t(' min d\u2019ici '), c('tgWhen','quand'), t('.') ];
+      return [ t('Je prépare '), c('context','un événement'), t(' d\u2019ici '), c('tgWhen','quand'), t('.') ];
+    }
+    return [];
+  }
   tgKindOpts = {
-    strength: [ {value:'tractions',label:'tractions'}, {value:'pompes',label:'pompes'}, {value:'dips',label:'dips'}, {value:'squats',label:'squats'}, {value:'fentes',label:'fentes'} ],
-    weight_loss: [ {value:'kg',label:'kg'}, {value:'pct',label:'% de masse grasse'} ],
+    strength: [ {value:'tractions',label:'tractions'}, {value:'pompes',label:'pompes'}, {value:'dips',label:'dips'}, {value:'squats',label:'squats'}, {value:'fentes',label:'fentes'}, {value:'deadlift',label:'au deadlift'}, {value:'bench',label:'au développé couché'}, {value:'squat_barre',label:'au squat barre'} ],
+    weight_loss: [ {value:'kg',label:'kg'}, {value:'pct',label:'% de masse grasse'}, {value:'kcal',label:'kcal par séance'} ],
     endurance: [ {value:'km',label:'km'}, {value:'min',label:'minutes sans pause'} ],
     event: [ {value:'marathon',label:'un marathon'}, {value:'semi',label:'un semi'}, {value:'trail',label:'un trail'}, {value:'hyrox',label:'un Hyrox'}, {value:'triathlon',label:'un triathlon'} ],
     move_more: [ {value:'pas',label:'pas par jour'}, {value:'minmarche',label:'min de marche par jour'} ]
@@ -826,7 +858,7 @@ class Component extends DCLogic {
     event: [ {value:'1m',label:'1 mois'}, {value:'3m',label:'3 mois'}, {value:'6m',label:'6 mois'}, {value:'year',label:'cette année'} ]
   };
 
-  titles = ['Ce qui t\u2019amène', 'Où tu en es', 'Ton point de départ', 'Ton premier objectif', 'Pour mieux t\u2019aider', 'Ta première habitude'];
+  titles = ['Ce qui t\u2019amène', 'Où tu en es', 'Ton objectif principal', 'Pour mieux t\u2019aider', 'Ta première habitude'];
   pickerTitles = {
     goal:'Qu\u2019est-ce qui t\u2019amène aujourd\u2019hui ?', limitation:'Côté corps ?',
     freq:'Tu t\u2019entraînes combien ?', place:'Où t\u2019entraînes-tu ?', level:'Où en es-tu aujourd\u2019hui ?',
@@ -836,11 +868,24 @@ class Component extends DCLogic {
   };
 
   optsFor(key) {
-    const g = this.state.answers.goal;
+    const a = this.state.answers;
+    const g = a.goal;
     if (key === 'context') return this.contextOpts[g] || [];
     if (key === 'tgKind') return this.tgKindOpts[g] || [];
     if (key === 'tgWhen') return this.tgWhenOpts[g === 'event' ? 'event' : '_default'];
-    if (key === 'tgAmount') return (this.tgAmountOpts[g] || []).map(n => ({ value:String(n), label:String(n) }));
+    if (key === 'tgAmount') {
+      if (g === 'strength') {
+        const isW = a.tgKind === 'deadlift' || a.tgKind === 'bench' || a.tgKind === 'squat_barre';
+        if (isW) return [60,80,100,120].map(n => ({ value:String(n), label:String(n) }));
+        return [5,10,15,20].map(n => ({ value:String(n), label:String(n) }));
+      }
+      if (g === 'weight_loss') {
+        if (a.tgKind === 'pct') return [10,12,15,20].map(n => ({ value:String(n), label:String(n) }));
+        if (a.tgKind === 'kcal') return [300,400,500,600].map(n => ({ value:String(n), label:String(n) }));
+        return [3,5,8,10].map(n => ({ value:String(n), label:String(n) }));
+      }
+      return (this.tgAmountOpts[g] || []).map(n => ({ value:String(n), label:String(n) }));
+    }
     if (key === 'micro') return this.data.micro[g] || [];
     return this.data[key] || [];
   }
@@ -859,17 +904,16 @@ class Component extends DCLogic {
   targetComplete() {
     const g = this.state.answers.goal;
     if (!g) return false;
-    const tpl = this.targetTpl[g] || [];
-    return tpl.filter(p => p.chip).every(p => !!this.state.answers[p.chip]);
+    const tokens = this.buildTargetTokens();
+    return tokens.filter(p => p.chip).every(p => !!this.state.answers[p.chip]);
   }
   reqMet(screen) {
     const a = this.state.answers;
     if (screen === 0) return !!a.goal;
     if (screen === 1) return !!a.freq && !!a.place && !!a.level;
-    if (screen === 2) return !!a.context;
-    if (screen === 3) return this.targetComplete();
-    if (screen === 4) return !!a.blocker;
-    return true; // habit step (5) not required
+    if (screen === 2) return this.targetComplete();
+    if (screen === 3) return !!a.blocker;
+    return true; // habit step (4) not required
   }
 
   open = (key) => this.setState({ picker: key, customText: '', customMode: false, customNum: '' });
@@ -879,6 +923,8 @@ class Component extends DCLogic {
     this.setState(s => {
       const a = { ...s.answers, [key]: value };
       if (key === 'goal' && s.answers.goal !== value) { a.context = ''; a.tgAmount = ''; a.tgKind = ''; a.tgWhen = ''; a.micro = ''; }
+      if (key === 'context' && s.answers.context !== value) { a.tgAmount = ''; }
+      if (key === 'tgKind' && s.answers.tgKind !== value) { a.tgAmount = ''; }
       const extra = {};
       if (key === 'anchor') {
         const defaults = { wake:'07:00', coffee:'08:30', lunch:'13:00', work:'18:00', sleep:'21:00' };
@@ -911,10 +957,10 @@ class Component extends DCLogic {
   go = (skipped) => {
     const s = this.state, a = s.answers, idx = s.screen;
     let nextScreen;
-    if (idx === 5) { const filled = !!a.micro && !!a.anchor; nextScreen = filled ? 6 : 7; }
-    else if (idx === 6) { nextScreen = 7; }
-    else nextScreen = Math.min(7, idx + 1);
-    if (!skipped && idx <= 5) this.celebrate(this.affirm[idx] || 'Beau travail');
+    if (idx === 4) { const filled = !!a.micro && !!a.anchor; nextScreen = filled ? 5 : 6; }
+    else if (idx === 5) { nextScreen = 6; }
+    else nextScreen = Math.min(6, idx + 1);
+    if (!skipped && idx <= 4) this.celebrate(this.affirm[idx] || 'Beau travail');
     this.setState({ screen: nextScreen, reaction: '' });
   };
   next = () => this.go(false);
@@ -934,7 +980,7 @@ class Component extends DCLogic {
   commitHabit = () => { clearInterval(this._iv); this.setState({ todayDone: true, holdProgress: 0 }); this.celebrate('Engagement pris'); };
   back = () => this.setState(s => {
     const a = s.answers; let prev;
-    if (s.screen === 7) prev = (!!a.micro && !!a.anchor) ? 6 : 5;
+    if (s.screen === 6) prev = (!!a.micro && !!a.anchor) ? 5 : 4;
     else prev = Math.max(0, s.screen - 1);
     return { screen: prev, reaction: '' };
   });
@@ -970,24 +1016,20 @@ class Component extends DCLogic {
     if (screen === 0) return [ t('Aujourd\u2019hui, je veux '), chip('goal','ce qui m\u2019amène'), t('. Et côté corps, '), chip('limitation','mon état'), t('.') ];
     if (screen === 1) return [ t('Je m\u2019entraîne '), chip('freq','une fréquence'), t(', surtout '), chip('place','un lieu'), t(', et '), chip('level','mon niveau'), t('.') ];
     if (screen === 2) {
-      const lead = { strength:'Aujourd\u2019hui, je m\u2019entraîne ', weight_loss:'En ce moment, je suis ', endurance:'Mon sport principal, c\u2019est ', event:'Je prépare ', move_more:'Je veux ' }[a.goal] || 'Mon point de départ, c\u2019est ';
-      return [ t(lead), chip('context','à préciser', true), t('.') ];
-    }
-    if (screen === 3) {
       if (!a.goal) return [ t('Choisis d\u2019abord ce qui t\u2019amène pour définir ton objectif.') ];
-      return (this.targetTpl[a.goal] || []).map(p => p.t !== undefined ? t(p.t) : chip(p.chip, p.ph, true));
+      return this.buildTargetTokens().map(p => p.t !== undefined ? t(p.t) : chip(p.chip, p.ph, true));
     }
-    if (screen === 4) return [ t('Ce qui me freine souvent, c\u2019est '), chip('blocker','mon frein'), t('. Je suis mes données avec '), chip('device','un objet'), t('.') ];
+    if (screen === 3) return [ t('Ce qui me freine souvent, c\u2019est '), chip('blocker','mon frein'), t('. Je suis mes données avec '), chip('device','un objet'), t('.') ];
     return [ t('Je m\u2019engage sur '), chip('days'), t(' par semaine. Pour démarrer en douceur, je ferai '), chip('micro','une habitude', true), t(', '), chip('anchor','un moment'), t('.') ];
   }
 
   renderVals() {
     const s = this.state, a = s.answers;
-    const isEngage = s.screen === 6;
-    const isRecap = s.screen === 7;
-    const isPhrase = s.screen <= 5;
+    const isEngage = s.screen === 5;
+    const isRecap = s.screen === 6;
+    const isPhrase = s.screen <= 4;
 
-    const segments = [0,1,2,3,4,5].map(i => {
+    const segments = [0,1,2,3,4].map(i => {
       const active = isPhrase && i === s.screen;
       const done = s.screen > i;
       const base = { height:'5px', borderRadius:'32px', flex:1, transition:'background .25s ease' };
@@ -999,7 +1041,7 @@ class Component extends DCLogic {
     const ctaActive = { width:'100%', height:'56px', border:'none', borderRadius:'14px', background:'#DDF247', color:'#245453', fontFamily:'"Trenda",sans-serif', fontWeight:700, fontSize:'17px', cursor:'pointer', transition:'all .2s ease', boxShadow:'0 10px 24px -10px rgba(190,210,40,.9)' };
     const ctaDisabled = { width:'100%', height:'56px', border:'none', borderRadius:'14px', background:'#EFEFEF', color:'#BcBcBc', fontFamily:'"Trenda",sans-serif', fontWeight:700, fontSize:'17px', cursor:'not-allowed' };
     const ctaEnabled = isEngage ? true : enabled;
-    const ctaLabel = isEngage ? 'Voir mon profil' : (s.screen === 5 ? 'Continuer' : 'Continuer');
+    const ctaLabel = isEngage ? 'Voir mon profil' : (s.screen === 4 ? 'Continuer' : 'Continuer');
 
     // picker
     const pk = s.picker;
@@ -1009,6 +1051,21 @@ class Component extends DCLogic {
       if (pk === 'context') pickerTitle = this.contextQ[a.goal] || 'Ton point de départ';
       else if (pk === 'tgKind') pickerTitle = this.tgKindTitle[a.goal] || 'Précise';
       else pickerTitle = this.pickerTitles[pk] || '';
+
+      if (pk === 'tgAmount') {
+        if (a.goal === 'event') {
+          if (a.context === 'hyrox') { pickerTitle = 'En combien de temps (min) ?'; amtPlaceholder = 'Ex : 90'; }
+          else if (a.context === 'trail' || a.context === 'ultra_trail') { pickerTitle = 'Quelle distance (km) ?'; amtPlaceholder = 'Ex : 50'; }
+        } else if (a.goal === 'strength') {
+          const isW = a.tgKind === 'deadlift' || a.tgKind === 'bench' || a.tgKind === 'squat_barre';
+          pickerTitle = isW ? 'Quel poids (kg) ?' : 'Combien de reps ?';
+          amtPlaceholder = isW ? 'Ex : 100' : 'Ex : 15';
+        } else if (a.goal === 'weight_loss') {
+          if (a.tgKind === 'pct') { pickerTitle = 'Quel pourcentage ?'; amtPlaceholder = 'Ex : 15'; }
+          else if (a.tgKind === 'kcal') { pickerTitle = 'Combien de kcal ?'; amtPlaceholder = 'Ex : 400'; }
+          else { pickerTitle = 'Combien de kilos ?'; amtPlaceholder = 'Ex : 5'; }
+        }
+      }
 
       if (pk === 'days') isStepper = true;
       else if (pk === 'place') { isGrid = true; gridCols = 'repeat(2,1fr)'; }
@@ -1086,7 +1143,7 @@ class Component extends DCLogic {
       canGoBack: s.screen > 0,
       onBack: this.back,
       segments,
-      kicker: 'Étape ' + (s.screen + 1) + ' sur 6',
+      kicker: 'Étape ' + (s.screen + 1) + ' sur 5',
       phraseTitle: this.titles[s.screen] || '',
       tokens: this.buildTokens(),
       showHint: s.screen === 0,
