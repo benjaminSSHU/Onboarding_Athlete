@@ -1129,7 +1129,7 @@ class Component extends DCLogic {
     const filledCount = this.fc();
     const goalEmoji = a.goal ? this.emojiFor('goal') : '👤';
     const ringStyle = { width:'46px', height:'46px', borderRadius:'50%', background:'conic-gradient(#DDF247 ' + s.animPct + '%, #E6E6E6 0)', display:'flex', alignItems:'center', justifyContent:'center', flex:'none', transition:'background .4s ease' };
-    const profileSub = filledCount + ' / ' + this._dims.length + ' réponses';
+    const profileSub = filledCount + ' / ' + this.activeChips().length + ' réponses';
 
     // recap
     const coach = this.coaches[a.goal] || { name:'On matche…', spec:'', mono:'?' };
