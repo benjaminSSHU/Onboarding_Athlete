@@ -888,6 +888,10 @@ class Component extends DCLogic {
         if (a.tgKind === 'minmarche') return [15,30,45,60].map(n => ({ value:String(n), label:String(n) }));
         return [5000,8000,10000,12000].map(n => ({ value:String(n), label:String(n) }));
       }
+      if (g === 'endurance') {
+        if (a.tgKind === 'min') return [20,30,40,60].map(n => ({ value:String(n), label:String(n) }));
+        return [5,10,21,42].map(n => ({ value:String(n), label:String(n) }));
+      }
       return (this.tgAmountOpts[g] || []).map(n => ({ value:String(n), label:String(n) }));
     }
     if (key === 'micro') return this.data.micro[g] || [];
@@ -1080,6 +1084,9 @@ class Component extends DCLogic {
         } else if (a.goal === 'move_more') {
           if (a.tgKind === 'minmarche') { pickerTitle = 'Combien de minutes ?'; amtPlaceholder = 'Ex : 30'; }
           else { pickerTitle = 'Combien de pas ?'; amtPlaceholder = 'Ex : 8000'; }
+        } else if (a.goal === 'endurance') {
+          if (a.tgKind === 'min') { pickerTitle = 'Combien de minutes ?'; amtPlaceholder = 'Ex : 45'; }
+          else { pickerTitle = 'Combien de kilomètres ?'; amtPlaceholder = 'Ex : 10'; }
         }
       }
 
