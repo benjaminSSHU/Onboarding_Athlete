@@ -884,6 +884,10 @@ class Component extends DCLogic {
         if (a.tgKind === 'kcal') return [300,400,500,600].map(n => ({ value:String(n), label:String(n) }));
         return [3,5,8,10].map(n => ({ value:String(n), label:String(n) }));
       }
+      if (g === 'move_more') {
+        if (a.tgKind === 'minmarche') return [15,30,45,60].map(n => ({ value:String(n), label:String(n) }));
+        return [5000,8000,10000,12000].map(n => ({ value:String(n), label:String(n) }));
+      }
       return (this.tgAmountOpts[g] || []).map(n => ({ value:String(n), label:String(n) }));
     }
     if (key === 'micro') return this.data.micro[g] || [];
@@ -922,7 +926,16 @@ class Component extends DCLogic {
     clearTimeout(this._jf); this._jf = setTimeout(() => this.setState({ justFilled: '' }), 440);
     this.setState(s => {
       const a = { ...s.answers, [key]: value };
-      if (key === 'goal' && s.answers.goal !== value) { a.context = ''; a.tgAmount = ''; a.tgKind = ''; a.tgWhen = ''; a.micro = ''; }
+      if (key === 'goal' && s.answers.goal !== value) { 
+        a.context = ''; 
+        a.tgAmount = ''; 
+        a.tgWhen = ''; 
+        a.micro = ''; 
+        if (value === 'move_more') a.tgKind = 'pas';
+        else if (value === 'weight_loss') a.tgKind = 'kg';
+        else if (value === 'endurance') a.tgKind = 'km';
+        else a.tgKind = '';
+      }
       if (key === 'context' && s.answers.context !== value) { a.tgAmount = ''; }
       if (key === 'tgKind' && s.answers.tgKind !== value) { a.tgAmount = ''; }
       const extra = {};
@@ -1064,6 +1077,9 @@ class Component extends DCLogic {
           if (a.tgKind === 'pct') { pickerTitle = 'Quel pourcentage ?'; amtPlaceholder = 'Ex : 15'; }
           else if (a.tgKind === 'kcal') { pickerTitle = 'Combien de kcal ?'; amtPlaceholder = 'Ex : 400'; }
           else { pickerTitle = 'Combien de kilos ?'; amtPlaceholder = 'Ex : 5'; }
+        } else if (a.goal === 'move_more') {
+          if (a.tgKind === 'minmarche') { pickerTitle = 'Combien de minutes ?'; amtPlaceholder = 'Ex : 30'; }
+          else { pickerTitle = 'Combien de pas ?'; amtPlaceholder = 'Ex : 8000'; }
         }
       }
 
