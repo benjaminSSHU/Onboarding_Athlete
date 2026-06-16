@@ -314,19 +314,14 @@
                   </sc-if>
                 </div>
 
-                <button onPointerDown="{{ onHoldStart }}" onPointerUp="{{ onHoldEnd }}" onPointerLeave="{{ onHoldEnd }}"
-                  onClick="{{ onHabitTap }}" aria-label="{{ habitBtnLabel }}" style="{{ habitBtnStyle }}"
-                  style-focus="box-shadow: inset 0 0 0 2px #1C1C1C;"><span style="{{ holdFillStyle }}"></span><span
-                    style="position:relative; z-index:1;">{{ habitBtnLabel }}</span></button>
-                <sc-if value="{{ showHoldHint }}">
-                  <div
-                    style="font-family:'Trenda',sans-serif; font-weight:400; font-size:12.5px; color:#9A9A92; margin-top:9px; text-align:center;">
-                    Appuie et maintiens une seconde pour t'engager</div>
-                </sc-if>
+                <button onClick="{{ onHabitTap }}" aria-label="{{ habitBtnLabel }}" style="{{ habitBtnStyle }}"
+                  style-focus="box-shadow: inset 0 0 0 2px #1C1C1C;">
+                  <span style="position:relative; z-index:1;">{{ habitBtnLabel }}</span>
+                </button>
                 <sc-if value="{{ todayDone }}">
                   <div
                     style="font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#7E8B36; margin-top:10px; text-align:center; animation:om-fade .3s ease;">
-                    Bravo, reviens demain pour tenir ta série.</div>
+                    C'est noté, l'application prend le relais !</div>
                 </sc-if>
               </div>
 
@@ -983,18 +978,7 @@ class Component extends DCLogic {
   next = () => this.go(false);
   skip = () => this.go(true);
 
-  holdStart = () => {
-    if (this.state.todayDone) return;
-    this._t0 = Date.now();
-    clearInterval(this._iv);
-    this._iv = setInterval(() => {
-      const p = Math.min(100, (Date.now() - this._t0) / 850 * 100);
-      this.setState({ holdProgress: p });
-      if (p >= 100) this.commitHabit();
-    }, 16);
-  };
-  holdEnd = () => { clearInterval(this._iv); if (this.state.todayDone) return; this.setState({ holdProgress: 0 }); };
-  commitHabit = () => { clearInterval(this._iv); this.setState({ todayDone: true, holdProgress: 0 }); this.celebrate('Engagement pris'); };
+  commitHabit = () => { this.setState({ todayDone: true }); this.celebrate(this.state.notif ? 'Rappel programmé !' : 'Routine activée !'); };
   back = () => this.setState(s => {
     const a = s.answers; let prev;
     if (s.screen === 6) prev = (!!a.micro && !!a.anchor) ? 5 : 4;
@@ -1145,8 +1129,7 @@ class Component extends DCLogic {
     const dots = Array.from({ length: daysCount }).map((_, i) => ({
       style: { width:'10px', height:'10px', borderRadius:'50%', background: (s.todayDone && i === 0) ? '#5E7A1F' : '#DCE89A', transition:'background .2s ease' }
     }));
-    const habitBtnStyle = { position:'relative', overflow:'hidden', width:'100%', height:'52px', marginTop:'18px', border:'none', borderRadius:'13px', cursor:'pointer', fontFamily:'"Trenda",sans-serif', fontWeight:700, fontSize:'16px', transition:'background .2s ease, color .2s ease', background: s.todayDone ? '#245453' : '#DDF247', color: s.todayDone ? '#DDF247' : '#245453' };
-    const holdFillStyle = { position:'absolute', left:'0', top:'0', bottom:'0', width: (s.todayDone ? 0 : s.holdProgress) + '%', background:'rgba(36,84,83,.20)', transition: s.holdProgress === 0 ? 'width .25s ease' : 'none' };
+    const habitBtnStyle = { position:'relative', overflow:'hidden', width:'100%', height:'52px', margin:'18px 0 0', border:'none', borderRadius:'13px', cursor:'pointer', fontFamily:'"Trenda",sans-serif', fontWeight:700, fontSize:'16px', transition:'background .2s ease, color .2s ease', background: s.todayDone ? '#245453' : '#DDF247', color: s.todayDone ? '#DDF247' : '#245453' };
 
     // profile ring
     const filledCount = this.fc();
@@ -1191,9 +1174,9 @@ class Component extends DCLogic {
       habitEl, dots,
       daysLabel: daysCount + (daysCount > 1 ? ' jours par semaine' : ' jour par semaine'),
       notif: s.notif, onToggleNotif: this.toggleNotif, switchTrackStyle, switchKnobStyle, notifTime: s.notifTime, onNotifTime: (e) => this.setState({ notifTime: e.target.value }),
-      todayDone: s.todayDone, habitBtnStyle, holdFillStyle,
-      habitBtnLabel: s.todayDone ? 'C\u2019est fait pour aujourd\u2019hui ✓' : 'Maintiens pour t\u2019engager',
-      onHoldStart: this.holdStart, onHoldEnd: this.holdEnd, onHabitTap: s.todayDone ? undefined : this.commitHabit, showHoldHint: !s.todayDone,
+      todayDone: s.todayDone, habitBtnStyle,
+      habitBtnLabel: s.todayDone ? 'Programmé avec succès ✓' : (s.notif ? ('Programmer mon rappel à ' + s.notifTime) : 'Activer ma routine'),
+      onHabitTap: s.todayDone ? undefined : this.commitHabit,
       weekPlan: ['L','M','M','J','V','S','D'].map((d, i) => {
         const on = effectiveDays.indexOf(i) !== -1;
         return { label:d, onClick: () => this.toggleWeekDay(i), style:{ flex:1, height:'40px', borderRadius:'11px', border:'none', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'"Trenda",sans-serif', fontWeight:700, fontSize:'13px', cursor:'pointer', background: on ? '#DDF247' : '#F2F2F2', color: on ? '#245453' : '#B6B6B0', transition:'all .2s ease' } };
