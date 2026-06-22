@@ -129,6 +129,16 @@
           }
         }
 
+        @keyframes om-blink {
+          0%, 50% {
+            opacity: 1
+          }
+
+          50.01%, 100% {
+            opacity: 0
+          }
+        }
+
         .om-scroll::-webkit-scrollbar {
           width: 0;
           height: 0;
@@ -197,6 +207,16 @@
                       style-focus="box-shadow: inset 0 0 0 2px #245453;"><sc-if value="{{ tok.isEmpty }}"><span
                           style="opacity:.85; font-weight:700;">+ </span></sc-if><sc-if value="{{ tok.hasEmoji }}"><span
                           style="font-size:18px;">{{ tok.emoji }}</span></sc-if><span>{{ tok.display }}</span></button>
+                  </sc-if>
+                  <sc-if value="{{ tok.isDate }}">
+                    <button onClick="{{ tok.onTap }}" style="{{ tok.style }}"
+                      style-focus="box-shadow: inset 0 0 0 2px #245453;"><span style="{{ tok.textStyle }}">{{
+                        tok.display }}</span></button>
+                  </sc-if>
+                  <sc-if value="{{ tok.isInput }}">
+                    <button onClick="{{ tok.onTap }}" style="{{ tok.style }}"
+                      style-focus="box-shadow: inset 0 0 0 2px #245453;"><span style="{{ tok.textStyle }}">{{
+                        tok.display }}</span><sc-if value="{{ tok.editing }}"><span style="{{ tok.caretStyle }}"></span></sc-if></button>
                   </sc-if>
                 </sc-for>
               </div>
@@ -380,23 +400,25 @@
                 </sc-for>
               </div>
 
-              <!-- compact habit summary -->
-              <sc-if value="{{ hasHabit }}">
+              <!-- compact target summary (objectif principal) -->
+              <sc-if value="{{ hasTarget }}">
                 <div
                   style="margin-top:18px; background:#FBFDEA; border:1.5px solid #DDF247; border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:12px;">
                   <span
                     style="flex:none; width:38px; height:38px; border-radius:11px; background:#DDF247; display:flex; align-items:center; justify-content:center;"><svg
                       xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none"
                       stroke="#245453" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M20 6 9 17l-5-5"></path>
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <circle cx="12" cy="12" r="6"></circle>
+                      <circle cx="12" cy="12" r="2"></circle>
                     </svg></span>
                   <span style="flex:1; min-width:0;">
                     <span
-                      style="display:block; font-family:'Trenda',sans-serif; font-weight:600; font-size:14.5px; color:#1C1C1C;">{{
-                      habitSummary }}</span>
+                      style="display:block; font-family:'Trenda',sans-serif; font-weight:400; font-size:12px; color:#7E8B36;">Ton
+                      objectif</span>
                     <span
-                      style="display:block; font-family:'Trenda',sans-serif; font-weight:400; font-size:12.5px; color:#7E8B36; margin-top:1px;">{{
-                      daysLabel }}</span>
+                      style="display:block; font-family:'Trenda',sans-serif; font-weight:600; font-size:14.5px; color:#1C1C1C; margin-top:1px;">{{
+                      targetSummary }}</span>
                   </span>
                 </div>
               </sc-if>
@@ -557,36 +579,6 @@
               </div>
             </sc-if>
 
-            <!-- unit segments (target amount, unit goals) -->
-            <sc-if value="{{ showUnits }}">
-              <div style="margin-bottom:4px;">
-                <div
-                  style="font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#8A8B86; margin-bottom:9px;">
-                  Tu veux raisonner en…</div>
-                <div style="display:flex; gap:8px;">
-                  <sc-for list="{{ unitSegs }}" as="u" hint-placeholder-count="3">
-                    <button onClick="{{ u.onClick }}" aria-label="{{ u.label }}" style="{{ u.style }}"
-                      style-focus="box-shadow: inset 0 0 0 2px #245453;">{{ u.label }}</button>
-                  </sc-for>
-                </div>
-              </div>
-            </sc-if>
-
-            <!-- numeric custom (target amount) -->
-            <sc-if value="{{ numCustom }}">
-              <div style="margin-top:12px; padding-top:14px; border-top:1px solid #F0F0F0;">
-                <div
-                  style="font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#8A8B86; margin-bottom:9px;">
-                  Une valeur précise</div>
-                <div style="display:flex; gap:8px;">
-                  <input value="{{ amtNum }}" onInput="{{ onAmtNum }}" onKeyDown="{{ onAmtKey }}" inputmode="numeric"
-                    placeholder="{{ amtPlaceholder }}"
-                    style="flex:1; min-width:0; padding:0 14px; height:48px; border-radius:12px; border:1.5px solid #E6E6E6; font-family:'Trenda',sans-serif; font-weight:600; font-size:16px; color:#1C1C1C; outline:none;">
-                  <button onClick="{{ onAmtSubmit }}" style="{{ amtBtnStyle }}">OK</button>
-                </div>
-              </div>
-            </sc-if>
-
             <!-- text custom (device / event other) -->
             <sc-if value="{{ textCustom }}">
               <div
@@ -627,6 +619,82 @@
           </div>
         </sc-if>
 
+        <!-- ===== SIMULATED MOBILE KEYBOARD ===== -->
+        <sc-if value="{{ keyboardOpen }}">
+          <div onClick="{{ onCloseKeyboard }}"
+            style="position:absolute; inset:0; z-index:18;"></div>
+          <div
+            style="position:absolute; left:0; right:0; bottom:0; z-index:19; background:#D1D5DB; padding:0 6px 10px; box-shadow:0 -8px 24px -10px rgba(0,0,0,.3); animation:om-rise .22s cubic-bezier(.22,1,.36,1);">
+            <!-- suggestion strip (above keys, like Android) -->
+            <sc-if value="{{ showSuggest }}">
+              <div
+                style="display:flex; align-items:center; gap:8px; overflow-x:auto; padding:9px 4px; border-bottom:1px solid #BFC4CB;">
+                <sc-for list="{{ suggestions }}" as="sg" hint-placeholder-count="4">
+                  <button onClick="{{ sg.onClick }}" style="{{ sg.style }}"
+                    style-focus="box-shadow: inset 0 0 0 2px #1C6FE0;">{{ sg.label }}</button>
+                </sc-for>
+              </div>
+            </sc-if>
+            <div style="text-align:right; padding:6px 6px 6px;">
+              <button onClick="{{ onCloseKeyboard }}"
+                style="background:none; border:none; color:#1C6FE0; font-family:'Trenda',sans-serif; font-weight:700; font-size:15px; cursor:pointer; padding:4px 8px;">OK</button>
+            </div>
+            <sc-for list="{{ keyRows }}" as="row" hint-placeholder-count="4">
+              <div style="display:flex; justify-content:center; gap:5px; margin-bottom:7px;">
+                <sc-for list="{{ row }}" as="k" hint-placeholder-count="10">
+                  <button onClick="{{ k.onClick }}" style="{{ k.style }}"
+                    style-focus="box-shadow: inset 0 0 0 2px #1C6FE0;">{{ k.label }}</button>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <!-- ===== DATE PICKER BOTTOM SHEET (Material) ===== -->
+        <sc-if value="{{ dateOpen }}">
+          <div onClick="{{ onCloseDate }}"
+            style="position:absolute; inset:0; background:rgba(18,18,18,.46); animation:om-fade .2s ease; z-index:22;"></div>
+          <div
+            style="position:absolute; left:0; right:0; bottom:0; background:#FFFFFF; border-radius:24px 24px 0 0; padding:8px 18px 26px; z-index:23; animation:om-rise .3s cubic-bezier(.22,1,.36,1); box-shadow:0 -16px 40px -10px rgba(0,0,0,.18);">
+            <div style="width:38px; height:4px; border-radius:4px; background:#E2E2E2; margin:6px auto 14px;"></div>
+            <div
+              style="font-family:'Trenda',sans-serif; font-weight:400; font-size:13px; color:#8A8B86; margin:0 6px 2px;">
+              Sélectionne ta date</div>
+            <div
+              style="font-family:'Sora',sans-serif; font-weight:700; font-size:24px; color:#1C1C1C; margin:0 6px 16px;">
+              {{ dateHeadline }}</div>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin:0 4px 10px;">
+              <button onClick="{{ onPrevMonth }}" aria-label="Mois précédent"
+                style="width:38px; height:38px; border-radius:50%; border:none; background:#F2F2F2; cursor:pointer; display:flex; align-items:center; justify-content:center;"><svg
+                  xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="#1C1C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m15 18-6-6 6-6"></path>
+                </svg></button>
+              <span
+                style="font-family:'Trenda',sans-serif; font-weight:600; font-size:16px; color:#1C1C1C;">{{ monthLabel }}</span>
+              <button onClick="{{ onNextMonth }}" aria-label="Mois suivant"
+                style="width:38px; height:38px; border-radius:50%; border:none; background:#F2F2F2; cursor:pointer; display:flex; align-items:center; justify-content:center;"><svg
+                  xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="#1C1C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m9 18 6-6-6-6"></path>
+                </svg></button>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:6px;">
+              <sc-for list="{{ weekDayLabels }}" as="wd" hint-placeholder-count="7">
+                <div
+                  style="text-align:center; font-family:'Trenda',sans-serif; font-weight:600; font-size:12px; color:#A8A8A2; padding:4px 0;">
+                  {{ wd }}</div>
+              </sc-for>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px;">
+              <sc-for list="{{ calendarCells }}" as="cell" hint-placeholder-count="35">
+                <button onClick="{{ cell.onClick }}" style="{{ cell.style }}"
+                  style-focus="box-shadow: inset 0 0 0 2px #245453;">{{ cell.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
       </div>
     </div>
   </x-dc>
@@ -634,7 +702,10 @@
 class Component extends DCLogic {
   state = {
     screen: 0,
-    answers: { goal:'', limitation:'', freq:'', place:'', level:'', context:'', tgAmount:'', tgKind:'', tgWhen:'', blocker:'', device:'', days:3, micro:'', anchor:'' },
+    answers: { goal:'', limitation:'', freq:'', place:'', level:'', context:'', tgAction:'', tgAmount:'', tgKind:'', tgWhen:'', blocker:'', device:'', days:3, micro:'', anchor:'' },
+    editField: '',
+    dateOpen: false,
+    dateView: '',
     picker: null,
     todayDone: false,
     toast: '',
@@ -654,11 +725,7 @@ class Component extends DCLogic {
   activeChips() {
     const a = this.state.answers;
     let chips = ['goal','limitation','freq','place','level','blocker','device','micro','anchor','days'];
-    if (a.goal) {
-      this.buildTargetTokens().forEach(t => { if (t.chip) chips.push(t.chip); });
-    } else {
-      chips.push('context','tgAmount','tgKind','tgWhen');
-    }
+    chips.push('tgAction','tgAmount','tgKind','tgWhen');
     return chips;
   }
   fc() { const a = this.state.answers; return this.activeChips().filter(k => k === 'days' ? true : !!a[k]).length; }
@@ -707,6 +774,7 @@ class Component extends DCLogic {
     place: { home:'L\u2019entraînement à domicile a explosé de 170 % depuis 2020, et les résultats sont équivalents à la salle.', gym:'Avoir accès à du matériel augmente les chances de tenir son programme de 38 % sur un an.', outdoor:'S\u2019entraîner dehors réduit le stress de 21 % par rapport à un entraînement en intérieur.', mixed:'Varier les lieux réduit la sensation de routine de 47 % et aide à tenir sur le long terme.' },
     level: { zero:'Les débutants progressent 2 à 3 fois plus vite que les sportifs confirmés. C\u2019est le meilleur moment.', stopped:'Bonne nouvelle : la mémoire musculaire existe. Tu récupères tes acquis 40 % plus vite qu\u2019un débutant.', occasional:'Passer d\u2019occasionnel à régulier divise le risque de blessure par 2.', regular:'Les sportifs réguliers ont un âge biologique inférieur de 9 ans en moyenne à leur âge réel.', competitor:'Les 1 % les plus entraînés voient encore des gains de 2 à 4 % par an. Chaque détail compte.' },
     context: 'Les plans personnalisés ont un taux de réussite 2 fois supérieur aux programmes génériques.',
+    tgAction: 'Nommer précisément ton objectif le rend 2 fois plus atteignable.',
     tgAmount: 'Se fixer un chiffre précis augmente les chances d\u2019atteindre son objectif de 42 %.',
     tgKind: 'Les objectifs précis sont atteints 33 % plus souvent que les objectifs vagues.',
     tgWhen: 'Se donner une date limite booste naturellement la motivation. Le cerveau adore les deadlines.',
@@ -814,115 +882,77 @@ class Component extends DCLogic {
   };
   contextQ = { strength:'À quelle fréquence t\u2019entraînes-tu en ce moment ?', weight_loss:'Quel est ton niveau d\u2019activité ?', endurance:'Quel sport pratiques-tu le plus ?', event:'Pour quel événement te prépares-tu ?', move_more:'Jusqu\u2019où veux-tu aller ?' };
 
-  // fill-in-the-blank "premier objectif"
+  // === ÉTAPE 3 — objectif "à trous" façon Atoms : saisie libre + chips de suggestion ===
+  // Phrase générique unique : « Je veux [action] [nombre] [unité], d'ici [date]. »
+  // Les champs action/amount/kind sont des inputs inline ; tgWhen est un date picker.
   buildTargetTokens() {
-    const a = this.state.answers;
-    const g = a.goal;
-    const t = (text) => ({ t: text });
-    const c = (chip, ph, dg, dk) => ({ chip, ph, dependsKey: dk });
-    
-    if (g === 'strength') {
-      const isWeight = a.tgKind === 'deadlift' || a.tgKind === 'bench' || a.tgKind === 'squat_barre';
-      if (isWeight) {
-        return [ t('Aujourd\u2019hui, je m\u2019entraîne '), c('context','à préciser'), t(' et je veux soulever '), c('tgAmount','combien', true, 'tgKind'), t(' kg au '), c('tgKind','quel mouvement', true), t(' d\u2019ici '), c('tgWhen','quand', true), t('.') ];
-      }
-      return [ t('Aujourd\u2019hui, je m\u2019entraîne '), c('context','à préciser'), t(' et je veux faire '), c('tgAmount','combien', true, 'tgKind'), t(' '), c('tgKind','quel mouvement', true), t(' d\u2019ici '), c('tgWhen','quand', true), t('.') ];
-    }
-    if (g === 'weight_loss') {
-      let verb = 'perdre';
-      if (a.tgKind === 'pct') verb = 'descendre à';
-      if (a.tgKind === 'kcal') verb = 'brûler';
-      return [ t('En ce moment, je suis '), c('context','à préciser'), t(' et je veux ' + verb + ' '), c('tgAmount','un objectif'), t(' d\u2019ici '), c('tgWhen','quand'), t('.') ];
-    }
-    if (g === 'endurance') return [ t('Mon sport principal, c\u2019est '), c('context','à préciser'), t(' et je veux parcourir '), c('tgAmount','une distance'), t(' d\u2019ici '), c('tgWhen','quand'), t('.') ];
-    if (g === 'move_more') return [ t('Je veux '), c('context','à préciser'), t(' pour atteindre '), c('tgAmount','une cible'), t(' d\u2019ici '), c('tgWhen','quand'), t('.') ];
-    if (g === 'event') {
-      const evt = a.context;
-      if (!evt) return [ t('Je prépare '), c('context','un événement'), t(' d\u2019ici '), c('tgWhen','quand'), t('.') ];
-      if (evt === 'trail' || evt === 'ultra_trail') return [ t('Je prépare '), c('context','un événement'), t(' de '), c('tgAmount','distance'), t(' km d\u2019ici '), c('tgWhen','quand'), t('.') ];
-      if (evt === 'hyrox') return [ t('Je prépare '), c('context','un événement'), t(' en moins de '), c('tgAmount','temps'), t(' min d\u2019ici '), c('tgWhen','quand'), t('.') ];
-      return [ t('Je prépare '), c('context','un événement'), t(' d\u2019ici '), c('tgWhen','quand'), t('.') ];
-    }
+    return [
+      { t: 'Je veux ' },
+      { field: 'tgAction', ph: 'faire quoi' },
+      { t: ' ' },
+      { field: 'tgAmount', ph: 'combien', numeric: true },
+      { t: ' ' },
+      { field: 'tgKind', ph: 'unité' },
+      { t: ', d’ici ' },
+      { field: 'tgWhen', ph: 'une date', date: true },
+      { t: '.' }
+    ];
+  }
+  // Suggestions par objectif (goal). action / kind (unité) / values (nombres).
+  tgSuggest = {
+    strength:    { action: ['soulever','faire','tenir'], kind: ['kg','reps','sec'], values: [5,10,20,50] },
+    weight_loss: { action: ['perdre','descendre à','brûler'], kind: ['kg','% de masse grasse','kcal'], values: [3,5,8,10] },
+    endurance:   { action: ['courir','nager','pédaler','ramer'], kind: ['km','min','m'], values: [5,10,21,42] },
+    move_more:   { action: ['marcher','bouger','atteindre'], kind: ['pas','min','km'], values: [5000,8000,10000,12000] },
+    event:       { action: ['courir','finir','viser'], kind: ['km','min','h'], values: [5,10,21,42] }
+  };
+  // Suggestions pour le champ actif de l'étape 3 (selon le goal de l'étape 1).
+  suggestFor(field) {
+    const g = this.state.answers.goal;
+    const s = this.tgSuggest[g] || this.tgSuggest.move_more;
+    if (field === 'tgAction') return s.action;
+    if (field === 'tgKind') return s.kind;
+    if (field === 'tgAmount') return s.values.map(String);
     return [];
   }
-  tgKindOpts = {
-    strength: [ {value:'tractions',label:'tractions'}, {value:'pompes',label:'pompes'}, {value:'dips',label:'dips'}, {value:'squats',label:'squats'}, {value:'fentes',label:'fentes'}, {value:'deadlift',label:'au deadlift'}, {value:'bench',label:'au développé couché'}, {value:'squat_barre',label:'au squat barre'} ],
-    weight_loss: [ {value:'kg',label:'kg'}, {value:'pct',label:'% de masse grasse'}, {value:'kcal',label:'kcal par séance'} ],
-    endurance: [ {value:'km',label:'km'}, {value:'min',label:'minutes sans pause'} ],
-    event: [ {value:'marathon',label:'un marathon'}, {value:'semi',label:'un semi'}, {value:'trail',label:'un trail'}, {value:'hyrox',label:'un Hyrox'}, {value:'triathlon',label:'un triathlon'} ],
-    move_more: [ {value:'pas',label:'pas par jour'}, {value:'minmarche',label:'min de marche par jour'} ]
-  };
-  tgKindTitle = { strength:'Quel mouvement ?', weight_loss:'Quelle unité ?', endurance:'Quelle unité ?', event:'Quel événement vises-tu ?', move_more:'Quelle cible ?' };
-  tgAmountOpts = { strength:[5,10,15,20], weight_loss:[3,5,8,10], endurance:[5,10,21,42], move_more:[5000,8000,10000,12000] };
-  tgWhenOpts = {
-    _default: [ {value:'4w',label:'4 semaines'}, {value:'8w',label:'8 semaines'}, {value:'3m',label:'3 mois'}, {value:'6m',label:'6 mois'} ],
-    event: [ {value:'1m',label:'1 mois'}, {value:'3m',label:'3 mois'}, {value:'6m',label:'6 mois'}, {value:'year',label:'cette année'} ]
-  };
 
-  titles = ['Ce qui t\u2019amène', 'Où tu en es', 'Ton objectif principal', 'Pour mieux t\u2019aider', 'Ta première habitude'];
+  // Format d'affichage d'une date ISO (YYYY-MM-DD) en "15 sept. 2026".
+  formatDate(iso) {
+    if (!iso) return '';
+    const parts = iso.split('-');
+    if (parts.length !== 3) return iso;
+    const mois = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+    const m = parseInt(parts[1], 10) - 1;
+    return parseInt(parts[2], 10) + ' ' + (mois[m] || '') + ' ' + parts[0];
+  }
+  // Résumé chiffré de l'objectif (étape 3), pour la carte de l'écran final.
+  targetSummary() {
+    const a = this.state.answers;
+    if (!a.tgAction) return '';
+    let s = a.tgAction;
+    if (a.tgAmount) s += ' ' + a.tgAmount;
+    if (a.tgKind) s += ' ' + a.tgKind;
+    if (a.tgWhen) s += ' d’ici le ' + this.formatDate(a.tgWhen);
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  titles = ['Ce qui t’amène', 'Où tu en es', 'Ton objectif principal', 'Pour mieux t’aider', 'Ta première habitude'];
   pickerTitles = {
-    goal:'Qu\u2019est-ce qui t\u2019amène aujourd\u2019hui ?', limitation:'Côté corps ?',
-    freq:'Tu t\u2019entraînes combien ?', place:'Où t\u2019entraînes-tu ?', level:'Où en es-tu aujourd\u2019hui ?',
-    blocker:'Qu\u2019est-ce qui te freine ?', device:'Quel objet connecté ?',
-    days:'Combien de jours par semaine ?', micro:'Ta micro-habitude pour démarrer', anchor:'À quel moment ?',
-    tgAmount:'Combien ?', tgWhen:'D\u2019ici quand ?'
+    goal:'Qu’est-ce qui t’amène aujourd’hui ?', limitation:'Côté corps ?',
+    freq:'Tu t’entraînes combien ?', place:'Où t’entraînes-tu ?', level:'Où en es-tu aujourd’hui ?',
+    blocker:'Qu’est-ce qui te freine ?', device:'Quel objet connecté ?',
+    days:'Combien de jours par semaine ?', micro:'Ta micro-habitude pour démarrer', anchor:'À quel moment ?'
   };
 
   optsFor(key) {
     const a = this.state.answers;
     const g = a.goal;
-    if (key === 'context') return this.contextOpts[g] || [];
-    if (key === 'tgKind') return this.tgKindOpts[g] || [];
-    if (key === 'tgWhen') return this.tgWhenOpts[g === 'event' ? 'event' : '_default'];
-    if (key === 'tgAmount') {
-      if (g === 'strength') {
-        const isW = a.tgKind === 'deadlift' || a.tgKind === 'bench' || a.tgKind === 'squat_barre';
-        if (isW) return [60,80,100,120].map(n => ({ value:String(n), label:String(n) }));
-        return [5,10,15,20].map(n => ({ value:String(n), label:String(n) }));
-      }
-      if (g === 'weight_loss') {
-        if (a.tgKind === 'pct') return [10,12,15,20].map(n => ({ value:String(n), label:String(n) }));
-        if (a.tgKind === 'kcal') return [300,400,500,600].map(n => ({ value:String(n), label:String(n) }));
-        return [3,5,8,10].map(n => ({ value:String(n), label:String(n) }));
-      }
-      if (g === 'move_more') {
-        if (a.tgKind === 'minmarche') return [15,30,45,60].map(n => ({ value:String(n), label:String(n) }));
-        return [5000,8000,10000,12000].map(n => ({ value:String(n), label:String(n) }));
-      }
-      if (g === 'endurance') {
-        if (a.tgKind === 'min') return [20,30,40,60].map(n => ({ value:String(n), label:String(n) }));
-        return [5,10,21,42].map(n => ({ value:String(n), label:String(n) }));
-      }
-      return (this.tgAmountOpts[g] || []).map(n => ({ value:String(n), label:String(n) }));
-    }
     if (key === 'micro') return this.data.micro[g] || [];
     return this.data[key] || [];
-  }
-  // Goals dont l'unité (tgKind) se choisit DANS le picker tgAmount, pas dans un trou séparé.
-  unitGoals = ['weight_loss', 'endurance', 'move_more'];
-  // Suffixe affiché après le nombre, selon le goal + l'unité (tgKind) choisie.
-  unitSuffix() {
-    const a = this.state.answers;
-    if (a.goal === 'weight_loss') return a.tgKind === 'pct' ? '%' : (a.tgKind === 'kcal' ? 'kcal/séance' : 'kg');
-    if (a.goal === 'endurance') return a.tgKind === 'min' ? 'min' : 'km';
-    if (a.goal === 'move_more') return a.tgKind === 'minmarche' ? 'min/jour' : 'pas/jour';
-    return '';
-  }
-  // Segments d'unité proposés dans le picker tgAmount (label court pour bouton-segment).
-  unitSegments() {
-    const g = this.state.answers.goal;
-    if (g === 'weight_loss') return [ {value:'kg',label:'kg'}, {value:'pct',label:'% masse grasse'}, {value:'kcal',label:'kcal/séance'} ];
-    if (g === 'endurance') return [ {value:'km',label:'km'}, {value:'min',label:'minutes'} ];
-    if (g === 'move_more') return [ {value:'pas',label:'pas/jour'}, {value:'minmarche',label:'min de marche'} ];
-    return [];
   }
   labelFor(key) {
     const v = this.state.answers[key];
     if (!v) return '';
-    // tgAmount des goals à unité : on affiche "5 kg", "10 km", etc.
-    if (key === 'tgAmount' && this.unitGoals.indexOf(this.state.answers.goal) !== -1) {
-      return v + ' ' + this.unitSuffix();
-    }
     const o = this.optsFor(key).find(x => x.value === v);
     return o ? o.label : v;
   }
@@ -933,10 +963,8 @@ class Component extends DCLogic {
   }
 
   targetComplete() {
-    const g = this.state.answers.goal;
-    if (!g) return false;
-    const tokens = this.buildTargetTokens();
-    return tokens.filter(p => p.chip).every(p => !!this.state.answers[p.chip]);
+    const a = this.state.answers;
+    return !!a.tgAction && !!a.tgAmount && !!a.tgKind && !!a.tgWhen;
   }
   reqMet(screen) {
     const a = this.state.answers;
@@ -948,36 +976,15 @@ class Component extends DCLogic {
   }
 
   open = (key) => this.setState({ picker: key, customText: '', customMode: false, customNum: '' });
-  nextTargetChip = () => {
-    // Ordre de SAISIE (respecte les dépendances : tgKind avant tgAmount),
-    // distinct de l'ordre d'apparition dans la phrase. Filtré sur les trous présents.
-    const a = this.state.answers;
-    const present = this.buildTargetTokens().filter(p => p.chip).map(p => p.chip);
-    const order = ['context', 'tgKind', 'tgAmount', 'tgWhen'];
-    return order.find(k => k !== 'context' && present.indexOf(k) !== -1 && !a[k]) || null;
-  };
-  chainTarget = () => {
-    const next = this.nextTargetChip();
-    if (next) { clearTimeout(this._chain); this._chain = setTimeout(() => this.open(next), 260); }
-  };
   closePicker = () => this.setState({ picker: null });
   pick = (key, value) => {
     clearTimeout(this._jf); this._jf = setTimeout(() => this.setState({ justFilled: '' }), 440);
     this.setState(s => {
       const a = { ...s.answers, [key]: value };
       if (key === 'goal' && s.answers.goal !== value) {
-        a.context = '';
-        a.tgAmount = '';
-        a.tgWhen = '';
-        a.micro = '';
-        // Unité fixe par goal (pas de choix utilisateur). strength/event : pas d'unité par défaut.
-        if (value === 'weight_loss') a.tgKind = 'kg';
-        else if (value === 'endurance') a.tgKind = 'km';
-        else if (value === 'move_more') a.tgKind = 'pas';
-        else a.tgKind = '';
+        // Changer d'objectif réinitialise la cible (étape 3) et la micro-habitude.
+        a.tgAction = ''; a.tgAmount = ''; a.tgKind = ''; a.tgWhen = ''; a.micro = '';
       }
-      if (key === 'context' && s.answers.context !== value) { a.tgAmount = ''; }
-      if (key === 'tgKind' && s.answers.tgKind !== value) { a.tgAmount = ''; }
       const extra = {};
       if (key === 'anchor') {
         const defaults = { wake:'07:00', coffee:'08:30', lunch:'13:00', work:'18:00', sleep:'21:00' };
@@ -985,15 +992,10 @@ class Component extends DCLogic {
       }
       return { answers: a, picker: null, customMode: false, customText: '', justFilled: key, reaction: this.reactFor(key, value), ...extra };
     });
-    if (this.state.screen === 2 && ['context','tgKind','tgAmount'].indexOf(key) !== -1) this.chainTarget();
   };
   onCustomText = (e) => this.setState({ customText: e.target.value });
   onCustomKey = (e) => { if (e.key === 'Enter') this.submitCustom(); };
   submitCustom = () => { const t = (this.state.customText || '').trim(); if (t) this.pick(this.state.picker, t); };
-  onCustomNum = (e) => this.setState({ customNum: e.target.value.replace(/[^0-9]/g, '').slice(0, 6) });
-  pickUnit = (value) => this.setState(s => ({ answers: { ...s.answers, tgKind: value, tgAmount: '' }, customNum: '' }));
-  submitAmount = () => { const n = parseInt(this.state.customNum, 10); if (n >= 1) this.pick('tgAmount', String(n)); };
-  onAmtKey = (e) => { if (e.key === 'Enter') this.submitAmount(); };
   startTextCustom = () => this.setState({ customMode: true, customText: '' });
   toggleNotif = () => this.setState(s => ({ notif: !s.notif }));
   setNotifLead = (v) => this.setState({ notifLead: v });
@@ -1009,6 +1011,46 @@ class Component extends DCLogic {
   });
   celebrate = (msg) => { this.setState({ celebrate: msg }); clearTimeout(this._cel); this._cel = setTimeout(() => this.setState({ celebrate: '' }), 1100); };
 
+  // === Étape 3 — édition inline des champs objectif ===
+  // Tap sur un champ texte/numérique : l'active et ouvre le clavier simulé.
+  editFocus = (field) => this.setState({ editField: field });
+  // Tap sur une chip de suggestion : remplit le champ + garde le focus.
+  pickSuggest = (field, value) => this.setState(s => ({ answers: { ...s.answers, [field]: String(value) }, editField: field, reaction: this.react[field] || '' }));
+
+  // --- Clavier mobile simulé ---
+  closeKeyboard = () => this.setState({ editField: '' });
+  // Ajoute un caractère au champ actif (lettres/chiffres/espace).
+  keyPress = (ch) => this.setState(s => {
+    const f = s.editField; if (!f) return {};
+    let v = (s.answers[f] || '') + ch;
+    if (f === 'tgAmount') {
+      // Chiffres + une seule virgule décimale.
+      v = v.replace(/[^0-9,]/g, '');
+      const parts = v.split(',');
+      v = parts.shift() + (parts.length ? ',' + parts.join('').slice(0, 2) : '');
+      v = v.slice(0, 8);
+    } else {
+      v = v.slice(0, 24);
+    }
+    return { answers: { ...s.answers, [f]: v }, reaction: this.react[f] || '' };
+  });
+  // Efface le dernier caractère du champ actif.
+  keyBackspace = () => this.setState(s => {
+    const f = s.editField; if (!f) return {};
+    return { answers: { ...s.answers, [f]: (s.answers[f] || '').slice(0, -1) } };
+  });
+
+  // --- Date picker (bottom sheet Material) ---
+  openDate = () => this.setState(s => ({ dateOpen: true, editField: '', dateView: (s.answers.tgWhen || new Date().toISOString().slice(0,10)).slice(0,7) }));
+  closeDate = () => this.setState({ dateOpen: false });
+  shiftMonth = (delta) => this.setState(s => {
+    const [y, m] = s.dateView.split('-').map(Number);
+    const d = new Date(y, (m - 1) + delta, 1);
+    return { dateView: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') };
+  });
+  // Sélectionne un jour (ISO) et ferme le sheet.
+  pickDate = (iso) => this.setState(s => ({ answers: { ...s.answers, tgWhen: iso }, dateOpen: false, reaction: this.react.tgWhen || '' }));
+
   go = (skipped) => {
     const s = this.state, a = s.answers, idx = s.screen;
     let nextScreen;
@@ -1016,7 +1058,9 @@ class Component extends DCLogic {
     else if (idx === 5) { nextScreen = 6; }
     else nextScreen = Math.min(6, idx + 1);
     if (!skipped && idx <= 4) this.celebrate(this.affirm[idx] || 'Beau travail');
-    this.setState({ screen: nextScreen, reaction: '' });
+    // À l'arrivée sur l'écran objectif (2), pré-cible le 1er champ pour afficher ses suggestions.
+    const editField = nextScreen === 2 ? (this.state.answers.tgAction ? '' : 'tgAction') : '';
+    this.setState({ screen: nextScreen, reaction: '', editField });
   };
   next = () => this.go(false);
   skip = () => this.go(true);
@@ -1025,9 +1069,9 @@ class Component extends DCLogic {
     const a = s.answers; let prev;
     if (s.screen === 6) prev = (!!a.micro && !!a.anchor) ? 5 : 4;
     else prev = Math.max(0, s.screen - 1);
-    return { screen: prev, reaction: '' };
+    return { screen: prev, reaction: '', editField: '' };
   });
-  restart = () => this.setState({ screen:0, todayDone:false, weekDays:null, reaction:'', answers:{ goal:'', limitation:'', freq:'', place:'', level:'', context:'', tgAmount:'', tgKind:'', tgWhen:'', blocker:'', device:'', days:3, micro:'', anchor:'' } });
+  restart = () => this.setState({ screen:0, todayDone:false, weekDays:null, reaction:'', editField:'', answers:{ goal:'', limitation:'', freq:'', place:'', level:'', context:'', tgAction:'', tgAmount:'', tgKind:'', tgWhen:'', blocker:'', device:'', days:3, micro:'', anchor:'' } });
   showToast = (msg) => { this.setState({ toast: msg }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: '' }), 2200); };
 
   buildTokens() {
@@ -1060,7 +1104,30 @@ class Component extends DCLogic {
     if (screen === 1) return [ t('Je m\u2019entraîne '), chip('freq','une fréquence'), t(', surtout '), chip('place','un lieu'), t(', et '), chip('level','mon niveau'), t('.') ];
     if (screen === 2) {
       if (!a.goal) return [ t('Choisis d\u2019abord ce qui t\u2019amène pour définir ton objectif.') ];
-      return this.buildTargetTokens().map(p => p.t !== undefined ? t(p.t) : chip(p.chip, p.ph, true, p.dependsKey));
+      const fieldBase = { display:'inline-flex', alignItems:'center', verticalAlign:'middle', borderRadius:'8px', padding:'2px 8px', fontFamily:'"Trenda",sans-serif', fontWeight:700, fontSize:'23px', lineHeight:'1.3', cursor:'pointer', whiteSpace:'nowrap', transition:'all .15s ease' };
+      const ed = this.state.editField;
+      return this.buildTargetTokens().map(p => {
+        if (p.t !== undefined) return t(p.t);
+        const val = a[p.field] || '';
+        const filled = !!val;
+        const editing = ed === p.field;
+        const boxStyle = { ...fieldBase,
+          background: filled ? '#F3FAC3' : '#FBFDF0',
+          border: '1.5px ' + (filled ? 'solid #C7DF3F' : 'dashed #C2D87A'),
+          boxShadow: editing ? 'inset 0 0 0 2px #245453' : 'none' };
+        const textStyle = { color: filled ? '#245453' : '#9DAE63', fontWeight:700 };
+        const caretStyle = { display:'inline-block', width:'2px', height:'22px', background:'#245453', marginLeft:'1px', verticalAlign:'middle', animation:'om-blink 1s steps(1) infinite' };
+        if (p.date) {
+          return { isDate:true, isInput:false, field:p.field, filled,
+            display: filled ? this.formatDate(val) : p.ph,
+            style: boxStyle, textStyle,
+            onTap: () => this.openDate() };
+        }
+        return { isInput:true, isDate:false, field:p.field, filled, editing,
+          display: filled ? val : p.ph,
+          style: boxStyle, textStyle, caretStyle,
+          onTap: () => this.editFocus(p.field) };
+      });
     }
     if (screen === 3) return [ t('Ce qui me freine souvent, c\u2019est '), chip('blocker','mon frein'), t('. Je suis mes données avec '), chip('device','un objet'), t('.') ];
     return [ t('Je m\u2019engage sur '), chip('days'), t(' par semaine. Pour démarrer en douceur, je ferai '), chip('micro','une habitude', true), t(', '), chip('anchor','un moment'), t('.') ];
@@ -1089,52 +1156,25 @@ class Component extends DCLogic {
     // picker
     const pk = s.picker;
     let pickerTitle='', isList=false, isGrid=false, isStepper=false, gridCols='', pickerOptions=[];
-    let numCustom=false, textCustom=false, customLabel='', customPlaceholder='', amtPlaceholder='Ex : 12';
+    let textCustom=false, customLabel='', customPlaceholder='';
     if (pk) {
-      if (pk === 'context') pickerTitle = this.contextQ[a.goal] || 'Ton point de départ';
-      else if (pk === 'tgKind') pickerTitle = this.tgKindTitle[a.goal] || 'Précise';
-      else pickerTitle = this.pickerTitles[pk] || '';
-
-      if (pk === 'tgAmount') {
-        if (a.goal === 'event') {
-          if (a.context === 'hyrox') { pickerTitle = 'En combien de temps (min) ?'; amtPlaceholder = 'Ex : 90'; }
-          else if (a.context === 'trail' || a.context === 'ultra_trail') { pickerTitle = 'Quelle distance (km) ?'; amtPlaceholder = 'Ex : 50'; }
-        } else if (a.goal === 'strength') {
-          const isW = a.tgKind === 'deadlift' || a.tgKind === 'bench' || a.tgKind === 'squat_barre';
-          pickerTitle = isW ? 'Quel poids (kg) ?' : 'Combien de reps ?';
-          amtPlaceholder = isW ? 'Ex : 100' : 'Ex : 15';
-        } else if (a.goal === 'weight_loss') {
-          if (!a.tgKind) pickerTitle = 'Quel est ton objectif ?';
-          else if (a.tgKind === 'pct') { pickerTitle = 'Quel pourcentage ?'; amtPlaceholder = 'Ex : 15'; }
-          else if (a.tgKind === 'kcal') { pickerTitle = 'Combien de kcal ?'; amtPlaceholder = 'Ex : 400'; }
-          else { pickerTitle = 'Combien de kilos ?'; amtPlaceholder = 'Ex : 5'; }
-        } else if (a.goal === 'move_more') {
-          if (!a.tgKind) pickerTitle = 'Quelle cible veux-tu ?';
-          else if (a.tgKind === 'minmarche') { pickerTitle = 'Combien de minutes ?'; amtPlaceholder = 'Ex : 30'; }
-          else { pickerTitle = 'Combien de pas ?'; amtPlaceholder = 'Ex : 8000'; }
-        } else if (a.goal === 'endurance') {
-          if (!a.tgKind) pickerTitle = 'Quelle distance veux-tu viser ?';
-          else if (a.tgKind === 'min') { pickerTitle = 'Combien de minutes ?'; amtPlaceholder = 'Ex : 45'; }
-          else { pickerTitle = 'Combien de kilomètres ?'; amtPlaceholder = 'Ex : 10'; }
-        }
-      }
+      pickerTitle = this.pickerTitles[pk] || '';
 
       if (pk === 'days') isStepper = true;
       else if (pk === 'place') { isGrid = true; gridCols = 'repeat(2,1fr)'; }
       else if (pk === 'device') { isGrid = true; gridCols = 'repeat(3,1fr)'; }
       else isList = true;
 
-      numCustom = pk === 'tgAmount';
-      textCustom = (pk === 'device' || pk === 'context') && s.customMode;
-      customLabel = pk === 'device' ? 'Quel appareil utilises-tu ?' : 'Précise ton événement';
-      customPlaceholder = pk === 'device' ? 'Ex : Coros, Withings…' : 'Ex : Spartan Race, Ironman…';
+      textCustom = (pk === 'device') && s.customMode;
+      customLabel = 'Quel appareil utilises-tu ?';
+      customPlaceholder = 'Ex : Coros, Withings…';
 
       const tileBase = { display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'8px', minHeight: pk==='device'?'88px':'96px', padding:'14px 8px', borderRadius:'14px', cursor:'pointer', fontFamily:'"Trenda",sans-serif', background:'#F7F7F5', border:'1.5px solid transparent', transition:'all .15s ease' };
       const rowBase = { display:'flex', alignItems:'center', width:'100%', padding:'15px 16px', borderRadius:'13px', cursor:'pointer', fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'16px', color:'#1C1C1C', background:'#F7F7F5', border:'1.5px solid transparent', transition:'all .15s ease' };
       const monoBase = { width:'34px', height:'34px', borderRadius:'9px', background:'#FFFFFF', border:'1px solid #E6E6E6', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'"Sora",sans-serif', fontWeight:700, fontSize:'15px', color:'#454643' };
 
       pickerOptions = this.optsFor(pk).map((o) => {
-        const isOther = o.value === 'other' && (pk === 'device' || pk === 'context');
+        const isOther = o.value === 'other' && pk === 'device';
         const selected = a[pk] === o.value || (isOther && s.customMode);
         const style = isGrid
           ? { ...tileBase, background: selected ? '#F3FAC3' : '#F7F7F5', border: '1.5px solid ' + (selected ? '#C7DF3F' : 'transparent') }
@@ -1147,17 +1187,76 @@ class Component extends DCLogic {
       });
     }
 
-    // Segments d'unité dans le picker tgAmount (goals à unité uniquement).
-    const showUnits = pk === 'tgAmount' && this.unitGoals.indexOf(a.goal) !== -1;
-    const unitSegStyle = (sel) => ({ flex:1, padding:'0 4px', height:'40px', borderRadius:'10px', border:'1.5px solid ' + (sel ? '#C7DF3F' : '#E6E6E6'), background: sel ? '#F3FAC3' : '#FFFFFF', color: sel ? '#245453' : '#56574F', fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'13.5px', cursor:'pointer', transition:'all .15s ease', whiteSpace:'nowrap' });
-    const unitSegs = showUnits ? this.unitSegments().map(u => ({ value:u.value, label:u.label, style: unitSegStyle(a.tgKind === u.value), onClick: () => this.pickUnit(u.value) })) : [];
+    // === Suggestions étape 3 : chips sous la phrase, pour le champ en édition ===
+    const sgField = s.screen === 2 ? s.editField : '';
+    const showSuggest = !!sgField && ['tgAction','tgAmount','tgKind'].indexOf(sgField) !== -1;
+    const sgLabels = { tgAction: 'Suggestions', tgAmount: 'Valeurs courantes', tgKind: 'Unités' };
+    const suggestLabel = sgLabels[sgField] || '';
+    const sgChipStyle = (sel) => ({ flex:'none', whiteSpace:'nowrap', padding:'7px 14px', borderRadius:'999px', border:'1.5px solid ' + (sel ? '#C7DF3F' : '#CBD0D6'), background: sel ? '#F3FAC3' : '#FFFFFF', color: sel ? '#245453' : '#3A3D42', fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'15px', cursor:'pointer', transition:'all .15s ease' });
+    const suggestions = showSuggest ? this.suggestFor(sgField).map(v => ({
+      label: String(v),
+      style: sgChipStyle(String(a[sgField]) === String(v)),
+      onClick: () => this.pickSuggest(sgField, v)
+    })) : [];
+
+    // === Clavier mobile simulé (champs texte/numérique de l'étape 3) ===
+    const kbField = s.screen === 2 ? s.editField : '';
+    const keyboardOpen = ['tgAction','tgKind','tgAmount'].indexOf(kbField) !== -1;
+    const keyW = (flex, bg, col) => ({ flex: flex || '1', height:'42px', border:'none', borderRadius:'7px', background: bg || '#FFFFFF', color: col || '#1C1C1C', fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'17px', cursor:'pointer', boxShadow:'0 1px 0 rgba(0,0,0,.25)', display:'flex', alignItems:'center', justifyContent:'center' });
+    const mkKey = (label, ch) => ({ label, style: keyW(), onClick: () => this.keyPress(ch === undefined ? label : ch) });
+    const bsKey = { label:'⌫', style: keyW('1.6', '#AFB5BD', '#1C1C1C'), onClick: () => this.keyBackspace() };
+    let keyRows = [];
+    if (kbField === 'tgAmount') {
+      // Pavé numérique Android : virgule décimale à gauche du 0.
+      keyRows = [
+        ['1','2','3'].map(d => mkKey(d)),
+        ['4','5','6'].map(d => mkKey(d)),
+        ['7','8','9'].map(d => mkKey(d)),
+        [ mkKey(',', ','), mkKey('0'), bsKey ]
+      ];
+    } else {
+      // Clavier QWERTY standard Android.
+      const r1 = 'qwertyuiop'.split('').map(c => mkKey(c));
+      const r2 = 'asdfghjkl'.split('').map(c => mkKey(c));
+      const r3 = [ { label:'⇧', style: keyW('1.5','#AFB5BD','#1C1C1C'), onClick: () => {} } ]
+        .concat('zxcvbnm'.split('').map(c => mkKey(c)))
+        .concat([bsKey]);
+      const r4 = [ mkKey(',', ','), mkKey('espace', ' '), mkKey('.', '.') ];
+      keyRows = [r1, r2, r3, r4];
+    }
+
+    // === Date picker (bottom sheet Material) ===
+    const dateOpen = s.dateOpen;
+    const moisLong = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+    let dateHeadline = 'Choisis une date', monthLabel = '', calendarCells = [];
+    const weekDayLabels = ['L','M','M','J','V','S','D'];
+    if (dateOpen) {
+      const sel = a.tgWhen;
+      dateHeadline = sel ? this.formatDate(sel) : 'Choisis une date';
+      const [vy, vm] = (s.dateView || new Date().toISOString().slice(0,7)).split('-').map(Number);
+      monthLabel = moisLong[vm - 1] + ' ' + vy;
+      const first = new Date(vy, vm - 1, 1);
+      // Lundi = 0 (getDay: dimanche=0 → on décale).
+      const lead = (first.getDay() + 6) % 7;
+      const daysInMonth = new Date(vy, vm, 0).getDate();
+      const todayISO = new Date().toISOString().slice(0,10);
+      const cellBase = { height:'40px', border:'none', borderRadius:'50%', background:'transparent', fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'15px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' };
+      for (let i = 0; i < lead; i++) calendarCells.push({ label:'', style: { ...cellBase, cursor:'default' }, onClick: () => {} });
+      for (let d = 1; d <= daysInMonth; d++) {
+        const iso = vy + '-' + String(vm).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+        const isSel = iso === sel;
+        const isPast = iso < todayISO;
+        const style = { ...cellBase,
+          background: isSel ? '#DDF247' : 'transparent',
+          color: isSel ? '#245453' : (isPast ? '#CFCFCA' : '#1C1C1C'),
+          cursor: isPast ? 'not-allowed' : 'pointer' };
+        calendarCells.push({ label: String(d), style, onClick: isPast ? () => {} : () => this.pickDate(iso) });
+      }
+    }
 
     const customText = s.customText || '';
     const customEnabled = customText.trim().length > 0;
     const customBtnStyle = { flex:'none', padding:'0 18px', height:'48px', borderRadius:'12px', border:'none', background: customEnabled ? '#DDF247' : '#EFEFEF', color: customEnabled ? '#245453' : '#BcBcBc', fontFamily:'"Trenda",sans-serif', fontWeight:700, fontSize:'15px', cursor: customEnabled ? 'pointer' : 'not-allowed' };
-    const amtNum = s.customNum || '';
-    const amtEnabled = parseInt(amtNum, 10) >= 1;
-    const amtBtnStyle = { flex:'none', padding:'0 18px', height:'48px', borderRadius:'12px', border:'none', background: amtEnabled ? '#DDF247' : '#EFEFEF', color: amtEnabled ? '#245453' : '#BcBcBc', fontFamily:'"Trenda",sans-serif', fontWeight:700, fontSize:'15px', cursor: amtEnabled ? 'pointer' : 'not-allowed' };
 
     // notifications
     const switchTrackStyle = { flex:'none', width:'46px', height:'28px', borderRadius:'28px', background: s.notif ? '#DDF247' : '#E2E2E2', display:'inline-flex', alignItems:'center', padding:'3px', transition:'background .2s ease' };
@@ -1191,6 +1290,9 @@ class Component extends DCLogic {
     const recapCoachAvatarStyle = { flex:'none', width:'48px', height:'48px', borderRadius:'50%', background:'#245453', color:'#DDF247', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'"Sora",sans-serif', fontWeight:700, fontSize:'16px' };
     const hasHabit = !!a.micro && !!a.anchor;
     const habitSummary = hasHabit ? (anchorCap + ', ' + microL) : '';
+    // Carte récap : on rappelle l'objectif principal chiffré (étape 3), pas la micro-habitude.
+    const targetSummary = this.targetSummary();
+    const hasTarget = !!targetSummary;
 
     return {
       isPhrase, isEngage, isRecap,
@@ -1209,14 +1311,16 @@ class Component extends DCLogic {
       ctaLabel,
       ctaStyle: ctaEnabled ? ctaActive : ctaDisabled,
       onCta: ctaEnabled ? this.next : undefined,
-      showSkip: isPhrase || isEngage,
+      showSkip: (isPhrase && s.screen !== 0) || isEngage,
       skipLabel: isEngage ? 'Plus tard' : 'Passer cette étape',
       onSkip: this.skip,
       // picker
       pickerOpen: !!pk,
       pickerTitle, isList, isGrid, isStepper, gridCols, pickerOptions,
-      numCustom, amtNum, amtPlaceholder, amtBtnStyle, onAmtNum: this.onCustomNum, onAmtSubmit: this.submitAmount, onAmtKey: this.onAmtKey,
-      showUnits, unitSegs,
+      showSuggest, suggestLabel, suggestions,
+      keyboardOpen, keyRows, onCloseKeyboard: this.closeKeyboard,
+      dateOpen, dateHeadline, monthLabel, weekDayLabels, calendarCells,
+      onPrevMonth: () => this.shiftMonth(-1), onNextMonth: () => this.shiftMonth(1), onCloseDate: this.closeDate,
       textCustom, customLabel, customText, customPlaceholder, customBtnStyle, onCustomText: this.onCustomText, onCustomSubmit: this.submitCustom, onCustomKey: this.onCustomKey,
       onClosePicker: this.closePicker,
       stepperValue: a.days, onStepDec: () => this.step(-1), onStepInc: () => this.step(1), onConfirmDays: this.confirmDays,
@@ -1235,7 +1339,7 @@ class Component extends DCLogic {
       // recap
       identityPre: 'Tu es désormais quelqu\u2019un qui s\u2019entraîne', identityNum: daysCount + '×', identityPost: 'par semaine.',
       recapChips: ['goal','level','place'].filter(k => a[k]).map(k => ({ emoji: this.emojiFor(k), hasEmoji: !!this.emojiFor(k), label: this.labelFor(k) })),
-      hasHabit, habitSummary,
+      hasHabit, habitSummary, hasTarget, targetSummary,
       coachMono: coach.mono, coachName: coach.name, coachSpec: coach.spec, recapCoachAvatarStyle,
       coachHasPhoto: !!coach.photo, coachNoPhoto: !coach.photo,
       onCoach: () => this.showToast('On prépare tes coachs recommandés…'),
