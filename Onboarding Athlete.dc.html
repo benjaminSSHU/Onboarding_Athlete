@@ -1014,8 +1014,19 @@ class Component extends DCLogic {
   // === Étape 3 — édition inline des champs objectif ===
   // Tap sur un champ texte/numérique : l'active et ouvre le clavier simulé.
   editFocus = (field) => this.setState({ editField: field });
-  // Tap sur une chip de suggestion : remplit le champ + garde le focus.
-  pickSuggest = (field, value) => this.setState(s => ({ answers: { ...s.answers, [field]: String(value) }, editField: field, reaction: this.react[field] || '' }));
+  // Ordre de saisie des champs de l'objectif (étape 3).
+  targetOrder = ['tgAction', 'tgAmount', 'tgKind', 'tgWhen'];
+  // Tap sur une chip de suggestion : remplit le champ puis focus automatiquement le suivant.
+  pickSuggest = (field, value) => {
+    this.setState(s => ({ answers: { ...s.answers, [field]: String(value) }, reaction: this.react[field] || '' }));
+    const next = this.targetOrder[this.targetOrder.indexOf(field) + 1];
+    clearTimeout(this._adv);
+    this._adv = setTimeout(() => {
+      if (next === 'tgWhen') this.openDate();
+      else if (next) this.setState({ editField: next });
+      else this.setState({ editField: '' });
+    }, 180);
+  };
 
   // --- Clavier mobile simulé ---
   closeKeyboard = () => this.setState({ editField: '' });
