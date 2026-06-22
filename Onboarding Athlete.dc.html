@@ -186,7 +186,7 @@
         </div>
 
         <!-- CONTENT -->
-        <div class="om-scroll" style="flex:1; overflow-y:auto; overflow-x:hidden; padding:0;">
+        <div class="om-scroll" style="{{ contentStyle }}">
 
           <!-- ===== PHRASE SCREENS ===== -->
           <sc-if value="{{ isPhrase }}" hint-placeholder-val="{{ true }}">
@@ -195,8 +195,29 @@
                 style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:#9A9A92; margin-bottom:6px;">
                 {{ kicker }}</div>
               <div
-                style="font-family:'Sora',sans-serif; font-weight:600; font-size:15px; color:#454643; margin-bottom:30px;">
+                style="font-family:'Sora',sans-serif; font-weight:600; font-size:15px; color:#454643; margin-bottom:{{ titleMb }};">
                 {{ phraseTitle }}</div>
+
+              <!-- guidance callout (étape 4 — habitude) -->
+              <sc-if value="{{ showHabitIntro }}">
+                <div
+                  style="margin-bottom:10px; display:flex; align-items:flex-start; gap:9px; background:#F3FAC3; border-radius:14px; padding:11px 13px;">
+                  <span
+                    style="flex:none; display:inline-flex; width:26px; height:26px; border-radius:50%; background:#DDF247; align-items:center; justify-content:center; margin-top:1px;"><svg
+                      xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                      stroke="#3D5310" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M9 18h6"></path>
+                      <path d="M10 22h4"></path>
+                      <path
+                        d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14">
+                      </path>
+                    </svg></span>
+                  <span
+                    style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13.5px; line-height:1.45; color:#4A5E1B;">Créons
+                    ensemble une petite habitude quotidienne : c'est ce qui augmente vraiment tes chances d'aller au bout
+                    de ton projet.</span>
+                </div>
+              </sc-if>
 
               <div
                 style="font-family:'Trenda',sans-serif; font-weight:600; font-size:23px; line-height:2; color:#1C1C1C; text-wrap:pretty;">
@@ -625,10 +646,16 @@
             style="position:absolute; inset:0; z-index:18;"></div>
           <div
             style="position:absolute; left:0; right:0; bottom:0; z-index:19; background:#D1D5DB; padding:0 6px 10px; box-shadow:0 -8px 24px -10px rgba(0,0,0,.3); animation:om-rise .22s cubic-bezier(.22,1,.36,1);">
-            <!-- suggestion strip (above keys, like Android) -->
+            <!-- guidance line -->
+            <sc-if value="{{ keyboardHint }}">
+              <div
+                style="background:#FFFFFF; padding:11px 14px; font-family:'Trenda',sans-serif; font-weight:600; font-size:13.5px; line-height:1.4; color:#3A3D42;">
+                {{ keyboardHint }}</div>
+            </sc-if>
+            <!-- suggestion chips (wrap, gauche→droite puis ligne suivante) -->
             <sc-if value="{{ showSuggest }}">
               <div
-                style="display:flex; align-items:center; gap:8px; overflow-x:auto; padding:9px 4px; border-bottom:1px solid #BFC4CB;">
+                style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:10px 4px; border-bottom:1px solid #BFC4CB;">
                 <sc-for list="{{ suggestions }}" as="sg" hint-placeholder-count="4">
                   <button onClick="{{ sg.onClick }}" style="{{ sg.style }}"
                     style-focus="box-shadow: inset 0 0 0 2px #1C6FE0;">{{ sg.label }}</button>
@@ -906,13 +933,17 @@ class Component extends DCLogic {
     move_more:   { action: ['marcher','bouger','atteindre'], kind: ['pas','min','km'], values: [5000,8000,10000,12000] },
     event:       { action: ['courir','finir','viser'], kind: ['km','min','h'], values: [5,10,21,42] }
   };
-  // Suggestions pour le champ actif de l'étape 3 (selon le goal de l'étape 1).
+  // Moments d'ancrage suggérés pour l'habitude (étape 5).
+  anchorSuggest = ['après le réveil', 'après le café', 'après le déjeuner', 'après le travail', 'avant de dormir'];
+  // Suggestions pour le champ actif (étape 3 objectif + étape 5 habitude), selon le goal.
   suggestFor(field) {
     const g = this.state.answers.goal;
     const s = this.tgSuggest[g] || this.tgSuggest.move_more;
     if (field === 'tgAction') return s.action;
     if (field === 'tgKind') return s.kind;
     if (field === 'tgAmount') return s.values.map(String);
+    if (field === 'micro') return (this.data.micro[g] || this.data.micro.move_more).map(o => o.label);
+    if (field === 'anchor') return this.anchorSuggest;
     return [];
   }
 
@@ -1014,12 +1045,13 @@ class Component extends DCLogic {
   // === Étape 3 — édition inline des champs objectif ===
   // Tap sur un champ texte/numérique : l'active et ouvre le clavier simulé.
   editFocus = (field) => this.setState({ editField: field });
-  // Ordre de saisie des champs de l'objectif (étape 3).
-  targetOrder = ['tgAction', 'tgAmount', 'tgKind', 'tgWhen'];
+  // Ordre de saisie des champs : étape 3 (objectif) et étape 5 (habitude).
+  fieldOrder = { 2: ['tgAction', 'tgAmount', 'tgKind', 'tgWhen'], 4: ['micro', 'anchor'] };
   // Tap sur une chip de suggestion : remplit le champ puis focus automatiquement le suivant.
   pickSuggest = (field, value) => {
     this.setState(s => ({ answers: { ...s.answers, [field]: String(value) }, reaction: this.react[field] || '' }));
-    const next = this.targetOrder[this.targetOrder.indexOf(field) + 1];
+    const order = this.fieldOrder[this.state.screen] || [];
+    const next = order[order.indexOf(field) + 1];
     clearTimeout(this._adv);
     this._adv = setTimeout(() => {
       if (next === 'tgWhen') this.openDate();
@@ -1070,7 +1102,9 @@ class Component extends DCLogic {
     else nextScreen = Math.min(6, idx + 1);
     if (!skipped && idx <= 4) this.celebrate(this.affirm[idx] || 'Beau travail');
     // À l'arrivée sur l'écran objectif (2), pré-cible le 1er champ pour afficher ses suggestions.
-    const editField = nextScreen === 2 ? (this.state.answers.tgAction ? '' : 'tgAction') : '';
+    let editField = '';
+    if (nextScreen === 2 && !this.state.answers.tgAction) editField = 'tgAction';
+    else if (nextScreen === 4 && !this.state.answers.micro) editField = 'micro';
     this.setState({ screen: nextScreen, reaction: '', editField });
   };
   next = () => this.go(false);
@@ -1110,38 +1144,32 @@ class Component extends DCLogic {
         onTap: disabled ? () => this.lockedTap(dependsKey ? 'Choisis d\u2019abord le mouvement' : undefined) : () => this.open(key)
       };
     };
+    // Champ à saisie libre inline (clavier simulé) — partagé étapes 3 et 4.
+    const fieldBaseInline = { display:'inline-flex', alignItems:'center', verticalAlign:'middle', borderRadius:'8px', padding:'2px 8px', fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'22px', lineHeight:'1.4', cursor:'pointer', whiteSpace:'normal', transition:'all .15s ease' };
+    const field = (key, ph, isDate) => {
+      const val = a[key] || '';
+      const filled = !!val;
+      const editing = this.state.editField === key;
+      const boxStyle = { ...fieldBaseInline,
+        background: filled ? '#F3FAC3' : '#FBFDF0',
+        border: '1.5px ' + (filled ? 'solid #C7DF3F' : 'dashed #C2D87A'),
+        boxShadow: editing ? 'inset 0 0 0 2px #245453' : 'none' };
+      const textStyle = { color: filled ? '#245453' : '#9DAE63', fontWeight:600 };
+      const caretStyle = { display:'inline-block', width:'2px', height:'21px', background:'#245453', marginLeft:'1px', verticalAlign:'middle', animation:'om-blink 1s steps(1) infinite' };
+      if (isDate) {
+        return { isDate:true, isInput:false, field:key, filled, display: filled ? this.formatDate(val) : ph, style: boxStyle, textStyle, onTap: () => this.openDate() };
+      }
+      return { isInput:true, isDate:false, field:key, filled, editing, display: filled ? val : ph, style: boxStyle, textStyle, caretStyle, onTap: () => this.editFocus(key) };
+    };
 
     if (screen === 0) return [ t('Aujourd\u2019hui, je veux '), chip('goal','ce qui m\u2019amène'), t('. Et côté corps, '), chip('limitation','mon état'), t('.') ];
     if (screen === 1) return [ t('Je m\u2019entraîne '), chip('freq','une fréquence'), t(', surtout '), chip('place','un lieu'), t(', et '), chip('level','mon niveau'), t('.') ];
     if (screen === 2) {
       if (!a.goal) return [ t('Choisis d\u2019abord ce qui t\u2019amène pour définir ton objectif.') ];
-      const fieldBase = { display:'inline-flex', alignItems:'center', verticalAlign:'middle', borderRadius:'8px', padding:'2px 8px', fontFamily:'"Trenda",sans-serif', fontWeight:700, fontSize:'23px', lineHeight:'1.3', cursor:'pointer', whiteSpace:'nowrap', transition:'all .15s ease' };
-      const ed = this.state.editField;
-      return this.buildTargetTokens().map(p => {
-        if (p.t !== undefined) return t(p.t);
-        const val = a[p.field] || '';
-        const filled = !!val;
-        const editing = ed === p.field;
-        const boxStyle = { ...fieldBase,
-          background: filled ? '#F3FAC3' : '#FBFDF0',
-          border: '1.5px ' + (filled ? 'solid #C7DF3F' : 'dashed #C2D87A'),
-          boxShadow: editing ? 'inset 0 0 0 2px #245453' : 'none' };
-        const textStyle = { color: filled ? '#245453' : '#9DAE63', fontWeight:700 };
-        const caretStyle = { display:'inline-block', width:'2px', height:'22px', background:'#245453', marginLeft:'1px', verticalAlign:'middle', animation:'om-blink 1s steps(1) infinite' };
-        if (p.date) {
-          return { isDate:true, isInput:false, field:p.field, filled,
-            display: filled ? this.formatDate(val) : p.ph,
-            style: boxStyle, textStyle,
-            onTap: () => this.openDate() };
-        }
-        return { isInput:true, isDate:false, field:p.field, filled, editing,
-          display: filled ? val : p.ph,
-          style: boxStyle, textStyle, caretStyle,
-          onTap: () => this.editFocus(p.field) };
-      });
+      return this.buildTargetTokens().map(p => p.t !== undefined ? t(p.t) : field(p.field, p.ph, p.date));
     }
     if (screen === 3) return [ t('Ce qui me freine souvent, c\u2019est '), chip('blocker','mon frein'), t('. Je suis mes données avec '), chip('device','un objet'), t('.') ];
-    return [ t('Je m\u2019engage sur '), chip('days'), t(' par semaine. Pour démarrer en douceur, je ferai '), chip('micro','une habitude', true), t(', '), chip('anchor','un moment'), t('.') ];
+    return [ t('Je m\u2019engage sur '), chip('days'), t(' par semaine. Pour démarrer, je ferai '), field('micro','quoi'), t(', '), field('anchor','à quel moment'), t('.') ];
   }
 
   renderVals() {
@@ -1198,10 +1226,12 @@ class Component extends DCLogic {
       });
     }
 
-    // === Suggestions étape 3 : chips sous la phrase, pour le champ en édition ===
-    const sgField = s.screen === 2 ? s.editField : '';
-    const showSuggest = !!sgField && ['tgAction','tgAmount','tgKind'].indexOf(sgField) !== -1;
-    const sgLabels = { tgAction: 'Suggestions', tgAmount: 'Valeurs courantes', tgKind: 'Unités' };
+    // === Champs à saisie libre (étape 3 objectif + étape 5 habitude) ===
+    // Champ actif selon l'écran : étape 3 → tg*, étape 5 → micro/anchor.
+    const editableByScreen = { 2: ['tgAction','tgAmount','tgKind'], 4: ['micro','anchor'] };
+    const sgField = (editableByScreen[s.screen] || []).indexOf(s.editField) !== -1 ? s.editField : '';
+    const showSuggest = !!sgField;
+    const sgLabels = { tgAction: 'Suggestions', tgAmount: 'Valeurs courantes', tgKind: 'Unités', micro: 'Idées d’habitude', anchor: 'Moments' };
     const suggestLabel = sgLabels[sgField] || '';
     const sgChipStyle = (sel) => ({ flex:'none', whiteSpace:'nowrap', padding:'7px 14px', borderRadius:'999px', border:'1.5px solid ' + (sel ? '#C7DF3F' : '#CBD0D6'), background: sel ? '#F3FAC3' : '#FFFFFF', color: sel ? '#245453' : '#3A3D42', fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'15px', cursor:'pointer', transition:'all .15s ease' });
     const suggestions = showSuggest ? this.suggestFor(sgField).map(v => ({
@@ -1210,9 +1240,12 @@ class Component extends DCLogic {
       onClick: () => this.pickSuggest(sgField, v)
     })) : [];
 
-    // === Clavier mobile simulé (champs texte/numérique de l'étape 3) ===
-    const kbField = s.screen === 2 ? s.editField : '';
-    const keyboardOpen = ['tgAction','tgKind','tgAmount'].indexOf(kbField) !== -1;
+    // === Clavier mobile simulé ===
+    const kbField = sgField;
+    const keyboardOpen = !!kbField;
+    // Phrase de guidage en tête du clavier, selon l'écran.
+    const kbHints = { 2: 'Définis le premier objectif que tu aimerais atteindre' };
+    const keyboardHint = keyboardOpen ? (kbHints[s.screen] || '') : '';
     const keyW = (flex, bg, col) => ({ flex: flex || '1', height:'42px', border:'none', borderRadius:'7px', background: bg || '#FFFFFF', color: col || '#1C1C1C', fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'17px', cursor:'pointer', boxShadow:'0 1px 0 rgba(0,0,0,.25)', display:'flex', alignItems:'center', justifyContent:'center' });
     const mkKey = (label, ch) => ({ label, style: keyW(), onClick: () => this.keyPress(ch === undefined ? label : ch) });
     const bsKey = { label:'⌫', style: keyW('1.6', '#AFB5BD', '#1C1C1C'), onClick: () => this.keyBackspace() };
@@ -1273,17 +1306,18 @@ class Component extends DCLogic {
     const switchTrackStyle = { flex:'none', width:'46px', height:'28px', borderRadius:'28px', background: s.notif ? '#DDF247' : '#E2E2E2', display:'inline-flex', alignItems:'center', padding:'3px', transition:'background .2s ease' };
     const switchKnobStyle = { width:'22px', height:'22px', borderRadius:'50%', background:'#FFFFFF', boxShadow:'0 1px 3px rgba(0,0,0,.25)', transform: s.notif ? 'translateX(18px)' : 'translateX(0)', transition:'transform .2s ease' };
 
-    // habit card
-    const anchorL = this.labelFor('anchor');
+    // habit card (écran 5) — lecture seule : récapitule l'habitude saisie à l'écran 4.
+    const anchorL = a.anchor || '';
     const anchorCap = anchorL ? anchorL.charAt(0).toUpperCase() + anchorL.slice(1) : '';
-    const microL = this.labelFor('micro');
+    const microL = a.micro || '';
     const effectiveDays = s.weekDays !== null ? s.weekDays : (this.spreadMap[a.days] || []);
     const daysCount = effectiveDays.length || a.days;
-    const habitTapStyle = { borderBottom:'1.5px dashed #C2D87A', cursor:'pointer', paddingBottom:'1px' };
-    const habitEl = React.createElement('div', { style:{ fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'22px', lineHeight:1.3, color:'#1C1C1C', marginTop:'8px' } }, [
-      React.createElement('span', { key:'a', style:habitTapStyle, onClick:()=>this.open('anchor') }, anchorCap || '…'),
-      ', je ferai ',
-      React.createElement('span', { key:'m', style:habitTapStyle, onClick:()=>this.open('micro') }, microL || '…'),
+    const accent = { fontWeight:600, color:'#245453' };
+    const habitEl = React.createElement('div', { style:{ fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'22px', lineHeight:1.5, color:'#1C1C1C', marginTop:'8px' } }, [
+      'Chaque jour, je vais ',
+      React.createElement('span', { key:'m', style:accent }, microL || '…'),
+      anchorL ? ', ' : '',
+      React.createElement('span', { key:'a', style:accent }, anchorL || ''),
       '.'
     ]);
     const dots = Array.from({ length: daysCount }).map((_, i) => ({
@@ -1315,7 +1349,11 @@ class Component extends DCLogic {
       phraseTitle: this.titles[s.screen] || '',
       tokens: this.buildTokens(),
       showHint: s.screen === 0,
-      reactionText: isPhrase ? (s.reaction || '') : '',
+      showHabitIntro: s.screen === 4,
+      titleMb: s.screen === 4 ? '14px' : '30px',
+      // Quand le clavier est ouvert, on réserve de la place en bas pour scroller le contenu au-dessus.
+      contentStyle: { flex:'1', overflowY:'auto', overflowX:'hidden', padding:0, paddingBottom: keyboardOpen ? '320px' : '0' },
+      reactionText: (isPhrase && s.screen !== 4) ? (s.reaction || '') : '',
       reactionIconEl: this.ic('lightbulb', 13, '#3D5310', 2),
       // footer
       showFooter: isPhrase || isEngage,
@@ -1329,7 +1367,7 @@ class Component extends DCLogic {
       pickerOpen: !!pk,
       pickerTitle, isList, isGrid, isStepper, gridCols, pickerOptions,
       showSuggest, suggestLabel, suggestions,
-      keyboardOpen, keyRows, onCloseKeyboard: this.closeKeyboard,
+      keyboardOpen, keyRows, keyboardHint, onCloseKeyboard: this.closeKeyboard,
       dateOpen, dateHeadline, monthLabel, weekDayLabels, calendarCells,
       onPrevMonth: () => this.shiftMonth(-1), onNextMonth: () => this.shiftMonth(1), onCloseDate: this.closeDate,
       textCustom, customLabel, customText, customPlaceholder, customBtnStyle, onCustomText: this.onCustomText, onCustomSubmit: this.submitCustom, onCustomKey: this.onCustomKey,
