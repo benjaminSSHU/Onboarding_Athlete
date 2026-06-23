@@ -139,6 +139,18 @@
           }
         }
 
+        @keyframes om-soft {
+          from {
+            opacity: 0;
+            transform: translateY(8px)
+          }
+
+          to {
+            opacity: 1;
+            transform: translateY(0)
+          }
+        }
+
         .om-scroll::-webkit-scrollbar {
           width: 0;
           height: 0;
@@ -191,12 +203,26 @@
           <!-- ===== PHRASE SCREENS ===== -->
           <sc-if value="{{ isPhrase }}" hint-placeholder-val="{{ true }}">
             <div style="padding:30px 24px 28px;">
-              <div
-                style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:#9A9A92; margin-bottom:6px;">
-                {{ kicker }}</div>
-              <div
-                style="font-family:'Sora',sans-serif; font-weight:600; font-size:15px; color:#454643; margin-bottom:{{ titleMb }};">
-                {{ phraseTitle }}</div>
+              <sc-if value="{{ focusMode }}" hint-placeholder-val="{{ false }}">
+                <div style="animation:om-soft .42s ease-out;">
+                  <div
+                    style="font-family:'Sora',sans-serif; font-weight:700; font-size:21px; line-height:1.25; color:#1C1C1C; letter-spacing:-.01em;">
+                    Définis le premier objectif que tu aimerais atteindre</div>
+                  <div
+                    style="font-family:'Trenda',sans-serif; font-weight:400; font-size:13.5px; line-height:1.45; color:#8A8B86; margin-top:8px; margin-bottom:20px;">
+                    Pour être atteint, un objectif doit être quantifiable et avec une date butoir.</div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ showChrome }}" hint-placeholder-val="{{ true }}">
+                <div style="{{ chromeAnim }}">
+                  <div
+                    style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:#9A9A92; margin-bottom:6px;">
+                    {{ kicker }}</div>
+                  <div
+                    style="font-family:'Sora',sans-serif; font-weight:600; font-size:15px; color:#454643; margin-bottom:{{ titleMb }};">
+                    {{ phraseTitle }}</div>
+                </div>
+              </sc-if>
 
               <!-- guidance callout (étape 4 — habitude) -->
               <sc-if value="{{ showHabitIntro }}">
@@ -274,6 +300,25 @@
                 </div>
               </sc-if>
 
+              <!-- exemples d'objectifs (mode focus étape 3) -->
+              <sc-if value="{{ showExamples }}">
+                <div style="margin-top:22px; animation:om-soft .44s ease-out .06s both;">
+                  <div
+                    style="font-family:'Trenda',sans-serif; font-weight:600; font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:#9DAE63; margin-bottom:10px;">
+                    Quelques exemples</div>
+                  <div style="display:flex; flex-direction:column; gap:9px;">
+                    <sc-for list="{{ examples }}" as="ex" hint-placeholder-count="5">
+                      <div
+                        style="display:flex; align-items:flex-start; gap:9px; font-family:'Trenda',sans-serif; font-weight:500; font-size:14px; line-height:1.35; color:#56574F;">
+                        <span style="flex:none; color:#C7DF3F; font-size:15px; line-height:1.3;">•</span>
+                        <span>{{ ex }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ showChrome }}" hint-placeholder-val="{{ true }}">
               <div style="margin-top:28px; background:#F7F7F5; border-radius:16px; padding:16px;">
                 <div style="display:flex; align-items:center; gap:13px;">
                   <div style="{{ ringStyle }}">
@@ -292,6 +337,7 @@
                     profilePct }}%</div>
                 </div>
               </div>
+              </sc-if>
             </div>
           </sc-if>
 
@@ -804,7 +850,7 @@ class Component extends DCLogic {
     tgAction: 'Nommer précisément ton objectif le rend 2 fois plus atteignable.',
     tgAmount: 'Se fixer un chiffre précis augmente les chances d\u2019atteindre son objectif de 42 %.',
     tgKind: 'Les objectifs précis sont atteints 33 % plus souvent que les objectifs vagues.',
-    tgWhen: 'Se donner une date limite booste naturellement la motivation. Le cerveau adore les deadlines.',
+    tgWhen: 'Se fixer une échéance claire renforce naturellement la motivation.',
     blocker: { time:'20 min d\u2019exercice intense apportent les mêmes bénéfices cardio qu\u2019une heure à rythme modéré.', motivation:'La motivation chute après 6 semaines chez 80 % des gens. C\u2019est normal, le système prend le relais.', know_how:'Les athlètes guidés par un coach progressent 44 % plus vite que ceux qui s\u2019entraînent seuls.', consistency:'Il faut en moyenne 66 jours pour qu\u2019un comportement devienne automatique.', injury_fatigue:'80 % des blessures sportives viennent d\u2019une montée en charge trop rapide. On dosera.' },
     device: 'Les utilisateurs de montres connectées font en moyenne 1 850 pas de plus par jour.',
     micro: 'D\u2019après Stanford, une habitude de 2 min par jour crée autant de changement qu\u2019une longue séance.',
@@ -932,6 +978,44 @@ class Component extends DCLogic {
     endurance:   { action: ['courir','nager','pédaler','ramer'], kind: ['km','min','m'], values: [5,10,21,42] },
     move_more:   { action: ['marcher','bouger','atteindre'], kind: ['pas','min','km'], values: [5000,8000,10000,12000] },
     event:       { action: ['courir','finir','viser'], kind: ['km','min','h'], values: [5,10,21,42] }
+  };
+  // Exemples d'objectifs (texte non interactif) affichés à l'étape 3, par objectif principal.
+  tgExamples = {
+    strength: [
+      'Faire 30 tractions le 31/12/2026',
+      'Soulever 100 kg au deadlift le 31/12/2026',
+      'Tenir 2 min de gainage le 31/12/2026',
+      'Faire 50 pompes d’affilée le 31/12/2026',
+      'Réussir 10 muscle-ups le 31/12/2026'
+    ],
+    weight_loss: [
+      'Perdre 5 kg le 31/12/2026',
+      'Descendre à 15 % de masse grasse le 31/12/2026',
+      'Perdre 8 kg le 31/12/2026',
+      'Brûler 400 kcal par séance le 31/12/2026',
+      'Perdre 3 kg le 31/12/2026'
+    ],
+    endurance: [
+      'Courir 10 km en moins de 50 min le 31/12/2026',
+      'Nager 1500 m sans pause le 31/12/2026',
+      'Pédaler 100 km le 31/12/2026',
+      'Courir un semi en 1h45 le 31/12/2026',
+      'Tenir 30 min de course le 31/12/2026'
+    ],
+    event: [
+      'Finir un Hyrox en 55 min le 31/12/2026',
+      'Terminer un marathon le 31/12/2026',
+      'Gravir le mont Blanc 1 fois le 31/12/2026',
+      'Finir un triathlon le 31/12/2026',
+      'Boucler un trail de 30 km le 31/12/2026'
+    ],
+    move_more: [
+      'Atteindre 8000 pas par jour le 31/12/2026',
+      'Marcher 30 min par jour le 31/12/2026',
+      'Bouger 5 jours par semaine le 31/12/2026',
+      'Faire 10000 pas par jour le 31/12/2026',
+      'Marcher 5 km par jour le 31/12/2026'
+    ]
   };
   // Moments d'ancrage suggérés pour l'habitude (étape 5).
   anchorSuggest = ['après le réveil', 'après le café', 'après le déjeuner', 'après le travail', 'avant de dormir'];
@@ -1102,9 +1186,8 @@ class Component extends DCLogic {
     else nextScreen = Math.min(6, idx + 1);
     if (!skipped && idx <= 4) this.celebrate(this.affirm[idx] || 'Beau travail');
     // À l'arrivée sur l'écran objectif (2), pré-cible le 1er champ pour afficher ses suggestions.
+    // Pas de focus auto à l'arrivée (l'utilisateur déclenche lui-même la saisie).
     let editField = '';
-    if (nextScreen === 2 && !this.state.answers.tgAction) editField = 'tgAction';
-    else if (nextScreen === 4 && !this.state.answers.micro) editField = 'micro';
     this.setState({ screen: nextScreen, reaction: '', editField });
   };
   next = () => this.go(false);
@@ -1244,8 +1327,14 @@ class Component extends DCLogic {
     const kbField = sgField;
     const keyboardOpen = !!kbField;
     // Phrase de guidage en tête du clavier, selon l'écran.
-    const kbHints = { 2: 'Définis le premier objectif que tu aimerais atteindre' };
+    const kbHints = {};
     const keyboardHint = keyboardOpen ? (kbHints[s.screen] || '') : '';
+
+    // === Mode focus étape 3 : on épure l'écran pendant la saisie de l'objectif ===
+    const focusMode = s.screen === 2 && (keyboardOpen || s.dateOpen);
+    const showChrome = !focusMode;            // kicker, titre court, encart profil
+    const showExamples = focusMode;           // liste d'exemples d'objectifs
+    const examples = focusMode ? (this.tgExamples[a.goal] || []) : [];
     const keyW = (flex, bg, col) => ({ flex: flex || '1', height:'42px', border:'none', borderRadius:'7px', background: bg || '#FFFFFF', color: col || '#1C1C1C', fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'17px', cursor:'pointer', boxShadow:'0 1px 0 rgba(0,0,0,.25)', display:'flex', alignItems:'center', justifyContent:'center' });
     const mkKey = (label, ch) => ({ label, style: keyW(), onClick: () => this.keyPress(ch === undefined ? label : ch) });
     const bsKey = { label:'⌫', style: keyW('1.6', '#AFB5BD', '#1C1C1C'), onClick: () => this.keyBackspace() };
@@ -1341,7 +1430,9 @@ class Component extends DCLogic {
 
     return {
       isPhrase, isEngage, isRecap,
-      showProgress: isPhrase || isEngage,
+      showProgress: (isPhrase || isEngage) && !focusMode,
+      focusMode, showChrome, showExamples, examples,
+      chromeAnim: (s.screen === 2 && !focusMode) ? { animation:'om-soft .42s ease-out' } : {},
       canGoBack: s.screen > 0,
       onBack: this.back,
       segments,
