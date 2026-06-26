@@ -195,22 +195,60 @@
               </sc-for>
             </div>
           </sc-if>
+          <sc-if value="{{ showExit }}">
+            <button onClick="{{ onExit }}" aria-label="Quitter l'onboarding"
+              style="flex:none; margin-left:auto; width:34px; height:34px; border-radius:50%; border:none; background:#F2F2F2; color:#1C1C1C; cursor:pointer; display:flex; align-items:center; justify-content:center;"><svg
+                xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="#1C1C1C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 6 6 18"></path>
+                <path d="m6 6 12 12"></path>
+              </svg></button>
+          </sc-if>
         </div>
 
         <!-- CONTENT -->
         <div class="om-scroll" style="{{ contentStyle }}">
 
+          <!-- ===== PROFILE SELECT (screen -1) ===== -->
+          <sc-if value="{{ isProfile }}">
+            <div style="padding:34px 24px 28px;">
+              <div
+                style="font-family:'Trenda',sans-serif; font-weight:600; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:#9A9A92; margin-bottom:8px;">
+                Bienvenue sur Hustle Up</div>
+              <div
+                style="font-family:'Sora',sans-serif; font-weight:700; font-size:25px; line-height:1.2; color:#1C1C1C; letter-spacing:-.01em;">
+                Qui es-tu&nbsp;?</div>
+              <div
+                style="font-family:'Trenda',sans-serif; font-weight:400; font-size:14.5px; line-height:1.5; color:#56574F; margin-top:8px; margin-bottom:24px;">
+                Choisis ton profil pour adapter ton expérience.</div>
+
+              <div style="display:flex; flex-direction:column; gap:12px;">
+                <sc-for list="{{ profileOptions }}" as="opt" hint-placeholder-count="3">
+                  <button onClick="{{ opt.onClick }}" aria-label="{{ opt.label }}" style="{{ opt.style }}"
+                    style-focus="box-shadow: inset 0 0 0 2px #245453;">
+                    <span style="{{ opt.iconStyle }}">{{ opt.emoji }}</span>
+                    <span style="flex:1; min-width:0;">
+                      <span style="{{ opt.labelStyle }}">{{ opt.label }}</span>
+                      <div style="{{ opt.subStyle }}">{{ opt.sub }}</div>
+                    </span>
+                    <span style="{{ opt.checkStyle }}">✓</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
           <!-- ===== PHRASE SCREENS ===== -->
           <sc-if value="{{ isPhrase }}" hint-placeholder-val="{{ true }}">
-            <div style="padding:30px 24px 28px;">
-              <sc-if value="{{ focusMode }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:14px 24px 28px;">
+              <sc-if value="{{ showFocusTitle }}" hint-placeholder-val="{{ false }}">
                 <div style="animation:om-soft .42s ease-out;">
                   <div
                     style="font-family:'Sora',sans-serif; font-weight:700; font-size:21px; line-height:1.25; color:#1C1C1C; letter-spacing:-.01em;">
-                    Définis le premier objectif que tu aimerais atteindre</div>
+                    {{ focusTitle }}</div>
                   <div
                     style="font-family:'Trenda',sans-serif; font-weight:400; font-size:13.5px; line-height:1.45; color:#8A8B86; margin-top:8px; margin-bottom:20px;">
-                    Pour être atteint, un objectif doit être quantifiable et avec une date butoir.</div>
+                    {{ focusSub }}</div>
                 </div>
               </sc-if>
               <sc-if value="{{ showChrome }}" hint-placeholder-val="{{ true }}">
@@ -563,6 +601,14 @@
           </sc-if>
         </div>
 
+        <!-- FOOTER CTA — profil -->
+        <sc-if value="{{ isProfile }}">
+          <div
+            style="flex:none; padding:12px 22px 22px; background:linear-gradient(to top, #FFFFFF 70%, rgba(255,255,255,0));">
+            <button onClick="{{ onSubmitProfile }}" style="{{ profileCtaStyle }}">Commencer</button>
+          </div>
+        </sc-if>
+
         <!-- FOOTER CTA -->
         <sc-if value="{{ showFooter }}" hint-placeholder-val="{{ true }}">
           <div
@@ -575,6 +621,38 @@
                   skipLabel }}</button>
               </div>
             </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- ===== POPUP CONFIRMATION DE SORTIE ===== -->
+        <sc-if value="{{ confirmExitOpen }}">
+          <div onClick="{{ onCancelExit }}"
+            style="position:absolute; inset:0; background:rgba(18,18,18,.5); animation:om-fade .2s ease; z-index:40; display:flex; align-items:center; justify-content:center; padding:28px;">
+          </div>
+          <div
+            style="position:absolute; left:28px; right:28px; top:50%; transform:translateY(-50%); background:#FFFFFF; border-radius:24px; padding:26px 24px 22px; z-index:41; animation:om-drop .32s cubic-bezier(.22,1,.36,1); box-shadow:0 24px 60px -16px rgba(0,0,0,.4);">
+            <div
+              style="width:52px; height:52px; border-radius:50%; background:#F3FAC3; display:flex; align-items:center; justify-content:center; margin-bottom:16px;"><svg
+                xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none"
+                stroke="#5E7A1F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 8v4"></path>
+                <path d="M12 16h.01"></path>
+                <circle cx="12" cy="12" r="10"></circle>
+              </svg></div>
+            <div
+              style="font-family:'Sora',sans-serif; font-weight:700; font-size:20px; line-height:1.25; color:#1C1C1C; letter-spacing:-.01em;">
+              Quitter pour le moment ?</div>
+            <div
+              style="font-family:'Trenda',sans-serif; font-weight:400; font-size:14.5px; line-height:1.5; color:#56574F; margin-top:10px;">
+              Pas d'inquiétude : ta progression est sauvegardée. Tu pourras reprendre la définition de ton objectif quand tu veux.</div>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:24px;">
+              <button onClick="{{ onConfirmExit }}"
+                style="width:100%; height:52px; border:none; border-radius:14px; background:#1C1C1C; color:#FFFFFF; font-family:'Trenda',sans-serif; font-weight:700; font-size:16px; cursor:pointer;">Quitter
+                l'onboarding</button>
+              <button onClick="{{ onCancelExit }}"
+                style="width:100%; height:52px; border:none; border-radius:14px; background:#F2F2F2; color:#1C1C1C; font-family:'Trenda',sans-serif; font-weight:700; font-size:16px; cursor:pointer;">Continuer
+                ici</button>
+            </div>
           </div>
         </sc-if>
 
@@ -687,9 +765,9 @@
         </sc-if>
 
         <!-- ===== SIMULATED MOBILE KEYBOARD ===== -->
+        <!-- Pas d'overlay plein écran ici : il bloquerait le scroll/tap du contenu (exemples).
+             La fermeture du clavier se fait via le bouton « OK ». -->
         <sc-if value="{{ keyboardOpen }}">
-          <div onClick="{{ onCloseKeyboard }}"
-            style="position:absolute; inset:0; z-index:18;"></div>
           <div
             style="position:absolute; left:0; right:0; bottom:0; z-index:19; background:#D1D5DB; padding:0 6px 10px; box-shadow:0 -8px 24px -10px rgba(0,0,0,.3); animation:om-rise .22s cubic-bezier(.22,1,.36,1);">
             <!-- guidance line -->
@@ -774,7 +852,9 @@
   <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
-    screen: 0,
+    screen: -1,
+    profile: '',
+    confirmExit: false,
     answers: { goal:'', limitation:'', freq:'', place:'', level:'', context:'', tgAction:'', tgAmount:'', tgKind:'', tgWhen:'', blocker:'', device:'', days:3, micro:'', anchor:'' },
     editField: '',
     dateOpen: false,
@@ -826,6 +906,19 @@ class Component extends DCLogic {
     move_more: { name:'Sam D.', spec:'Remise en mouvement', mono:'SD' }
   };
   affirm = ['Beau départ', 'Tu te connais bien', 'Objectif posé', 'On y est presque', 'Dernière ligne droite'];
+
+  // Écran 0 (screen -1) : choix du type de profil.
+  // Seul « athlete » est implémenté pour l'instant ; coach / gym déclenchent le flow plus tard.
+  profiles = [
+    { value:'athlete', emoji:'🏋️', label:'Sportif', sub:'Je m’entraîne et je veux progresser.' },
+    { value:'coach', emoji:'📋', label:'Coach', sub:'J’accompagne et je suis mes sportifs.' },
+    { value:'gym', emoji:'🏢', label:'Gérant d’une salle de sport', sub:'Je gère une salle et ma communauté.' }
+  ];
+  selectProfile = (value) => this.setState({ profile: value });
+  submitProfile = () => {
+    if (this.state.profile !== 'athlete') return;
+    this.setState({ screen: 0 });
+  };
 
   // reactions shown UNDER the sentence when a choice is made
   // → fun facts & stats instead of generic motivation
@@ -1019,6 +1112,14 @@ class Component extends DCLogic {
   };
   // Moments d'ancrage suggérés pour l'habitude (étape 5).
   anchorSuggest = ['après le réveil', 'après le café', 'après le déjeuner', 'après le travail', 'avant de dormir'];
+  // Exemples d'habitude (étape 5, mode focus), format court « [quoi], [à quel moment] »
+  // (pas de préfixe répété « Pour démarrer, je ferai »).
+  // 1 exemple par ancrage (5 au total) ; les 3 micro-gestes existants sont cyclés et espacés.
+  habitExamples(goal) {
+    const micros = (this.data.micro[goal] || this.data.micro.move_more);
+    const anchors = this.anchorSuggest;
+    return anchors.map((anchor, i) => micros[i % micros.length].label + ', ' + anchor + '.');
+  }
   // Suggestions pour le champ actif (étape 3 objectif + étape 5 habitude), selon le goal.
   suggestFor(field) {
     const g = this.state.answers.goal;
@@ -1192,14 +1293,19 @@ class Component extends DCLogic {
   };
   next = () => this.go(false);
   skip = () => this.go(true);
+  // Croix en haut : on demande confirmation avant de quitter l'onboarding.
+  exitOnboarding = () => this.setState({ confirmExit: true });
+  cancelExit = () => this.setState({ confirmExit: false });
+  // Confirmé : quitte l'onboarding (simule l'entrée dans l'app). La progression est conservée pour reprendre plus tard.
+  doExit = () => this.setState({ confirmExit: false }, () => this.showToast('Bienvenue ! Tu pourras reprendre quand tu veux.'));
 
   back = () => this.setState(s => {
     const a = s.answers; let prev;
     if (s.screen === 6) prev = (!!a.micro && !!a.anchor) ? 5 : 4;
-    else prev = Math.max(0, s.screen - 1);
+    else prev = Math.max(-1, s.screen - 1); // screen 0 → -1 : retour à l'écran de profil
     return { screen: prev, reaction: '', editField: '' };
   });
-  restart = () => this.setState({ screen:0, todayDone:false, weekDays:null, reaction:'', editField:'', answers:{ goal:'', limitation:'', freq:'', place:'', level:'', context:'', tgAction:'', tgAmount:'', tgKind:'', tgWhen:'', blocker:'', device:'', days:3, micro:'', anchor:'' } });
+  restart = () => this.setState({ screen:-1, profile:'', todayDone:false, weekDays:null, reaction:'', editField:'', answers:{ goal:'', limitation:'', freq:'', place:'', level:'', context:'', tgAction:'', tgAmount:'', tgKind:'', tgWhen:'', blocker:'', device:'', days:3, micro:'', anchor:'' } });
   showToast = (msg) => { this.setState({ toast: msg }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: '' }), 2200); };
 
   buildTokens() {
@@ -1257,9 +1363,10 @@ class Component extends DCLogic {
 
   renderVals() {
     const s = this.state, a = s.answers;
+    const isProfile = s.screen === -1;
     const isEngage = s.screen === 5;
     const isRecap = s.screen === 6;
-    const isPhrase = s.screen <= 4;
+    const isPhrase = s.screen >= 0 && s.screen <= 4;
 
     const segments = [0,1,2,3,4].map(i => {
       const active = isPhrase && i === s.screen;
@@ -1313,7 +1420,10 @@ class Component extends DCLogic {
     // Champ actif selon l'écran : étape 3 → tg*, étape 5 → micro/anchor.
     const editableByScreen = { 2: ['tgAction','tgAmount','tgKind'], 4: ['micro','anchor'] };
     const sgField = (editableByScreen[s.screen] || []).indexOf(s.editField) !== -1 ? s.editField : '';
-    const showSuggest = !!sgField;
+    // Étape 5 (micro/anchor) : pas de chips de suggestion — on s'appuie sur les exemples affichés à l'écran.
+    // Le clavier reste actif (kbField), seules les suggestions sont masquées.
+    const noSuggestFields = ['micro', 'anchor'];
+    const showSuggest = !!sgField && noSuggestFields.indexOf(sgField) === -1;
     const sgLabels = { tgAction: 'Suggestions', tgAmount: 'Valeurs courantes', tgKind: 'Unités', micro: 'Idées d’habitude', anchor: 'Moments' };
     const suggestLabel = sgLabels[sgField] || '';
     const sgChipStyle = (sel) => ({ flex:'none', whiteSpace:'nowrap', padding:'7px 14px', borderRadius:'999px', border:'1.5px solid ' + (sel ? '#C7DF3F' : '#CBD0D6'), background: sel ? '#F3FAC3' : '#FFFFFF', color: sel ? '#245453' : '#3A3D42', fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'15px', cursor:'pointer', transition:'all .15s ease' });
@@ -1329,12 +1439,23 @@ class Component extends DCLogic {
     // Phrase de guidage en tête du clavier, selon l'écran.
     const kbHints = {};
     const keyboardHint = keyboardOpen ? (kbHints[s.screen] || '') : '';
+    // Hauteur approximative du clavier (4 rangées + barre OK), + suggestions + hint si présents.
+    // Sert à raccourcir la zone scrollable pour que tout le contenu reste atteignable au-dessus du clavier.
+    const kbHeight = 236 + (showSuggest ? 56 : 0) + (keyboardHint ? 40 : 0);
 
-    // === Mode focus étape 3 : on épure l'écran pendant la saisie de l'objectif ===
-    const focusMode = s.screen === 2 && (keyboardOpen || s.dateOpen);
+    // === Mode focus étapes 3 (objectif) et 5 (habitude) : on épure l'écran pendant la saisie ===
+    const focusable = s.screen === 2 || s.screen === 4;
+    const focusMode = focusable && (keyboardOpen || s.dateOpen);
     const showChrome = !focusMode;            // kicker, titre court, encart profil
-    const showExamples = focusMode;           // liste d'exemples d'objectifs
-    const examples = focusMode ? (this.tgExamples[a.goal] || []) : [];
+    const showExamples = focusMode;           // liste d'exemples (objectif ou habitude)
+    const examples = focusMode
+      ? (s.screen === 2 ? (this.tgExamples[a.goal] || []) : this.habitExamples(a.goal))
+      : [];
+    // En mode focus (étapes 3 et 5), on masque titre + sous-titre pour libérer de la place
+    // et garder les exemples lisibles (l'utilisateur scrolle pour tout voir).
+    const showFocusTitle = false;
+    const focusTitle = '';
+    const focusSub = '';
     const keyW = (flex, bg, col) => ({ flex: flex || '1', height:'42px', border:'none', borderRadius:'7px', background: bg || '#FFFFFF', color: col || '#1C1C1C', fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'17px', cursor:'pointer', boxShadow:'0 1px 0 rgba(0,0,0,.25)', display:'flex', alignItems:'center', justifyContent:'center' });
     const mkKey = (label, ch) => ({ label, style: keyW(), onClick: () => this.keyPress(ch === undefined ? label : ch) });
     const bsKey = { label:'⌫', style: keyW('1.6', '#AFB5BD', '#1C1C1C'), onClick: () => this.keyBackspace() };
@@ -1428,22 +1549,50 @@ class Component extends DCLogic {
     const targetSummary = this.targetSummary();
     const hasTarget = !!targetSummary;
 
+    // ===== Écran de choix de profil (screen -1) =====
+    const profileCardBase = { display:'flex', alignItems:'center', gap:'14px', width:'100%', textAlign:'left', padding:'16px 16px', borderRadius:'16px', cursor:'pointer', fontFamily:'"Trenda",sans-serif', background:'#F7F7F5', border:'1.5px solid transparent', transition:'all .15s ease' };
+    const profileOptions = this.profiles.map(p => {
+      const selected = s.profile === p.value;
+      return {
+        value: p.value, emoji: p.emoji, label: p.label, sub: p.sub, selected,
+        onClick: () => this.selectProfile(p.value),
+        style: { ...profileCardBase, background: selected ? '#F3FAC3' : '#F7F7F5', border: '1.5px solid ' + (selected ? '#C7DF3F' : 'transparent') },
+        iconStyle: { flex:'none', width:'48px', height:'48px', borderRadius:'14px', background: selected ? '#DDF247' : '#FFFFFF', border:'1px solid ' + (selected ? '#C7DF3F' : '#ECECEC'), display:'flex', alignItems:'center', justifyContent:'center', fontSize:'24px', transition:'all .15s ease' },
+        labelStyle: { fontFamily:'"Trenda",sans-serif', fontWeight:600, fontSize:'16px', color: selected ? '#245453' : '#1C1C1C' },
+        subStyle: { fontFamily:'"Trenda",sans-serif', fontWeight:400, fontSize:'13px', color:'#8A8B86', marginTop:'2px', lineHeight:'1.35' },
+        checkStyle: { flex:'none', width:'22px', height:'22px', borderRadius:'50%', background:'#245453', color:'#DDF247', display: selected ? 'flex' : 'none', alignItems:'center', justifyContent:'center', fontSize:'13px', fontWeight:700 }
+      };
+    });
+    const profileReady = s.profile === 'athlete';
+
     return {
+      isProfile, profileOptions, profileReady,
+      onSubmitProfile: profileReady ? this.submitProfile : undefined,
+      profileCtaStyle: profileReady ? ctaActive : ctaDisabled,
       isPhrase, isEngage, isRecap,
       showProgress: (isPhrase || isEngage) && !focusMode,
-      focusMode, showChrome, showExamples, examples,
+      focusMode, showChrome, showExamples, examples, showFocusTitle, focusTitle, focusSub,
+      // Croix « quitter l'onboarding » — étapes 2 à 5 (screens 1-4), masquée en mode focus.
+      showExit: isPhrase && s.screen >= 1 && !focusMode,
+      onExit: this.exitOnboarding,
+      // Popup de confirmation de sortie.
+      confirmExitOpen: s.confirmExit,
+      onCancelExit: this.cancelExit,
+      onConfirmExit: this.doExit,
       chromeAnim: (s.screen === 2 && !focusMode) ? { animation:'om-soft .42s ease-out' } : {},
-      canGoBack: s.screen > 0,
+      canGoBack: s.screen >= 0,
       onBack: this.back,
       segments,
       kicker: 'Étape ' + (s.screen + 1) + ' sur 5',
       phraseTitle: this.titles[s.screen] || '',
       tokens: this.buildTokens(),
       showHint: s.screen === 0,
-      showHabitIntro: s.screen === 4,
+      showHabitIntro: s.screen === 4 && !focusMode,
       titleMb: s.screen === 4 ? '14px' : '30px',
-      // Quand le clavier est ouvert, on réserve de la place en bas pour scroller le contenu au-dessus.
-      contentStyle: { flex:'1', overflowY:'auto', overflowX:'hidden', padding:0, paddingBottom: keyboardOpen ? '320px' : '0' },
+      // Le conteneur prend toute la place disponible (flex:1). Quand le clavier (absolu, en bas) est ouvert,
+      // on ajoute un padding bas = hauteur du clavier : le contenu dépasse alors la zone visible et devient
+      // scrollable, ce qui permet d'amener le bas du contenu (derniers exemples) AU-DESSUS du clavier.
+      contentStyle: { flex:'1', minHeight:'0', overflowY:'auto', overflowX:'hidden', WebkitOverflowScrolling:'touch', padding:0, paddingBottom: keyboardOpen ? (kbHeight + 24) + 'px' : '0' },
       reactionText: (isPhrase && s.screen !== 4) ? (s.reaction || '') : '',
       reactionIconEl: this.ic('lightbulb', 13, '#3D5310', 2),
       // footer
@@ -1451,7 +1600,7 @@ class Component extends DCLogic {
       ctaLabel,
       ctaStyle: ctaEnabled ? ctaActive : ctaDisabled,
       onCta: ctaEnabled ? this.next : undefined,
-      showSkip: (isPhrase && s.screen !== 0) || isEngage,
+      showSkip: (isPhrase && s.screen !== 0 && s.screen !== 2) || isEngage,
       skipLabel: isEngage ? 'Plus tard' : 'Passer cette étape',
       onSkip: this.skip,
       // picker
