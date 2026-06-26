@@ -160,13 +160,11 @@ Le parcours commence par un écran **Choix du profil**, puis compte 7 écrans : 
 
 ## Étape 3 — « Ton objectif principal »
 
-### En-tête (mode focus)
+### En-tête
 
 | Élément | Origine | Modification proposée |
 |---|---|---|
 | Titre court | Ton objectif principal | |
-| Titre (mode focus) | _Plus affiché_ (anciennement : Définis le premier objectif que tu aimerais atteindre) | |
-| Sous-titre (mode focus) | _Plus affiché_ (anciennement : Pour être atteint, un objectif doit être quantifiable et avec une date butoir.) | |
 | Phrase à compléter | Je veux [faire quoi] [combien] [unité], d'ici [une date]. | |
 | Message si objectif non choisi | Choisis d'abord ce qui t'amène pour définir ton objectif. | |
 | Libellé suggestions (action) | Suggestions | |
@@ -292,39 +290,9 @@ Le parcours commence par un écran **Choix du profil**, puis compte 7 écrans : 
 | Bouton : Valider | |
 | Réaction après choix : 3 à 4 jours par semaine, c'est le sweet spot : 80 % des bénéfices pour la moitié de l'effort. | |
 
-### Idées de micro-habitude (suggestions selon l'objectif)
-
-| Objectif | Origine | Modification proposée |
-|---|---|---|
-| Force | 10 pompes | |
-| Force | une suspension à la barre 20 s | |
-| Force | 15 squats au poids du corps | |
-| Perte de poids | 10 min de marche rapide | |
-| Perte de poids | un grand verre d'eau | |
-| Perte de poids | 20 squats | |
-| Endurance | 10 min de course légère | |
-| Endurance | 20 montées de genoux | |
-| Endurance | 2 min de corde à sauter | |
-| Événement | 15 min de cardio | |
-| Événement | 1 min de gainage | |
-| Événement | 10 montées d'escaliers | |
-| Bouger plus | 5 min de marche | |
-| Bouger plus | me lever toutes les heures | |
-| Bouger plus | 20 squats | |
-
-### Moments d'ancrage (suggestions)
-
-| Origine | Modification proposée |
-|---|---|
-| après le réveil | |
-| après le café | |
-| après le déjeuner | |
-| après le travail | |
-| avant de dormir | |
-
 ### Exemples d'habitude affichés (titre « Quelques exemples »)
 
-Générés en croisant les 3 micro-habitudes ci-dessus avec les 5 moments d'ancrage. Format court « [geste], [moment]. ».
+Format court « [geste], [moment]. ». Les chips de suggestion (micro-habitudes et moments) ne sont plus affichées : seuls ces exemples guident l'utilisateur.
 
 | Objectif | Origine | Modification proposée |
 |---|---|---|
