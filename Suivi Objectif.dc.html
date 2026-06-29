@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Hustle Up — Suivi de l'objectif (mock)</title>
+<style>
+  @font-face { font-family:"Trenda"; src:url("fonts/Trenda-Regular.otf") format("opentype"); font-weight:400; }
+  @font-face { font-family:"Trenda"; src:url("fonts/Trenda-Semibold.otf") format("opentype"); font-weight:600; }
+  @font-face { font-family:"Trenda"; src:url("fonts/Trenda-Bold.otf") format("opentype"); font-weight:700; }
+  @font-face { font-family:"Sora"; src:url("fonts/Sora.woff2") format("woff2"); font-weight:100 800; font-display:swap; }
+
+  :root{
+    /* DS Hustle Up (Figma) */
+    --deep:#133C40;      /* vert profond : tuiles, texte primaire, icônes */
+    --teal:#245453;      /* secondaire / badge */
+    --lime:#DDF247; --lime2:#E4F56C; --lime-hi:#B0D717;
+    --lime-pale:#F3FAC3; --lime-soft:#FAFBF1;
+    --ink:#171717; --ink2:#282828; --muted:#454643; --gray:#8A8B86;
+    --bg:#FFFFFF; --surface:#F2F2F2; --line:#D1D1D1; --line2:#F2F2F2;
+    /* ressenti */
+    --r-loin:#D98A5B; --r-voie:#7E9A2E; --r-presque:#4F6B1E; --r-jysuis:#133C40;
+    --rad:16px; --rad-lg:24px; --rad-pill:32px;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; padding:0; background:#E9E9E6; overflow-x:hidden;
+             font-family:"Trenda",system-ui,sans-serif; color:var(--ink); }
+  .phone{ width:375px; max-width:100%; margin:0 auto; background:var(--bg);
+          min-height:100vh; position:relative; overflow-x:hidden; display:flex; flex-direction:column; }
+
+  svg{ display:block; }
+  .ic{ width:24px; height:24px; stroke:currentColor; stroke-width:1.9; fill:none;
+       stroke-linecap:round; stroke-linejoin:round; }
+  .ic.sm{ width:20px; height:20px; }
+
+  .status{ display:flex; justify-content:space-between; align-items:center; padding:12px 20px 2px; font-size:15px; font-weight:600; color:var(--ink); }
+  .status .sig{ display:flex; gap:5px; align-items:center; }
+  .bars{ display:inline-block; width:17px; height:11px;
+         background:linear-gradient(90deg,var(--ink) 0 70%, #c9c9c4 70% 100%); -webkit-mask:linear-gradient(#000 0 0); border-radius:2px; }
+
+  .screen{ flex:1; display:none; flex-direction:column; overflow-y:auto; padding-bottom:82px; }
+  .screen.active{ display:flex; }
+  h1,h2,h3{ margin:0; } button{ font-family:inherit; cursor:pointer; border:none; background:none; }
+  .muted{ color:var(--gray); }
+
+  /* header */
+  .topbar{ display:flex; align-items:center; justify-content:space-between; padding:6px 20px 4px; }
+  .brand{ display:flex; align-items:center; gap:9px; }
+  .brand .name{ font-weight:700; font-size:23px; letter-spacing:-.3px; }
+  .brand .reg{ font-size:10px; vertical-align:super; font-weight:600; color:var(--muted); }
+  .topbar .acts{ display:flex; gap:16px; color:var(--ink); }
+
+  /* quick actions */
+  .quick{ display:flex; align-items:flex-start; gap:0; padding:14px 16px 4px; overflow-x:auto; }
+  .qa{ width:74px; flex:0 0 auto; text-align:center; }
+  .qa .tile{ width:60px; height:60px; margin:0 auto; border-radius:var(--rad); display:flex; align-items:center; justify-content:center; }
+  .qa.primary .tile{ background:var(--lime); color:var(--deep); }
+  .qa .tile.dark{ background:var(--deep); color:#fff; }
+  .qa .lab{ display:block; font-size:11px; line-height:1.15; margin-top:7px; color:var(--ink2); }
+  .qdiv{ width:1px; align-self:stretch; background:var(--line); margin:6px 12px 26px; flex:0 0 auto; }
+
+  /* objective hero */
+  .hero{ margin:14px 16px 4px; border-radius:var(--rad-lg); padding:18px; position:relative; overflow:hidden;
+         background:linear-gradient(135deg,var(--lime) 0%, var(--lime2) 100%); color:var(--deep); }
+  .hero .glow{ position:absolute; right:-34px; top:-34px; width:150px; height:150px; border-radius:50%; background:rgba(255,255,255,.22); }
+  .hero .kick{ font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; opacity:.75; position:relative; }
+  .hero h2{ font-size:22px; font-weight:700; margin:5px 0 2px; letter-spacing:-.3px; position:relative; }
+  .hero .countdown{ font-family:"Sora","Trenda",sans-serif; font-size:44px; font-weight:800; letter-spacing:-.02em; line-height:1; margin:6px 0 2px; position:relative; }
+  .hero .sub{ font-size:13px; font-weight:600; opacity:.85; position:relative; }
+  .barrow{ display:flex; align-items:center; gap:10px; margin:10px 0 2px; position:relative; }
+  .bar{ flex:1; height:12px; border-radius:8px; background:rgba(255,255,255,.55); overflow:hidden; }
+  .bar > i{ display:block; height:100%; background:var(--deep); border-radius:8px; transition:width .5s ease; }
+  .barrow .pct{ font-size:15px; font-weight:700; min-width:42px; text-align:right; }
+  .hero .cta{ margin-top:14px; width:100%; background:var(--deep); color:#fff; border-radius:var(--rad-pill); padding:13px; font-size:15px; font-weight:700; position:relative; }
+
+  /* condensed test fitness */
+  .tfline{ margin:14px 16px 2px; display:flex; align-items:center; gap:10px; padding:13px 14px; border:1px solid var(--line2); border-radius:var(--rad); }
+  .tfline .lbl{ font-size:14px; font-weight:600; flex:1; }
+  .tfline .pc{ color:var(--deep); font-weight:700; }
+  .tfline .lnk{ font-size:13px; font-weight:700; color:var(--deep); white-space:nowrap; }
+
+  /* sessions / rituel */
+  .secttitle{ display:flex; justify-content:space-between; align-items:baseline; padding:20px 18px 8px; }
+  .secttitle b{ font-size:16px; font-weight:700; }
+  .secttitle .date{ font-size:13px; color:var(--gray); }
+  .rituel{ margin:0 16px; display:flex; align-items:center; gap:12px; padding:14px; background:var(--lime-soft); border:1px solid #ECEFCF; border-radius:var(--rad); }
+  .rituel .b{ color:var(--deep); }
+  .rituel .t{ flex:1; font-size:14px; font-weight:600; }
+  .rituel .t small{ display:block; font-weight:400; color:var(--gray); font-size:12px; }
+  .rituel .chk{ width:24px; height:24px; border-radius:7px; border:2px solid var(--deep); display:flex; align-items:center; justify-content:center; color:transparent; }
+  .rituel.done .chk{ background:var(--deep); color:#fff; }
+  .emptybox{ margin:10px 16px 0; border:1px dashed #CFCFC9; border-radius:var(--rad); padding:18px; text-align:center; color:var(--gray); font-size:14px; }
+
+  /* objective screen */
+  .nav{ display:flex; align-items:center; gap:12px; padding:8px 16px; }
+  .nav .back{ width:38px; height:38px; border-radius:50%; background:var(--surface); display:flex; align-items:center; justify-content:center; color:var(--ink); }
+  .nav .t{ font-weight:700; font-size:17px; }
+  .objhead{ margin:6px 16px 0; padding:18px; border-radius:var(--rad-lg); background:var(--lime-soft); border:1px solid #ECEFCF; }
+  .objhead h2{ font-size:21px; font-weight:700; color:var(--ink); margin-bottom:12px; letter-spacing:-.3px; }
+  .objhead .bar{ background:#E6E9CE; }
+  .objhead .bar > i{ background:var(--deep); }
+  .objhead .meta{ font-size:13px; color:var(--muted); margin-top:11px; font-weight:600; }
+  .objhead .countdown{ font-family:"Sora","Trenda",sans-serif; font-size:44px; font-weight:800; letter-spacing:-.02em; color:var(--deep); line-height:1; }
+  .btn-primary{ margin:14px 16px 6px; width:calc(100% - 32px); border-radius:var(--rad-pill); padding:14px; font-size:15px; font-weight:700;
+                background:linear-gradient(135deg,var(--lime),var(--lime2)); color:var(--deep); }
+  .btn-ghost{ background:#fff; color:var(--deep); border:1.5px solid var(--deep); }
+
+  .jtitle{ padding:20px 18px 8px; font-size:16px; font-weight:700; }
+  .timeline{ padding:0 16px; }
+  .entry{ display:flex; gap:12px; padding:11px 0; border-bottom:1px solid var(--line2); }
+  .entry .dot{ width:11px; height:11px; border-radius:50%; margin-top:6px; flex:0 0 auto; }
+  .entry .l1{ font-size:14px; font-weight:600; }
+  .entry .when{ font-size:12px; color:var(--gray); font-weight:600; }
+  .entry .rs{ font-weight:700; }
+  .entry .note{ font-size:13px; color:var(--gray); margin-top:1px; }
+  .entry .tag{ display:inline-block; font-size:10px; font-weight:700; color:var(--teal); background:var(--lime-pale); border-radius:20px; padding:2px 8px; margin-left:6px; vertical-align:middle; }
+  .actions{ display:flex; flex-wrap:wrap; gap:8px; padding:14px 16px 4px; }
+  .actions button{ background:var(--surface); color:var(--muted); border-radius:20px; padding:9px 14px; font-size:13px; font-weight:600; }
+  .repere{ margin:14px 16px 18px; padding:14px; border:1px solid var(--line2); border-radius:var(--rad); }
+  .repere b{ font-size:13px; font-weight:700; } .repere p{ margin:4px 0 0; font-size:13px; color:var(--gray); }
+
+  /* bottom nav */
+  .tabbar{ position:absolute; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--line2);
+           display:flex; justify-content:space-around; padding:9px 4px 14px; }
+  .tab{ text-align:center; font-size:11px; color:var(--gray); flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .tab.active{ color:var(--ink); font-weight:700; }
+  .tab .pip{ width:5px; height:5px; border-radius:50%; background:var(--lime-hi); margin-top:1px; }
+
+  /* check-in sheet */
+  .overlay{ position:absolute; inset:0; background:rgba(19,19,19,.42); display:none; z-index:30; }
+  .overlay.show{ display:block; }
+  .sheet{ position:absolute; left:0; right:0; bottom:0; background:#fff; border-radius:24px 24px 0 0; padding:10px 20px 26px;
+          transform:translateY(110%); transition:transform .32s cubic-bezier(.2,.8,.2,1); z-index:40; }
+  .sheet.show{ transform:translateY(0); }
+  .grip{ width:42px; height:5px; background:#DADAD6; border-radius:3px; margin:4px auto 14px; }
+  .sheet h3{ font-size:18px; font-weight:700; }
+  .sheet .q{ font-size:13px; font-weight:700; color:var(--muted); margin:16px 0 8px; }
+  .valrow{ display:flex; align-items:center; gap:10px; }
+  .valrow input{ width:88px; font-family:inherit; font-size:20px; font-weight:700; text-align:center; padding:11px; border:1.5px solid var(--line); border-radius:12px; color:var(--ink); }
+  .valrow .unit{ font-size:15px; font-weight:600; color:var(--muted); }
+  .valrow .last{ margin-left:auto; font-size:12px; color:var(--gray); }
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{ border:1.5px solid var(--line); background:#fff; border-radius:22px; padding:9px 13px; font-size:13px; font-weight:600; color:var(--muted); }
+  .chip.sel{ background:linear-gradient(135deg,var(--lime),var(--lime2)); border-color:transparent; color:var(--deep); }
+  .noteinp{ width:100%; font-family:inherit; font-size:14px; padding:11px 12px; border:1.5px solid var(--line); border-radius:12px; }
+  .sheet .save{ margin-top:18px; width:100%; border-radius:var(--rad-pill); padding:14px; font-size:15px; font-weight:700;
+                background:linear-gradient(135deg,var(--lime),var(--lime2)); color:var(--deep); }
+
+  /* atteinte popup */
+  .popup{ position:absolute; left:24px; right:24px; top:50%; transform:translateY(-50%) scale(.92); opacity:0; pointer-events:none;
+          background:#fff; border-radius:22px; padding:24px 20px; text-align:center; z-index:50; transition:.2s; box-shadow:0 18px 50px rgba(0,0,0,.25); }
+  .popup.show{ opacity:1; transform:translateY(-50%) scale(1); pointer-events:auto; }
+  .popup .em{ font-size:38px; } .popup h3{ font-size:18px; font-weight:700; margin:8px 0 16px; }
+  .popup .row{ display:flex; gap:10px; }
+  .popup .row button{ flex:1; border-radius:24px; padding:12px; font-size:14px; font-weight:700; }
+  .popup .yes{ background:linear-gradient(135deg,var(--lime),var(--lime2)); color:var(--deep); }
+  .popup .no{ background:var(--surface); color:var(--muted); }
+
+  /* celebration */
+  #screen-celebration{ background:linear-gradient(160deg,var(--lime) 0%, var(--lime-soft) 60%); align-items:center; justify-content:center; text-align:center; padding:40px 26px; }
+  #screen-celebration .star{ width:88px; height:88px; border-radius:26px; background:var(--deep); color:var(--lime); display:flex; align-items:center; justify-content:center; margin-bottom:18px; }
+  #screen-celebration h1{ font-family:"Sora","Trenda",sans-serif; font-size:28px; font-weight:800; letter-spacing:-.01em; text-transform:uppercase; color:var(--deep); }
+  #screen-celebration p{ font-size:15px; color:var(--muted); margin:10px 0 24px; }
+  #screen-celebration .recap{ background:#fff; border-radius:18px; padding:14px 18px; font-size:14px; color:var(--ink); font-weight:600; }
+  #screen-celebration .recap b{ color:var(--deep); }
+  .cel-sub2{ font-size:12px; color:var(--gray); margin-top:6px; font-weight:600; }
+  .pc-head{ padding:8px 18px 6px; }
+  .pc-count{ font-size:13px; color:var(--gray); font-weight:600; }
+  .pc-row{ display:flex; gap:12px; align-items:center; padding:13px 14px; border:1px solid var(--line2); border-radius:var(--rad); margin-bottom:10px; }
+  .pc-ic{ width:34px; height:34px; border-radius:10px; background:var(--lime-soft); display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .pc-row.cur .pc-ic{ background:#EAF0D6; }
+  .pc-title{ font-size:15px; font-weight:700; }
+  .pc-meta{ font-size:12px; color:var(--gray); margin-top:2px; }
+  .pc-badge{ margin-left:auto; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; background:var(--surface); color:var(--muted); white-space:nowrap; }
+  .pc-badge.done{ background:var(--lime-pale); color:var(--teal); }
+
+  .toast{ position:absolute; left:24px; right:24px; bottom:96px; background:var(--ink); color:#fff; border-radius:14px; padding:13px 16px; font-size:13px; text-align:center; z-index:60; opacity:0; transform:translateY(10px); transition:.25s; }
+  .toast.show{ opacity:1; transform:translateY(0); }
+
+  .demo{ position:absolute; top:8px; right:10px; z-index:80; }
+  .demo .btn{ background:var(--ink); color:#fff; font-size:11px; font-weight:700; border-radius:20px; padding:6px 11px; opacity:.5; }
+  .demo .panel{ display:none; position:absolute; right:0; top:34px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:8px; box-shadow:0 8px 28px rgba(0,0,0,.15); width:200px; }
+  .demo.open .panel{ display:block; }
+  .demo .panel small{ display:block; font-size:10px; color:var(--gray); padding:2px 6px 6px; }
+  .demo .panel button{ display:block; width:100%; text-align:left; background:var(--surface); border-radius:9px; padding:9px 10px; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--ink); }
+  .demo .panel button.on{ background:var(--lime-pale); color:var(--deep); }
+</style>
+</head>
+<body>
+<!-- ===== ICÔNES SVG (sprite) ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <g id="i-pin"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11Z"/><circle cx="12" cy="10" r="2.4"/></g>
+  <g id="i-timer"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 13.5l3.2-2.2"/><path d="M9.5 2.5h5"/><path d="M12 2.5v3.5"/></g>
+  <g id="i-dumbbell"><path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"/></g>
+  <g id="i-records"><path d="M5 8.5h8M5 12h11M5 15.5h6"/></g>
+  <g id="i-bell"><path d="M6 9a6 6 0 1 1 12 0c0 4.6 1.8 6 1.8 6H4.2S6 13.6 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></g>
+  <g id="i-chat"><path d="M4.5 5.5h15v10H10l-4 3v-3H4.5Z"/></g>
+  <g id="i-penta"><path d="M12 3.5l8.2 6-3.1 9.3H6.9L3.8 9.5Z"/></g>
+  <g id="i-bolt"><path d="M13 2.5 4.5 14H10l-1 7.5L19 9.5h-5.5l1-7Z"/></g>
+  <g id="i-search"><circle cx="11" cy="11" r="6.2"/><path d="M20 20l-4.2-4.2"/></g>
+  <g id="i-box"><path d="M4 8l8-4 8 4v8l-8 4-8-4Z"/><path d="M4 8l8 4 8-4M12 12v8"/></g>
+  <g id="i-person"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c0-3.5 3-5.8 6.5-5.8s6.5 2.3 6.5 5.8"/></g>
+  <g id="i-back"><path d="M15 5l-7 7 7 7"/></g>
+  <g id="i-check"><path d="M5 12.5l4 4 10-10"/></g>
+</defs></svg>
+
+<div class="phone">
+
+  <div class="status"><span>9:41</span><span class="sig">▮▮▮ <span class="bars"></span></span></div>
+
+  <!-- ====================== HOME ====================== -->
+  <section class="screen active" id="screen-home">
+    <div class="topbar">
+      <div class="brand">
+        <svg width="34" height="22" viewBox="0 0 40 24" fill="var(--deep)"><path d="M8 4h9l-7 16H1z"/><path d="M21 4h9l-7 16h-9z"/></svg>
+        <span class="name">Hustle Up<span class="reg">®</span></span>
+      </div>
+      <div class="acts">
+        <svg class="ic" viewBox="0 0 24 24"><use href="#i-bell"/></svg>
+        <svg class="ic" viewBox="0 0 24 24"><use href="#i-chat"/></svg>
+      </div>
+    </div>
+
+    <div class="quick">
+      <div class="qa primary"><div class="tile"><svg class="ic" viewBox="0 0 24 24"><use href="#i-pin"/></svg></div><span class="lab">Trouver<br>une box</span></div>
+      <div class="qdiv"></div>
+      <div class="qa"><div class="tile dark"><svg class="ic" viewBox="0 0 24 24"><use href="#i-timer"/></svg></div><span class="lab">Chrono</span></div>
+      <div class="qa"><div class="tile dark"><svg class="ic" viewBox="0 0 24 24"><use href="#i-dumbbell"/></svg></div><span class="lab">Calcul<br>de charge</span></div>
+      <div class="qa"><div class="tile dark"><svg class="ic" viewBox="0 0 24 24"><use href="#i-records"/></svg></div><span class="lab">Records</span></div>
+    </div>
+
+    <div id="home-objective"></div>
+
+    <div class="tfline">
+      <svg class="ic sm" viewBox="0 0 24 24" style="color:var(--deep)"><use href="#i-penta"/></svg>
+      <div class="lbl">Test fitness · <span class="pc">72%</span></div>
+      <div class="lnk">Re-teste-toi →</div>
+    </div>
+
+    <div class="secttitle"><b>Mes séances du jour</b><span class="date">lun. 29 juin</span></div>
+    <div class="rituel" id="rituel" onclick="this.classList.toggle('done')">
+      <svg class="ic b" viewBox="0 0 24 24"><use href="#i-bolt"/></svg>
+      <div class="t">Rituel : 10 pompes<small>après le réveil</small></div>
+      <div class="chk"><svg class="ic sm" viewBox="0 0 24 24" style="width:16px;height:16px"><use href="#i-check"/></svg></div>
+    </div>
+    <div class="emptybox">Rien d'autre de prévu aujourd'hui</div>
+
+    <div class="tabbar" id="tabbar-tpl"></div>
+  </section>
+
+  <!-- ====================== MON OBJECTIF ====================== -->
+  <section class="screen" id="screen-objectif">
+    <div class="nav"><button class="back" onclick="showScreen('home')"><svg class="ic" viewBox="0 0 24 24"><use href="#i-back"/></svg></button><span class="t">Mon objectif</span></div>
+    <div id="obj-content"></div>
+    <div class="tabbar"></div>
+  </section>
+
+  <!-- ====================== MON PARCOURS ====================== -->
+  <section class="screen" id="screen-parcours">
+    <div class="nav"><button class="back" onclick="showScreen('objectif')"><svg class="ic" viewBox="0 0 24 24"><use href="#i-back"/></svg></button><span class="t">Mon parcours</span></div>
+    <div class="pc-head"><span class="pc-count" id="pc-count">2 objectifs atteints</span></div>
+    <div id="parcours-list" style="padding:0 16px"></div>
+    <div class="tabbar"></div>
+  </section>
+
+  <!-- ====================== CELEBRATION ====================== -->
+  <section class="screen" id="screen-celebration">
+    <div class="star"><svg class="ic" viewBox="0 0 24 24" style="width:40px;height:40px;stroke-width:1.6"><path d="M12 3l2.3 5.8L20 9l-4.5 3.6L17 19l-5-3.2L7 19l1.5-6.4L4 9l5.7-.2Z"/></svg></div>
+    <h1>Objectif atteint.</h1>
+    <p id="cel-sub">Bravo, tu y es arrivé.</p>
+    <div class="recap" id="cel-recap"></div>
+    <button class="btn-primary" style="margin:24px 0 0;width:100%" onclick="loadScenario('chiffre')">Définir mon prochain objectif</button>
+    <button class="btn-primary btn-ghost" style="margin:10px 0 0;width:100%" onclick="showScreen('parcours')">Voir mon parcours</button>
+  </section>
+
+  <!-- ====================== OVERLAYS ====================== -->
+  <div class="overlay" id="overlay" onclick="closeCheckin()"></div>
+
+  <div class="sheet" id="sheet">
+    <div class="grip"></div>
+    <h3 id="sheet-title">Où en es-tu ?</h3>
+    <div id="sheet-valblock">
+      <div class="q">Ta valeur du moment</div>
+      <div class="valrow">
+        <input id="ci-val" type="number" inputmode="numeric" placeholder="—" />
+        <span class="unit" id="ci-unit">tractions</span>
+        <span class="last" id="ci-last">dernier : 18</span>
+      </div>
+    </div>
+    <div class="q">Comment tu le sens ?</div>
+    <div class="chips" id="ci-chips">
+      <button class="chip" data-r="loin"    onclick="selRessenti(this)">loin du compte</button>
+      <button class="chip" data-r="en_voie" onclick="selRessenti(this)">en bonne voie</button>
+      <button class="chip" data-r="presque" onclick="selRessenti(this)">presque là</button>
+      <button class="chip" data-r="jy_suis" onclick="selRessenti(this)">j'y suis !</button>
+    </div>
+    <div class="q">Une note ? (optionnel)</div>
+    <input class="noteinp" id="ci-note" placeholder="ex : ça vient, jambes lourdes" />
+    <button class="save" onclick="submitCheckin()">Ajouter à mon journal</button>
+  </div>
+
+  <div class="popup" id="popup">
+    <div class="em">🎉</div>
+    <h3>Tu as atteint ton objectif ?</h3>
+    <div class="row">
+      <button class="no" onclick="atteinteNon()">Pas encore</button>
+      <button class="yes" onclick="atteinteOui()">Oui, on célèbre</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+const TODAY = new Date('2026-06-29');
+const RESSENTI = {
+  loin:    { label:"loin du compte", color:"var(--r-loin)" },
+  en_voie: { label:"en bonne voie",  color:"var(--r-voie)" },
+  presque: { label:"presque là",     color:"var(--r-presque)" },
+  jy_suis: { label:"j'y suis !",     color:"var(--r-jysuis)" },
+};
+const AXE = { force:"Force", endurance:"Endurance" };
+function S(o){ return JSON.parse(JSON.stringify(o)); }
+
+const SCENARIOS = {
+  chiffre: {
+    objectif:{ phrase:"Faire 30 tractions", type:"force", kind:"chiffre", cible:30, unite:"tractions",
+               echeance:"2026-12-31", cree:"2026-06-15", depart:8, statut:"actif" },
+    releves:[
+      { date:"2026-06-15", valeur:8,  ressenti:"loin",    note:"", depart:true },
+      { date:"2026-06-22", valeur:15, ressenti:"loin",    note:"" },
+      { date:"2026-06-29", valeur:18, ressenti:"en_voie", note:"ça vient" },
+    ],
+  },
+  evenement: {
+    objectif:{ phrase:"Terminer un marathon", type:"evenement", kind:"evenement",
+               echeance:"2026-12-26", cree:"2026-06-15", statut:"actif" },
+    releves:[
+      { date:"2026-06-15", valeur:null, ressenti:"loin",    note:"premier long", depart:true },
+      { date:"2026-06-28", valeur:null, ressenti:"en_voie", note:"15 km ok" },
+    ],
+  },
+  qualitatif: {
+    objectif:{ phrase:"Bouger plus au quotidien", type:"bouger", kind:"qualitatif",
+               echeance:"2026-09-30", cree:"2026-06-01", statut:"actif" },
+    releves:[
+      { date:"2026-06-01", valeur:null, ressenti:"loin",    note:"", depart:true },
+      { date:"2026-06-20", valeur:null, ressenti:"en_voie", note:"plus de marche" },
+    ],
+  },
+  vide: { objectif:null, releves:[] },
+};
+
+let state = S(SCENARIOS.chiffre);
+let pendingRessenti = null;
+
+const TABBAR = `
+  <div class="tab active"><svg class="ic" viewBox="0 0 24 24"><use href="#i-bolt"/></svg>Aujourd'hui<span class="pip"></span></div>
+  <div class="tab"><svg class="ic" viewBox="0 0 24 24"><use href="#i-search"/></svg>Explorer</div>
+  <div class="tab"><svg class="ic" viewBox="0 0 24 24"><use href="#i-dumbbell"/></svg>Training</div>
+  <div class="tab"><svg class="ic" viewBox="0 0 24 24"><use href="#i-box"/></svg>Box</div>
+  <div class="tab"><svg class="ic" viewBox="0 0 24 24"><use href="#i-person"/></svg>Profil</div>`;
+
+function daysBetween(a,b){ return Math.round((b-a)/86400000); }
+function fmtDate(iso){ return new Date(iso).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}); }
+function lastValue(){ const v=[...state.releves].reverse().find(r=>r.valeur!=null); return v?v.valeur:null; }
+function valuePct(){ const o=state.objectif, cur=lastValue(); if(cur==null) return 0;
+  return Math.max(0,Math.min(100,Math.round((cur-o.depart)/(o.cible-o.depart)*100))); }
+function timePct(){ const o=state.objectif;
+  return Math.max(0,Math.min(100,Math.round((TODAY-new Date(o.cree))/(new Date(o.echeance)-new Date(o.cree))*100))); }
+function daysLeft(){ return daysBetween(TODAY,new Date(state.objectif.echeance)); }
+
+function render(){ renderHome(); renderObjectif(); renderParcours();
+  document.querySelectorAll('.tabbar').forEach(t=>t.innerHTML=TABBAR);
+  document.querySelectorAll('.demo .panel button').forEach(b=>b.classList.toggle('on', b.dataset.sc===state._name));
+}
+
+function renderHome(){
+  const box=document.getElementById('home-objective'), o=state.objectif;
+  if(!o){
+    box.innerHTML=`<div class="hero" style="background:linear-gradient(135deg,#F3FAC3,#FAFBF1)">
+      <div class="kick">Ton objectif</div><h2>Fixe ton objectif</h2>
+      <div class="sub">Débloque ta carte de suivi sur l'accueil.</div>
+      <button class="cta" onclick="toast('Lancerait l\\'étape « objectif » de l\\'onboarding')">Définir mon objectif</button></div>`;
+    return;
+  }
+  const last=state.releves[state.releves.length-1], rs=RESSENTI[last.ressenti];
+  let mid='';
+  if(o.kind==='chiffre'){
+    mid=`<div class="barrow"><div class="bar"><i style="width:${valuePct()}%"></i></div><div class="pct">${valuePct()}%</div></div>
+         <div class="sub">${lastValue()} / ${o.cible} ${o.unite} · reste ${daysLeft()} j · <b>${rs.label}</b></div>`;
+  } else if(o.kind==='evenement'){
+    mid=`<div class="countdown">J-${daysLeft()}</div><div class="sub">jusqu'au jour J · <b>${rs.label}</b></div>`;
+  } else {
+    mid=`<div class="barrow"><div class="bar"><i style="width:${timePct()}%"></i></div><div class="pct">${timePct()}%</div></div>
+         <div class="sub">reste ${daysLeft()} j · <b>${rs.label}</b></div>`;
+  }
+  box.innerHTML=`<div class="hero" onclick="showScreen('objectif')"><div class="glow"></div>
+      <div class="kick">Mon objectif</div><h2>${o.phrase}</h2>${mid}
+      <button class="cta" onclick="event.stopPropagation(); openCheckin()">Faire mon point</button></div>`;
+}
+
+function renderObjectif(){
+  const box=document.getElementById('obj-content'), o=state.objectif;
+  if(!o){ box.innerHTML=`<div class="emptybox" style="margin-top:30px">Aucun objectif défini.</div>`; return; }
+  let head='';
+  if(o.kind==='chiffre'){
+    head=`<h2>${o.phrase}</h2><div class="bar"><i style="width:${valuePct()}%"></i></div>
+      <div class="meta">${lastValue()} / ${o.cible} ${o.unite} · ${valuePct()}% · reste ${daysLeft()} j (échéance ${fmtDate(o.echeance)})</div>`;
+  } else if(o.kind==='evenement'){
+    head=`<h2>${o.phrase}</h2><div class="countdown">J-${daysLeft()}</div><div class="meta">jour J le ${fmtDate(o.echeance)}</div>`;
+  } else {
+    head=`<h2>${o.phrase}</h2><div class="bar"><i style="width:${timePct()}%"></i></div>
+      <div class="meta">${timePct()}% du temps écoulé · reste ${daysLeft()} j (échéance ${fmtDate(o.echeance)})</div>`;
+  }
+  let rows='';
+  [...state.releves].reverse().forEach(r=>{
+    const rs=RESSENTI[r.ressenti];
+    const val=r.valeur!=null?`<b>${r.valeur} ${o.unite||''}</b> · `:'';
+    const tag=r.depart?`<span class="tag">Départ</span>`:'';
+    const note=r.note?`<div class="note">« ${r.note} »</div>`:'';
+    rows+=`<div class="entry"><div class="dot" style="background:${rs.color}"></div><div>
+        <div class="l1"><span class="when">${fmtDate(r.date)}</span> · ${val}<span class="rs" style="color:${rs.color}">${rs.label}</span>${tag}</div>${note}
+      </div></div>`;
+  });
+  const repere=AXE[o.type]?`<div class="repere"><b>Repère de forme générale</b>
+      <p>Refais ton test fitness (axe ${AXE[o.type]}) pour situer ta forme. C'est un repère, pas la mesure exacte de cet objectif.</p></div>`:'';
+  const cibleBtn=o.kind==='evenement'
+    ? `<button class="btn-primary btn-ghost" onclick="openAtteinte()">C'est fait ✓</button>`
+    : `<button class="btn-primary btn-ghost" onclick="openAtteinte()">Marquer comme atteint</button>`;
+  box.innerHTML=`<div class="objhead">${head}</div>
+    <button class="btn-primary" onclick="openCheckin()">Faire mon point</button>
+    <div class="jtitle">Mon journal</div><div class="timeline">${rows}</div>
+    <div class="actions"><button onclick="showScreen('parcours')">Voir mon parcours</button>
+      <button onclick="toast('Ouvrirait l\\'édition de l\\'objectif')">Modifier l'objectif</button></div>
+    ${cibleBtn}${repere}`;
+}
+
+const PARCOURS_PAST=[
+  { phrase:"Courir 10 km", meta:"atteint · 73 jours", issue:"atteint" },
+  { phrase:"Faire 50 pompes d'affilée", meta:"atteint · 90 jours", issue:"atteint" },
+];
+function pcRow(phrase,meta,issue){
+  const done=issue==='atteint', ic=done?'#i-check':'#i-timer';
+  const badge=done?`<span class="pc-badge done">atteint</span>`:`<span class="pc-badge">en cours</span>`;
+  return `<div class="pc-row ${done?'':'cur'}"><div class="pc-ic" style="color:${done?'var(--r-presque)':'var(--deep)'}"><svg class="ic sm" viewBox="0 0 24 24"><use href="${ic}"/></svg></div>`
+    +`<div><div class="pc-title">${phrase}</div><div class="pc-meta">${meta}</div></div>${badge}</div>`;
+}
+function renderParcours(){
+  const o=state.objectif; let rows='';
+  if(o) rows+=pcRow(o.phrase,"en cours","en_cours");
+  PARCOURS_PAST.forEach(p=>rows+=pcRow(p.phrase,p.meta,p.issue));
+  document.getElementById('parcours-list').innerHTML=rows;
+}
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  document.querySelector('.screen.active').scrollTop=0;
+}
+function loadScenario(name){ state=S(SCENARIOS[name]); state._name=name;
+  const d=document.getElementById('demo'); if(d) d.classList.remove('open'); render(); showScreen('home'); }
+
+function openCheckin(){
+  const o=state.objectif; if(!o) return; pendingRessenti=null;
+  document.querySelectorAll('#ci-chips .chip').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('ci-val').value=''; document.getElementById('ci-note').value='';
+  const vb=document.getElementById('sheet-valblock');
+  if(o.kind==='chiffre'){ vb.style.display='block'; document.getElementById('ci-unit').textContent=o.unite;
+    const lv=lastValue(); document.getElementById('ci-last').textContent=lv!=null?('dernier : '+lv):'premier point'; }
+  else vb.style.display='none';
+  document.getElementById('sheet-title').textContent='Où en es-tu sur : '+o.phrase;
+  document.getElementById('overlay').classList.add('show'); document.getElementById('sheet').classList.add('show');
+}
+function closeCheckin(){ document.getElementById('overlay').classList.remove('show'); document.getElementById('sheet').classList.remove('show'); }
+function selRessenti(b){ document.querySelectorAll('#ci-chips .chip').forEach(c=>c.classList.remove('sel')); b.classList.add('sel'); pendingRessenti=b.dataset.r; }
+function submitCheckin(){
+  const o=state.objectif, valEl=document.getElementById('ci-val');
+  const val=(o.kind==='chiffre'&&valEl.value!=='')?Number(valEl.value):null;
+  const note=document.getElementById('ci-note').value.trim();
+  if(!pendingRessenti&&val==null){ toast('Choisis au moins un ressenti'); return; }
+  const ress=pendingRessenti||'en_voie', isFirst=state.releves.length===0;
+  state.releves.push({ date:"2026-06-29", valeur:val, ressenti:ress, note:note, depart:isFirst });
+  closeCheckin(); render();
+  const reached=(o.kind==='chiffre'&&val!=null&&val>=o.cible)||ress==='jy_suis';
+  if(reached) setTimeout(openAtteinte,350); else toast('Point ajouté à ton journal ✓');
+}
+
+function openAtteinte(){ document.getElementById('overlay').classList.add('show'); document.getElementById('popup').classList.add('show'); }
+function closeAtteinte(){ document.getElementById('overlay').classList.remove('show'); document.getElementById('popup').classList.remove('show'); }
+function atteinteNon(){ closeAtteinte();
+  const last=state.releves[state.releves.length-1];
+  if(last&&last.ressenti==='jy_suis'){ last.ressenti='presque'; render(); }
+  toast('Pas encore tout à fait ? On garde « presque là », tu y es presque.'); }
+function atteinteOui(){ closeAtteinte();
+  const o=state.objectif, n=state.releves.length, days=daysBetween(new Date(o.cree),TODAY);
+  document.getElementById('cel-sub').textContent=`« ${o.phrase} »`;
+  const line=o.kind==='chiffre'?`Parti de <b>${o.depart}</b>, arrivé à <b>${o.cible} ${o.unite}</b>`:`Objectif tenu jusqu'au bout`;
+  document.getElementById('cel-recap').innerHTML=`<div>${line}</div><div class="cel-sub2">${n} relevés · ${days} jours de parcours</div>`;
+  showScreen('celebration'); }
+
+let toastT;
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600); }
+
+(function(){
+  const q=new URLSearchParams(location.search), sc=q.get('scenario');
+  if(sc&&SCENARIOS[sc]) state=S(SCENARIOS[sc]);
+  state._name=(sc&&SCENARIOS[sc])?sc:'chiffre';
+  render();
+  const scr=q.get('screen'); if(scr) showScreen(scr);
+  if(q.get('sheet')==='1') openCheckin();
+  if(q.get('celebrate')==='1') atteinteOui();
+})();
+</script>
+</body>
+</html>
