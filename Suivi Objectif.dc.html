@@ -26,19 +26,19 @@
   html,body{ margin:0; padding:0; background:#E9E9E6; overflow-x:hidden;
              font-family:"Trenda",system-ui,sans-serif; color:var(--ink); }
   .phone{ width:375px; max-width:100%; margin:0 auto; background:var(--bg);
-          min-height:100vh; position:relative; overflow-x:hidden; display:flex; flex-direction:column; }
+          height:100vh; position:relative; overflow:hidden; display:flex; flex-direction:column; }
 
   svg{ display:block; }
   .ic{ width:24px; height:24px; stroke:currentColor; stroke-width:1.9; fill:none;
        stroke-linecap:round; stroke-linejoin:round; }
   .ic.sm{ width:20px; height:20px; }
 
-  .status{ display:flex; justify-content:space-between; align-items:center; padding:12px 20px 2px; font-size:15px; font-weight:600; color:var(--ink); }
-  .status .sig{ display:flex; gap:5px; align-items:center; }
-  .bars{ display:inline-block; width:17px; height:11px;
-         background:linear-gradient(90deg,var(--ink) 0 70%, #c9c9c4 70% 100%); -webkit-mask:linear-gradient(#000 0 0); border-radius:2px; }
+  .status{ display:flex; justify-content:space-between; align-items:center; padding:14px 22px 4px; }
+  .status .time{ font-size:15px; font-weight:700; color:var(--ink); }
+  .status .sys{ display:flex; align-items:center; gap:6px; }
 
-  .screen{ flex:1; display:none; flex-direction:column; overflow-y:auto; padding-bottom:82px; }
+  .screen{ flex:1; display:none; flex-direction:column; overflow-y:auto; padding-bottom:82px; scrollbar-width:none; }
+  .screen::-webkit-scrollbar{ display:none; }
   .screen.active{ display:flex; }
   h1,h2,h3{ margin:0; } button{ font-family:inherit; cursor:pointer; border:none; background:none; }
   .muted{ color:var(--gray); }
@@ -48,16 +48,17 @@
   .brand{ display:flex; align-items:center; gap:9px; }
   .brand .name{ font-weight:700; font-size:23px; letter-spacing:-.3px; }
   .brand .reg{ font-size:10px; vertical-align:super; font-weight:600; color:var(--muted); }
-  .topbar .acts{ display:flex; gap:16px; color:var(--ink); }
+  .topbar .acts{ display:flex; gap:18px; color:var(--ink); }
+  .topbar .acts .ic{ width:21px; height:21px; }
 
   /* quick actions */
-  .quick{ display:flex; align-items:flex-start; gap:0; padding:14px 16px 4px; overflow-x:auto; }
-  .qa{ width:74px; flex:0 0 auto; text-align:center; }
-  .qa .tile{ width:60px; height:60px; margin:0 auto; border-radius:var(--rad); display:flex; align-items:center; justify-content:center; }
+  .quick{ display:flex; align-items:flex-start; gap:2px; padding:14px 12px 4px; }
+  .qa{ flex:1 1 0; min-width:0; text-align:center; }
+  .qa .tile{ width:56px; height:56px; margin:0 auto; border-radius:var(--rad); display:flex; align-items:center; justify-content:center; }
   .qa.primary .tile{ background:var(--lime); color:var(--deep); }
   .qa .tile.dark{ background:var(--deep); color:#fff; }
   .qa .lab{ display:block; font-size:11px; line-height:1.15; margin-top:7px; color:var(--ink2); }
-  .qdiv{ width:1px; align-self:stretch; background:var(--line); margin:6px 12px 26px; flex:0 0 auto; }
+  .qdiv{ width:1px; align-self:stretch; background:var(--line); margin:8px 5px 26px; flex:0 0 auto; }
 
   /* objective hero */
   .hero{ margin:14px 16px 4px; border-radius:var(--rad-lg); padding:18px; position:relative; overflow:hidden;
@@ -72,23 +73,63 @@
   .bar > i{ display:block; height:100%; background:var(--deep); border-radius:8px; transition:width .5s ease; }
   .barrow .pct{ font-size:15px; font-weight:700; min-width:42px; text-align:right; }
   .hero .cta{ margin-top:14px; width:100%; background:var(--deep); color:#fff; border-radius:var(--rad-pill); padding:13px; font-size:15px; font-weight:700; position:relative; }
+  .hero .herobtns{ display:flex; gap:8px; margin-top:14px; position:relative; }
+  .hero .herobtns .cta{ margin-top:0; width:auto; flex:1; }
+  .hero .herobtns .cta.det{ flex:0 0 auto; background:transparent; border:1.6px solid var(--deep); color:var(--deep); }
+  /* News */
+  .lnk2{ font-size:13px; font-weight:700; color:var(--deep); }
+  .news{ display:flex; gap:12px; padding:4px 16px 0; overflow-x:auto; scrollbar-width:none; }
+  .news::-webkit-scrollbar{ display:none; }
+  .newscard{ flex:0 0 232px; }
+  .newsimg{ height:128px; border-radius:var(--rad); background:linear-gradient(135deg,var(--deep),#1e565a); position:relative; overflow:hidden; }
+  .newsimg .ico{ position:absolute; right:-8px; bottom:-12px; color:rgba(255,255,255,.13); }
+  .newsbadge{ position:absolute; top:10px; left:10px; background:var(--lime); color:var(--deep); font-size:11px; font-weight:700; padding:4px 11px; border-radius:20px; }
+  .newstitle{ font-size:14px; font-weight:700; margin:9px 2px 2px; line-height:1.25; }
+  .newsmeta{ font-size:12px; color:var(--gray); margin:0 2px; }
 
   /* condensed test fitness */
   .tfline{ margin:14px 16px 2px; display:flex; align-items:center; gap:10px; padding:13px 14px; border:1px solid var(--line2); border-radius:var(--rad); }
   .tfline .lbl{ font-size:14px; font-weight:600; flex:1; }
   .tfline .pc{ color:var(--deep); font-weight:700; }
   .tfline .lnk{ font-size:13px; font-weight:700; color:var(--deep); white-space:nowrap; }
+  /* test fitness compact (accent + mini-radar + stateful) */
+  .tfcard{ margin:14px 16px 2px; border:1px solid var(--line2); border-radius:var(--rad); padding:13px 14px; display:flex; align-items:center; gap:12px; }
+  .tfcard .accent{ width:4px; align-self:stretch; min-height:46px; background:var(--lime); border-radius:3px; }
+  .tfcard .tfbody{ flex:1; }
+  .tfcard .tftitle{ font-size:15px; font-weight:700; }
+  .tfcard .tfscore{ font-size:12px; color:var(--muted); margin-top:2px; }
+  .tfcard .tfscore b{ color:var(--deep); }
+  .tfcard .tfcta{ font-size:13px; font-weight:700; color:var(--deep); margin-top:7px; display:inline-block; }
+  .tfcard .radar{ flex:0 0 auto; }
 
   /* sessions / rituel */
   .secttitle{ display:flex; justify-content:space-between; align-items:baseline; padding:20px 18px 8px; }
   .secttitle b{ font-size:16px; font-weight:700; }
   .secttitle .date{ font-size:13px; color:var(--gray); }
-  .rituel{ margin:0 16px; display:flex; align-items:center; gap:12px; padding:14px; background:var(--lime-soft); border:1px solid #ECEFCF; border-radius:var(--rad); }
-  .rituel .b{ color:var(--deep); }
+  .rituel{ margin:0 16px; display:flex; align-items:center; gap:12px; padding:14px; background:var(--lime-soft); border:1px solid #ECEFCF; border-radius:var(--rad);
+           transition:background .3s ease, border-color .3s ease; position:relative; overflow:visible; }
+  .rituel.done{ background:#EAF0D6; border-color:#D6E29A; }
+  .rituel.pop{ animation:rsettle .4s ease; }
+  @keyframes rsettle{ 0%{transform:scale(1)} 30%{transform:scale(.985)} 100%{transform:scale(1)} }
+  .rituel .b{ color:var(--deep); transition:transform .3s ease; }
+  .rituel.done .b{ transform:rotate(-8deg) scale(1.05); }
   .rituel .t{ flex:1; font-size:14px; font-weight:600; }
   .rituel .t small{ display:block; font-weight:400; color:var(--gray); font-size:12px; }
-  .rituel .chk{ width:24px; height:24px; border-radius:7px; border:2px solid var(--deep); display:flex; align-items:center; justify-content:center; color:transparent; }
-  .rituel.done .chk{ background:var(--deep); color:#fff; }
+  .rituel .streak{ font-size:12px; font-weight:700; color:var(--deep); background:#fff; border:1px solid #E1E7C2;
+                   border-radius:20px; padding:3px 9px; white-space:nowrap; }
+  .rituel .streak.bump{ animation:bump .42s cubic-bezier(.2,1.5,.35,1); }
+  @keyframes bump{ 0%{transform:scale(1)} 40%{transform:scale(1.28)} 100%{transform:scale(1)} }
+  .rituel .chk{ width:24px; height:24px; border-radius:7px; border:2px solid var(--deep); display:flex; align-items:center; justify-content:center;
+                color:transparent; flex:0 0 auto; position:relative; transition:background .2s ease, border-color .2s ease; }
+  .rituel.done .chk{ background:var(--deep); border-color:var(--deep); color:#fff; }
+  .rituel.pop .chk{ animation:chkpop .44s cubic-bezier(.2,1.5,.35,1); }
+  @keyframes chkpop{ 0%{transform:scale(.55)} 48%{transform:scale(1.22)} 100%{transform:scale(1)} }
+  .rituel.pop .chk svg{ animation:chkdraw .3s .06s both; }
+  @keyframes chkdraw{ 0%{transform:scale(0); opacity:0} 60%{transform:scale(1.15)} 100%{transform:scale(1); opacity:1} }
+  .spark{ position:absolute; left:50%; top:50%; width:6px; height:6px; border-radius:50%; pointer-events:none; z-index:5;
+          animation:spark .55s ease-out forwards; }
+  @keyframes spark{ 0%{transform:translate(-50%,-50%) scale(1); opacity:1}
+                    100%{transform:translate(calc(-50% + var(--tx)),calc(-50% + var(--ty))) scale(.25); opacity:0} }
   .emptybox{ margin:10px 16px 0; border:1px dashed #CFCFC9; border-radius:var(--rad); padding:18px; text-align:center; color:var(--gray); font-size:14px; }
 
   /* objective screen */
@@ -114,10 +155,19 @@
   .entry .rs{ font-weight:700; }
   .entry .note{ font-size:13px; color:var(--gray); margin-top:1px; }
   .entry .tag{ display:inline-block; font-size:10px; font-weight:700; color:var(--teal); background:var(--lime-pale); border-radius:20px; padding:2px 8px; margin-left:6px; vertical-align:middle; }
+  .entry.stamp{ align-items:center; gap:8px; }
+  .entry.stamp .stampic{ width:18px; text-align:center; color:var(--gray); font-size:13px; }
+  .entry.stamp .stamptxt{ font-size:12px; color:var(--gray); font-style:italic; }
   .actions{ display:flex; flex-wrap:wrap; gap:8px; padding:14px 16px 4px; }
   .actions button{ background:var(--surface); color:var(--muted); border-radius:20px; padding:9px 14px; font-size:13px; font-weight:600; }
   .repere{ margin:14px 16px 18px; padding:14px; border:1px solid var(--line2); border-radius:var(--rad); }
   .repere b{ font-size:13px; font-weight:700; } .repere p{ margin:4px 0 0; font-size:13px; color:var(--gray); }
+  .navedit{ margin-left:auto; width:38px; height:38px; border-radius:50%; background:var(--surface); display:flex; align-items:center; justify-content:center; color:var(--ink); }
+  .jrow{ display:flex; align-items:baseline; justify-content:space-between; padding:20px 18px 8px; }
+  .jtitle2{ font-size:16px; font-weight:700; }
+  .jlink{ font-size:13px; font-weight:700; color:var(--deep); }
+  .atteint-link{ display:block; margin:6px auto 22px; font-size:14px; font-weight:700; color:var(--muted); text-decoration:underline; }
+  .emptyj{ background:var(--surface); border-radius:var(--rad); padding:22px 16px; text-align:center; color:var(--gray); font-size:14px; }
 
   /* bottom nav */
   .tabbar{ position:absolute; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--line2);
@@ -145,6 +195,9 @@
   .noteinp{ width:100%; font-family:inherit; font-size:14px; padding:11px 12px; border:1.5px solid var(--line); border-radius:12px; }
   .sheet .save{ margin-top:18px; width:100%; border-radius:var(--rad-pill); padding:14px; font-size:15px; font-weight:700;
                 background:linear-gradient(135deg,var(--lime),var(--lime2)); color:var(--deep); }
+  .sheet .save2{ margin-top:8px; width:100%; border-radius:var(--rad-pill); padding:13px; font-size:14px; font-weight:700; background:transparent; color:var(--deep); border:1.5px solid var(--deep); }
+  .edunite{ flex:1; font-family:inherit; font-size:15px; padding:11px 12px; border:1.5px solid var(--line); border-radius:12px; }
+  .edhint{ font-size:12px; color:var(--gray); margin-top:14px; line-height:1.45; }
 
   /* atteinte popup */
   .popup{ position:absolute; left:24px; right:24px; top:50%; transform:translateY(-50%) scale(.92); opacity:0; pointer-events:none;
@@ -193,8 +246,8 @@
   <g id="i-timer"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 13.5l3.2-2.2"/><path d="M9.5 2.5h5"/><path d="M12 2.5v3.5"/></g>
   <g id="i-dumbbell"><path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"/></g>
   <g id="i-records"><path d="M5 8.5h8M5 12h11M5 15.5h6"/></g>
-  <g id="i-bell"><path d="M6 9a6 6 0 1 1 12 0c0 4.6 1.8 6 1.8 6H4.2S6 13.6 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></g>
-  <g id="i-chat"><path d="M4.5 5.5h15v10H10l-4 3v-3H4.5Z"/></g>
+  <g id="i-bell"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M22 8c0-2.3-.8-4.3-2-6"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/><path d="M4 2C2.8 3.7 2 5.7 2 8"/></g>
+  <g id="i-chat"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></g>
   <g id="i-penta"><path d="M12 3.5l8.2 6-3.1 9.3H6.9L3.8 9.5Z"/></g>
   <g id="i-bolt"><path d="M13 2.5 4.5 14H10l-1 7.5L19 9.5h-5.5l1-7Z"/></g>
   <g id="i-search"><circle cx="11" cy="11" r="6.2"/><path d="M20 20l-4.2-4.2"/></g>
@@ -202,18 +255,37 @@
   <g id="i-person"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c0-3.5 3-5.8 6.5-5.8s6.5 2.3 6.5 5.8"/></g>
   <g id="i-back"><path d="M15 5l-7 7 7 7"/></g>
   <g id="i-check"><path d="M5 12.5l4 4 10-10"/></g>
+  <g id="i-edit"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></g>
 </defs></svg>
 
 <div class="phone">
 
-  <div class="status"><span>9:41</span><span class="sig">▮▮▮ <span class="bars"></span></span></div>
+  <div class="status">
+    <span class="time">9:41</span>
+    <span class="sys">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="#1c1c1c"><rect x="0" y="8.5" width="3" height="3.5" rx=".8"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8"/><rect x="10" y="2.8" width="3" height="9.2" rx=".8"/><rect x="15" y="0" width="3" height="12" rx=".8"/></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="#1c1c1c"><path d="M8.5 2.3c2.5 0 4.8 1 6.6 2.6l-1.5 1.6A7.3 7.3 0 0 0 8.5 4.5 7.3 7.3 0 0 0 3.4 6.5L1.9 4.9A9.4 9.4 0 0 1 8.5 2.3Z"/><path d="M8.5 6.1c1.4 0 2.7.6 3.7 1.5l-3.7 3.8-3.7-3.8A5.2 5.2 0 0 1 8.5 6.1Z"/></svg>
+      <svg width="25" height="13" viewBox="0 0 25 13"><rect x=".5" y=".5" width="21" height="12" rx="3.2" fill="none" stroke="#1c1c1c" stroke-opacity=".35"/><rect x="2" y="2" width="15" height="9" rx="1.6" fill="#1c1c1c"/><rect x="23" y="4.3" width="1.6" height="4.4" rx=".8" fill="#1c1c1c" fill-opacity=".35"/></svg>
+    </span>
+  </div>
 
   <!-- ====================== HOME ====================== -->
   <section class="screen active" id="screen-home">
     <div class="topbar">
       <div class="brand">
-        <svg width="34" height="22" viewBox="0 0 40 24" fill="var(--deep)"><path d="M8 4h9l-7 16H1z"/><path d="M21 4h9l-7 16h-9z"/></svg>
-        <span class="name">Hustle Up<span class="reg">®</span></span>
+        <svg class="logo" height="22" viewBox="0 0 198 50" fill="#171717" aria-label="Hustle Up">
+          <path d="M8.28354 22.6999L12.4672 14.6585C13.4274 12.813 15.3348 11.6553 17.4151 11.6553H27.3834C27.9066 11.6553 28.2434 12.2101 28.0019 12.6742L22.7859 22.6999H8.28354Z"/>
+          <path d="M0.532108 38.704L5.74603 28.6824H20.2484L16.0646 36.7238C15.1045 38.5693 13.1971 39.727 11.1168 39.727H1.15309C0.627792 39.727 0.289661 39.17 0.532108 38.704Z"/>
+          <path d="M61.203 39.5004H56.5085V27.7448H43.589V39.5004H38.9333V11.9931H43.589V23.3607H56.5085V11.9931H61.203V39.5004Z"/>
+          <path d="M77.3869 37.4053C76.9472 38.233 76.223 38.8796 75.2143 39.3452C74.2314 39.8108 73.171 40.0435 72.0329 40.0435C69.8344 40.0435 68.0885 39.3323 66.7953 37.9097C65.5279 36.4871 64.8942 34.6895 64.8942 32.5169V20.6061H69.3947V31.7021C69.3947 32.9695 69.7051 34.0041 70.3258 34.8059C70.9466 35.6077 71.9036 36.0086 73.1968 36.0086C74.4642 36.0086 75.4341 35.6206 76.1066 34.8447C76.805 34.0688 77.1541 33.0471 77.1541 31.7797V20.6061H81.6546V36.0474C81.6546 37.1855 81.7193 38.3365 81.8486 39.5004H77.5421C77.4387 38.9314 77.3869 38.233 77.3869 37.4053Z"/>
+          <path d="M83.4839 34.3791L87.4024 33.2928C87.48 34.1981 87.855 34.9611 88.5275 35.5819C89.2 36.2026 90.1053 36.513 91.2433 36.513C92.1227 36.513 92.8081 36.3061 93.2996 35.8922C93.8169 35.4784 94.0755 34.9611 94.0755 34.3403C94.0755 33.254 93.3384 32.5557 91.8641 32.2453L89.0707 31.6245C87.4412 31.2624 86.1867 30.5899 85.3073 29.6071C84.4279 28.6242 83.9882 27.4603 83.9882 26.1153C83.9882 24.46 84.6607 23.0374 86.0057 21.8476C87.3507 20.632 88.9931 20.0241 90.9329 20.0241C92.1745 20.0241 93.2737 20.2052 94.2307 20.5673C95.1877 20.9294 95.9249 21.4079 96.4422 22.0028C96.9853 22.5718 97.3992 23.1279 97.6837 23.6711C97.9682 24.2142 98.1492 24.7574 98.2268 25.3006L94.4247 26.3869C94.3212 25.6627 93.985 25.0161 93.416 24.447C92.8728 23.8521 92.0451 23.5547 90.9329 23.5547C90.157 23.5547 89.5104 23.7745 88.9931 24.2142C88.4758 24.6281 88.2171 25.1324 88.2171 25.7273C88.2171 26.7878 88.8508 27.4473 90.1182 27.706L92.9892 28.288C94.748 28.6759 96.093 29.3743 97.0241 30.383C97.9553 31.3917 98.4208 32.6074 98.4208 34.03C98.4208 35.6077 97.7871 37.0174 96.5198 38.2589C95.2782 39.4745 93.5324 40.0823 91.2821 40.0823C89.9889 40.0823 88.825 39.8884 87.7904 39.5004C86.7816 39.1124 85.9798 38.621 85.3849 38.0261C84.8159 37.4053 84.3633 36.7975 84.027 36.2026C83.7166 35.5819 83.5356 34.974 83.4839 34.3791Z"/>
+          <path d="M106.259 14.8253V20.6061H110.178V24.6022H106.259V33.3704C106.259 34.1981 106.453 34.8059 106.841 35.1939C107.229 35.556 107.837 35.737 108.665 35.737C109.182 35.737 109.699 35.6853 110.216 35.5819V39.3064C109.544 39.5909 108.626 39.7332 107.462 39.7332C105.703 39.7332 104.319 39.2417 103.311 38.2589C102.302 37.2501 101.797 35.8664 101.797 34.1076V24.6022H98.3056V20.6061H99.2756C100.233 20.6061 100.957 20.3345 101.448 19.7914C101.94 19.2482 102.185 18.5369 102.185 17.6575V14.8253H106.259Z"/>
+          <path d="M116.444 39.5004H111.944V11.4111H116.444V39.5004Z"/>
+          <path d="M123.064 27.9776H132.336C132.285 26.7878 131.858 25.792 131.056 24.9902C130.28 24.1884 129.155 23.7875 127.681 23.7875C126.336 23.7875 125.249 24.2142 124.422 25.0678C123.594 25.8955 123.141 26.8654 123.064 27.9776ZM132.841 32.9048L136.643 34.1076C136.1 35.8405 135.078 37.276 133.578 38.4141C132.104 39.5262 130.28 40.0823 128.107 40.0823C125.417 40.0823 123.128 39.1641 121.24 37.3277C119.378 35.4913 118.447 33.0342 118.447 29.9562C118.447 27.0594 119.352 24.6798 121.163 22.8175C122.999 20.9553 125.159 20.0241 127.642 20.0241C130.539 20.0241 132.802 20.9165 134.431 22.7011C136.061 24.46 136.876 26.8395 136.876 29.8399C136.876 30.6417 136.837 31.1202 136.759 31.2754H122.947C122.999 32.6979 123.516 33.8748 124.499 34.8059C125.508 35.737 126.711 36.2026 128.107 36.2026C130.539 36.2026 132.116 35.1034 132.841 32.9048Z"/>
+          <path d="M162.284 37.4053C160.37 39.19 157.913 40.0823 154.912 40.0823C151.912 40.0823 149.455 39.19 147.541 37.4053C145.627 35.6206 144.67 33.1247 144.67 29.9174V11.9931H149.287V29.6459C149.287 31.5599 149.778 33.0471 150.761 34.1076C151.77 35.1421 153.154 35.6594 154.912 35.6594C156.697 35.6594 158.081 35.1421 159.064 34.1076C160.047 33.073 160.538 31.5857 160.538 29.6459V11.9931H165.194V29.9174C165.194 33.1247 164.224 35.6206 162.284 37.4053Z"/>
+          <path d="M173.02 46.8719H168.559V20.6061H172.904V23.1667C173.395 22.3132 174.171 21.6019 175.232 21.0329C176.292 20.4638 177.521 20.1793 178.918 20.1793C181.633 20.1793 183.767 21.1105 185.319 22.9727C186.871 24.8091 187.647 27.1628 187.647 30.0338C187.647 32.9048 186.832 35.2844 185.203 37.1725C183.573 39.0348 181.427 39.9659 178.762 39.9659C177.469 39.9659 176.318 39.7202 175.309 39.2288C174.301 38.7374 173.538 38.1166 173.02 37.3665V46.8719ZM183.147 30.0338C183.147 28.275 182.681 26.8654 181.75 25.8049C180.819 24.7186 179.59 24.1754 178.064 24.1754C176.564 24.1754 175.335 24.7186 174.378 25.8049C173.447 26.8654 172.982 28.275 172.982 30.0338C172.982 31.8185 173.447 33.254 174.378 34.3403C175.335 35.4267 176.564 35.9698 178.064 35.9698C179.564 35.9698 180.78 35.4267 181.711 34.3403C182.668 33.254 183.147 31.8185 183.147 30.0338Z"/>
+          <path d="M191.662 19.2861V16.1305H193.167C193.415 16.1305 193.627 16.1747 193.804 16.2631C193.981 16.3515 194.115 16.4755 194.206 16.6351C194.3 16.7947 194.347 16.9828 194.347 17.1995C194.347 17.419 194.299 17.6057 194.202 17.7596C194.105 17.9135 193.967 18.0318 193.787 18.1145C193.608 18.1943 193.392 18.2342 193.141 18.2342H192.15V17.5843H192.996C193.133 17.5843 193.237 17.5515 193.308 17.486C193.379 17.4204 193.415 17.3249 193.415 17.1995C193.415 17.0655 193.379 16.9657 193.308 16.9002C193.237 16.8318 193.133 16.7976 192.996 16.7976H192.569V19.2861H191.662ZM193.749 17.8494L194.424 19.2861H193.432L192.825 17.8494H193.749Z"/>
+        </svg>
       </div>
       <div class="acts">
         <svg class="ic" viewBox="0 0 24 24"><use href="#i-bell"/></svg>
@@ -231,26 +303,53 @@
 
     <div id="home-objective"></div>
 
-    <div class="tfline">
-      <svg class="ic sm" viewBox="0 0 24 24" style="color:var(--deep)"><use href="#i-penta"/></svg>
-      <div class="lbl">Test fitness · <span class="pc">72%</span></div>
-      <div class="lnk">Re-teste-toi →</div>
+    <div class="tfcard">
+      <div class="accent"></div>
+      <div class="tfbody">
+        <div class="tftitle">Test fitness</div>
+        <div class="tfscore">Forme générale · <b>72%</b></div>
+        <button class="tfcta">Re-teste-toi →</button>
+      </div>
+      <svg class="radar" viewBox="0 0 64 64" width="54" height="54" aria-hidden="true">
+        <g stroke="#E6E6E6" stroke-width=".8">
+          <line x1="32" y1="32" x2="32" y2="6"/><line x1="32" y1="32" x2="56.7" y2="24"/>
+          <line x1="32" y1="32" x2="47.3" y2="53"/><line x1="32" y1="32" x2="16.7" y2="53"/>
+          <line x1="32" y1="32" x2="7.3" y2="24"/>
+        </g>
+        <polygon points="32,6 56.7,24 47.3,53 16.7,53 7.3,24" fill="none" stroke="#D1D1D1" stroke-width="1"/>
+        <polygon points="32,11.7 47.3,27 42.4,46.3 18.9,50.1 17.2,27.2" fill="rgba(221,242,71,.55)" stroke="var(--deep)" stroke-width="1.6" stroke-linejoin="round"/>
+      </svg>
     </div>
 
     <div class="secttitle"><b>Mes séances du jour</b><span class="date">lun. 29 juin</span></div>
-    <div class="rituel" id="rituel" onclick="this.classList.toggle('done')">
+    <div class="rituel" id="rituel" onclick="toggleRituel(this)">
       <svg class="ic b" viewBox="0 0 24 24"><use href="#i-bolt"/></svg>
       <div class="t">Rituel : 10 pompes<small>après le réveil</small></div>
+      <div class="streak" id="rituel-streak" data-base="4">🔥 4 j</div>
       <div class="chk"><svg class="ic sm" viewBox="0 0 24 24" style="width:16px;height:16px"><use href="#i-check"/></svg></div>
     </div>
     <div class="emptybox">Rien d'autre de prévu aujourd'hui</div>
+
+    <div class="secttitle"><b>News</b><span class="lnk2">Voir tout</span></div>
+    <div class="news">
+      <div class="newscard">
+        <div class="newsimg"><span class="newsbadge">Tuto</span><svg class="ic ico" viewBox="0 0 24 24" style="width:96px;height:96px"><use href="#i-dumbbell"/></svg></div>
+        <div class="newstitle">Bien régler sa barre au deadlift</div>
+        <div class="newsmeta">3 min de lecture</div>
+      </div>
+      <div class="newscard">
+        <div class="newsimg" style="background:linear-gradient(135deg,#2b2b2b,#1c1c1c)"><span class="newsbadge">Event</span><svg class="ic ico" viewBox="0 0 24 24" style="width:96px;height:96px"><use href="#i-bolt"/></svg></div>
+        <div class="newstitle">Hustle Games, inscriptions ouvertes</div>
+        <div class="newsmeta">Communauté</div>
+      </div>
+    </div>
 
     <div class="tabbar" id="tabbar-tpl"></div>
   </section>
 
   <!-- ====================== MON OBJECTIF ====================== -->
   <section class="screen" id="screen-objectif">
-    <div class="nav"><button class="back" onclick="showScreen('home')"><svg class="ic" viewBox="0 0 24 24"><use href="#i-back"/></svg></button><span class="t">Mon objectif</span></div>
+    <div class="nav"><button class="back" onclick="showScreen('home')"><svg class="ic" viewBox="0 0 24 24"><use href="#i-back"/></svg></button><span class="t">Mon objectif</span><button class="navedit" onclick="openEdit()" aria-label="Modifier l'objectif"><svg class="ic" viewBox="0 0 24 24"><use href="#i-edit"/></svg></button></div>
     <div id="obj-content"></div>
     <div class="tabbar"></div>
   </section>
@@ -274,7 +373,7 @@
   </section>
 
   <!-- ====================== OVERLAYS ====================== -->
-  <div class="overlay" id="overlay" onclick="closeCheckin()"></div>
+  <div class="overlay" id="overlay" onclick="closeCheckin();closeEdit()"></div>
 
   <div class="sheet" id="sheet">
     <div class="grip"></div>
@@ -297,6 +396,22 @@
     <div class="q">Une note ? (optionnel)</div>
     <input class="noteinp" id="ci-note" placeholder="ex : ça vient, jambes lourdes" />
     <button class="save" onclick="submitCheckin()">Ajouter à mon journal</button>
+  </div>
+
+  <div class="sheet" id="sheet-edit">
+    <div class="grip"></div>
+    <h3>Modifier l'objectif</h3>
+    <div class="q">Ton objectif</div>
+    <input class="noteinp" id="ed-phrase" placeholder="Ex : Faire 30 tractions" />
+    <div id="ed-chiffre">
+      <div class="q">Cible</div>
+      <div class="valrow"><input id="ed-cible" type="number" inputmode="numeric" /><input id="ed-unite" class="edunite" placeholder="unité" /></div>
+    </div>
+    <div class="q">Échéance</div>
+    <input class="noteinp" id="ed-date" type="date" />
+    <div class="edhint">Petite retouche (formulation, cible, date) : ton journal est conservé. Si c'est un objectif différent, repars à neuf.</div>
+    <button class="save" onclick="saveEdit()">Enregistrer</button>
+    <button class="save2" onclick="newObjectiveFromEdit()">C'est un nouvel objectif</button>
   </div>
 
   <div class="popup" id="popup">
@@ -384,20 +499,25 @@ function renderHome(){
       <button class="cta" onclick="toast('Lancerait l\\'étape « objectif » de l\\'onboarding')">Définir mon objectif</button></div>`;
     return;
   }
-  const last=state.releves[state.releves.length-1], rs=RESSENTI[last.ressenti];
+  const real=state.releves.filter(r=>!r.stamp), last=real[real.length-1];
+  const rsLabel=last?RESSENTI[last.ressenti].label:'à démarrer';
   let mid='';
   if(o.kind==='chiffre'){
+    const cur=lastValue();
     mid=`<div class="barrow"><div class="bar"><i style="width:${valuePct()}%"></i></div><div class="pct">${valuePct()}%</div></div>
-         <div class="sub">${lastValue()} / ${o.cible} ${o.unite} · reste ${daysLeft()} j · <b>${rs.label}</b></div>`;
+         <div class="sub">${cur!=null?cur:'—'} / ${o.cible} ${o.unite} · reste ${daysLeft()} j · <b>${rsLabel}</b></div>`;
   } else if(o.kind==='evenement'){
-    mid=`<div class="countdown">J-${daysLeft()}</div><div class="sub">jusqu'au jour J · <b>${rs.label}</b></div>`;
+    mid=`<div class="countdown">J-${daysLeft()}</div><div class="sub">jusqu'au jour J · <b>${rsLabel}</b></div>`;
   } else {
     mid=`<div class="barrow"><div class="bar"><i style="width:${timePct()}%"></i></div><div class="pct">${timePct()}%</div></div>
-         <div class="sub">reste ${daysLeft()} j · <b>${rs.label}</b></div>`;
+         <div class="sub">reste ${daysLeft()} j · <b>${rsLabel}</b></div>`;
   }
-  box.innerHTML=`<div class="hero" onclick="showScreen('objectif')"><div class="glow"></div>
+  box.innerHTML=`<div class="hero"><div class="glow"></div>
       <div class="kick">Mon objectif</div><h2>${o.phrase}</h2>${mid}
-      <button class="cta" onclick="event.stopPropagation(); openCheckin()">Faire mon point</button></div>`;
+      <div class="herobtns">
+        <button class="cta" onclick="openCheckin()">Faire mon point</button>
+        <button class="cta det" onclick="showScreen('objectif')">Détail</button>
+      </div></div>`;
 }
 
 function renderObjectif(){
@@ -406,7 +526,7 @@ function renderObjectif(){
   let head='';
   if(o.kind==='chiffre'){
     head=`<h2>${o.phrase}</h2><div class="bar"><i style="width:${valuePct()}%"></i></div>
-      <div class="meta">${lastValue()} / ${o.cible} ${o.unite} · ${valuePct()}% · reste ${daysLeft()} j (échéance ${fmtDate(o.echeance)})</div>`;
+      <div class="meta">${lastValue()!=null?lastValue():'—'} / ${o.cible} ${o.unite} · ${valuePct()}% · reste ${daysLeft()} j (échéance ${fmtDate(o.echeance)})</div>`;
   } else if(o.kind==='evenement'){
     head=`<h2>${o.phrase}</h2><div class="countdown">J-${daysLeft()}</div><div class="meta">jour J le ${fmtDate(o.echeance)}</div>`;
   } else {
@@ -415,6 +535,7 @@ function renderObjectif(){
   }
   let rows='';
   [...state.releves].reverse().forEach(r=>{
+    if(r.stamp){ rows+=`<div class="entry stamp"><div class="stampic">✎</div><div class="stamptxt">${r.note}</div></div>`; return; }
     const rs=RESSENTI[r.ressenti];
     const val=r.valeur!=null?`<b>${r.valeur} ${o.unite||''}</b> · `:'';
     const tag=r.depart?`<span class="tag">Départ</span>`:'';
@@ -423,17 +544,11 @@ function renderObjectif(){
         <div class="l1"><span class="when">${fmtDate(r.date)}</span> · ${val}<span class="rs" style="color:${rs.color}">${rs.label}</span>${tag}</div>${note}
       </div></div>`;
   });
-  const repere=AXE[o.type]?`<div class="repere"><b>Repère de forme générale</b>
-      <p>Refais ton test fitness (axe ${AXE[o.type]}) pour situer ta forme. C'est un repère, pas la mesure exacte de cet objectif.</p></div>`:'';
-  const cibleBtn=o.kind==='evenement'
-    ? `<button class="btn-primary btn-ghost" onclick="openAtteinte()">C'est fait ✓</button>`
-    : `<button class="btn-primary btn-ghost" onclick="openAtteinte()">Marquer comme atteint</button>`;
   box.innerHTML=`<div class="objhead">${head}</div>
     <button class="btn-primary" onclick="openCheckin()">Faire mon point</button>
-    <div class="jtitle">Mon journal</div><div class="timeline">${rows}</div>
-    <div class="actions"><button onclick="showScreen('parcours')">Voir mon parcours</button>
-      <button onclick="toast('Ouvrirait l\\'édition de l\\'objectif')">Modifier l'objectif</button></div>
-    ${cibleBtn}${repere}`;
+    <div class="jrow"><div class="jtitle2">Mon journal</div><button class="jlink" onclick="showScreen('parcours')">Mon parcours →</button></div>
+    <div class="timeline">${rows||`<div class="emptyj">${o.kind==='chiffre'?'Ajoute ton premier point : tu pars de combien ?':'Ajoute ta première entrée pour démarrer ton suivi.'}</div>`}</div>
+    <button class="atteint-link" onclick="openAtteinte()">${o.kind==='evenement'?"C'est fait, j'y suis allé ✓":"J'ai atteint cet objectif ✓"}</button>`;
 }
 
 const PARCOURS_PAST=[
@@ -441,14 +556,16 @@ const PARCOURS_PAST=[
   { phrase:"Faire 50 pompes d'affilée", meta:"atteint · 90 jours", issue:"atteint" },
 ];
 function pcRow(phrase,meta,issue){
-  const done=issue==='atteint', ic=done?'#i-check':'#i-timer';
-  const badge=done?`<span class="pc-badge done">atteint</span>`:`<span class="pc-badge">en cours</span>`;
-  return `<div class="pc-row ${done?'':'cur'}"><div class="pc-ic" style="color:${done?'var(--r-presque)':'var(--deep)'}"><svg class="ic sm" viewBox="0 0 24 24"><use href="${ic}"/></svg></div>`
+  const done=issue==='atteint', repl=issue==='remplace';
+  const ic=done?'#i-check':(repl?'#i-edit':'#i-timer');
+  const badge=done?`<span class="pc-badge done">atteint</span>`:(repl?`<span class="pc-badge">remplacé</span>`:`<span class="pc-badge">en cours</span>`);
+  return `<div class="pc-row ${done||repl?'':'cur'}"><div class="pc-ic" style="color:${done?'var(--r-presque)':'var(--deep)'}"><svg class="ic sm" viewBox="0 0 24 24"><use href="${ic}"/></svg></div>`
     +`<div><div class="pc-title">${phrase}</div><div class="pc-meta">${meta}</div></div>${badge}</div>`;
 }
 function renderParcours(){
   const o=state.objectif; let rows='';
   if(o) rows+=pcRow(o.phrase,"en cours","en_cours");
+  (state.history||[]).forEach(p=>rows+=pcRow(p.phrase,p.meta,p.issue));
   PARCOURS_PAST.forEach(p=>rows+=pcRow(p.phrase,p.meta,p.issue));
   document.getElementById('parcours-list').innerHTML=rows;
 }
@@ -466,7 +583,8 @@ function openCheckin(){
   document.getElementById('ci-val').value=''; document.getElementById('ci-note').value='';
   const vb=document.getElementById('sheet-valblock');
   if(o.kind==='chiffre'){ vb.style.display='block'; document.getElementById('ci-unit').textContent=o.unite;
-    const lv=lastValue(); document.getElementById('ci-last').textContent=lv!=null?('dernier : '+lv):'premier point'; }
+    const lv=lastValue(); document.getElementById('ci-val').value=lv!=null?lv:'';
+    document.getElementById('ci-last').textContent=lv!=null?('dernier : '+lv):'premier point'; }
   else vb.style.display='none';
   document.getElementById('sheet-title').textContent='Où en es-tu sur : '+o.phrase;
   document.getElementById('overlay').classList.add('show'); document.getElementById('sheet').classList.add('show');
@@ -485,6 +603,38 @@ function submitCheckin(){
   if(reached) setTimeout(openAtteinte,350); else toast('Point ajouté à ton journal ✓');
 }
 
+function openEdit(){
+  const o=state.objectif; if(!o) return;
+  document.getElementById('ed-phrase').value=o.phrase;
+  document.getElementById('ed-date').value=o.echeance;
+  const ch=document.getElementById('ed-chiffre');
+  if(o.kind==='chiffre'){ ch.style.display='block'; document.getElementById('ed-cible').value=o.cible; document.getElementById('ed-unite').value=o.unite; }
+  else ch.style.display='none';
+  document.getElementById('overlay').classList.add('show'); document.getElementById('sheet-edit').classList.add('show');
+}
+function closeEdit(){ document.getElementById('overlay').classList.remove('show'); document.getElementById('sheet-edit').classList.remove('show'); }
+function applyEditFields(){
+  const o=state.objectif;
+  o.phrase=document.getElementById('ed-phrase').value.trim()||o.phrase;
+  o.echeance=document.getElementById('ed-date').value||o.echeance;
+  if(o.kind==='chiffre'){ o.cible=Number(document.getElementById('ed-cible').value)||o.cible; o.unite=document.getElementById('ed-unite').value.trim()||o.unite; }
+}
+function saveEdit(){
+  const o=state.objectif, oldCible=o.cible;
+  applyEditFields();
+  if(o.kind==='chiffre' && oldCible!==o.cible){
+    state.releves.push({ date:"2026-06-29", valeur:null, ressenti:null, note:`Cible ajustée : ${oldCible} → ${o.cible} ${o.unite}`, stamp:true });
+  }
+  closeEdit(); render(); toast('Objectif mis à jour ✓ (journal conservé)');
+}
+function newObjectiveFromEdit(){
+  const o=state.objectif, oldPhrase=o.phrase;
+  (state.history=state.history||[]).unshift({ phrase:oldPhrase, meta:'remplacé le 29/06', issue:'remplace' });
+  applyEditFields();
+  o.depart=null; o.statut='actif'; o.cree="2026-06-29"; state.releves=[];
+  closeEdit(); render(); showScreen('home');
+  toast('Nouvel objectif défini · l\'ancien est dans ton parcours');
+}
 function openAtteinte(){ document.getElementById('overlay').classList.add('show'); document.getElementById('popup').classList.add('show'); }
 function closeAtteinte(){ document.getElementById('overlay').classList.remove('show'); document.getElementById('popup').classList.remove('show'); }
 function atteinteNon(){ closeAtteinte();
@@ -492,11 +642,41 @@ function atteinteNon(){ closeAtteinte();
   if(last&&last.ressenti==='jy_suis'){ last.ressenti='presque'; render(); }
   toast('Pas encore tout à fait ? On garde « presque là », tu y es presque.'); }
 function atteinteOui(){ closeAtteinte();
-  const o=state.objectif, n=state.releves.length, days=daysBetween(new Date(o.cree),TODAY);
+  const o=state.objectif, n=state.releves.filter(r=>!r.stamp).length, days=daysBetween(new Date(o.cree),TODAY);
   document.getElementById('cel-sub').textContent=`« ${o.phrase} »`;
   const line=o.kind==='chiffre'?`Parti de <b>${o.depart}</b>, arrivé à <b>${o.cible} ${o.unite}</b>`:`Objectif tenu jusqu'au bout`;
   document.getElementById('cel-recap').innerHTML=`<div>${line}</div><div class="cel-sub2">${n} relevés · ${days} jours de parcours</div>`;
   showScreen('celebration'); }
+
+function fireSparks(host){
+  const cols=['var(--lime-hi)','var(--deep)','var(--lime)','#9CC23A'];
+  for(let i=0;i<9;i++){
+    const s=document.createElement('span'); s.className='spark';
+    const ang=(Math.PI*2/9)*i + (Math.random()*.5-.25), dist=18+Math.random()*12;
+    s.style.setProperty('--tx',(Math.cos(ang)*dist).toFixed(1)+'px');
+    s.style.setProperty('--ty',(Math.sin(ang)*dist).toFixed(1)+'px');
+    s.style.background=cols[i%cols.length];
+    s.style.width=s.style.height=(4+Math.random()*4).toFixed(1)+'px';
+    host.appendChild(s); setTimeout(()=>s.remove(),600);
+  }
+}
+function bumpStreak(el){
+  const st=el.querySelector('.streak'); if(!st) return;
+  const base=parseInt(st.dataset.base)||4;
+  st.textContent='🔥 '+(base+1)+' j';
+  st.classList.remove('bump'); void st.offsetWidth; st.classList.add('bump');
+}
+function toggleRituel(el){
+  const wasDone=el.classList.contains('done');
+  el.classList.toggle('done');
+  if(!wasDone){
+    el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+    fireSparks(el.querySelector('.chk')); bumpStreak(el);
+    if(navigator.vibrate) navigator.vibrate(12);
+  } else {
+    const st=el.querySelector('.streak'); if(st){ st.classList.remove('bump'); st.textContent='🔥 '+(parseInt(st.dataset.base)||4)+' j'; }
+  }
+}
 
 let toastT;
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
@@ -510,6 +690,7 @@ function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg
   const scr=q.get('screen'); if(scr) showScreen(scr);
   if(q.get('sheet')==='1') openCheckin();
   if(q.get('celebrate')==='1') atteinteOui();
+  if(q.get('edit')==='1') openEdit();
 })();
 </script>
 </body>
