@@ -1633,7 +1633,19 @@ class Component extends DCLogic {
       coachHasPhoto: !!coach.photo, coachNoPhoto: !coach.photo,
       onCoach: () => this.showToast('On prépare tes coachs recommandés…'),
       onFittest: () => this.showToast('Le fittest arrive juste après'),
-      onAppCta: () => this.showToast('Bienvenue ! On ouvre ton app…'),
+      onAppCta: () => {
+        // Fin de l'onboarding → on entre dans l'app (mockup de suivi d'objectif).
+        // Le type d'objectif choisi détermine le scénario ouvert ; `from=onboarding` déclenche le slide-in par la droite.
+        const map = { strength:'chiffre', weight_loss:'chiffre', endurance:'chiffre', event:'evenement', move_more:'qualitatif' };
+        const sc = map[a.goal] || 'chiffre';
+        const url = 'Suivi%20Objectif.dc.html?scenario=' + sc + '&from=onboarding';
+        // Cache lime continu : évite le flash blanc pendant le chargement de la page suivante.
+        const cover = document.createElement('div');
+        cover.style.cssText = 'position:fixed;inset:0;background:linear-gradient(135deg,#DDF247,#E4F56C);z-index:99999;opacity:0;transition:opacity .16s ease;pointer-events:none;';
+        document.body.appendChild(cover);
+        requestAnimationFrame(() => { cover.style.opacity = '1'; });
+        setTimeout(() => { window.location.href = url; }, 170);
+      },
       onRestart: this.restart,
       celebrate: s.celebrate,
       toast: s.toast

@@ -20,13 +20,23 @@
     --bg:#FFFFFF; --surface:#F2F2F2; --line:#D1D1D1; --line2:#F2F2F2;
     /* ressenti */
     --r-loin:#D98A5B; --r-voie:#7E9A2E; --r-presque:#4F6B1E; --r-jysuis:#133C40;
-    --rad:16px; --rad-lg:24px; --rad-pill:32px;
+    /* feedback positif / succès — tokens DS lightGreen (Button positiveSecondary / Badge positiveSubtle) */
+    /* fond lightGreen-50 + texte lightGreen-650 */
+    --pos-bg:oklch(94.8% .0181 188.38); --pos-fg:oklch(51.53% .0718 185.1);
+    /* radius : échelle DS (xs=lg 8, sm=xl 12, rad=2xl 16, rad-lg=3xl 24, rad-pill=4xl/pilule) */
+    --rad-xs:8px; --rad-sm:12px; --rad:16px; --rad-lg:24px; --rad-pill:32px;
   }
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body{ margin:0; padding:0; background:#E9E9E6; overflow-x:hidden;
              font-family:"Trenda",system-ui,sans-serif; color:var(--ink); }
   .phone{ width:375px; max-width:100%; margin:0 auto; background:var(--bg);
           height:100vh; position:relative; overflow:hidden; display:flex; flex-direction:column; }
+  /* entrée depuis l'onboarding : l'écran arrive par la droite */
+  .phone.enter-right{ animation:phoneInRight .4s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes phoneInRight{ from{ transform:translateX(100%); } to{ transform:translateX(0); } }
+  /* cache lime de transition (continuité avec l'onboarding, masque le flash de chargement) */
+  #page-cover{ position:fixed; inset:0; background:linear-gradient(135deg,var(--lime),var(--lime2)); z-index:99999; pointer-events:none; opacity:0; transition:opacity .32s ease; }
+  html.from-onboarding #page-cover{ opacity:1; }
 
   svg{ display:block; }
   .ic{ width:24px; height:24px; stroke:currentColor; stroke-width:1.9; fill:none;
@@ -64,6 +74,9 @@
   .hero{ margin:14px 16px 4px; border-radius:var(--rad-lg); padding:18px; position:relative; overflow:hidden;
          background:linear-gradient(135deg,var(--lime) 0%, var(--lime2) 100%); color:var(--deep); }
   .hero .glow{ position:absolute; right:-34px; top:-34px; width:150px; height:150px; border-radius:50%; background:rgba(255,255,255,.22); }
+  .hero-top{ display:flex; align-items:center; gap:12px; position:relative; }
+  .hero-main{ flex:1; min-width:0; }
+  .hero-top .donut{ flex:0 0 auto; }
   .hero .kick{ font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; opacity:.75; position:relative; }
   .hero h2{ font-size:22px; font-weight:700; margin:5px 0 2px; letter-spacing:-.3px; position:relative; }
   .hero .countdown{ font-family:"Sora","Trenda",sans-serif; font-size:44px; font-weight:800; letter-spacing:-.02em; line-height:1; margin:6px 0 2px; position:relative; }
@@ -72,10 +85,14 @@
   .bar{ flex:1; height:12px; border-radius:8px; background:rgba(255,255,255,.55); overflow:hidden; }
   .bar > i{ display:block; height:100%; background:var(--deep); border-radius:8px; transition:width .5s ease; }
   .barrow .pct{ font-size:15px; font-weight:700; min-width:42px; text-align:right; }
-  .hero .cta{ margin-top:14px; width:100%; background:var(--deep); color:#fff; border-radius:var(--rad-pill); padding:13px; font-size:15px; font-weight:700; position:relative; }
+  /* CTA sur hero saturé (fond lime) : primaire = fond blanc plein (DS secondarySecondary) pour contraster */
+  .hero .cta{ margin-top:14px; width:100%; background:#fff; color:var(--deep); border-radius:var(--rad-pill); padding:13px; font-size:15px; font-weight:700; position:relative; }
   .hero .herobtns{ display:flex; gap:8px; margin-top:14px; position:relative; }
   .hero .herobtns .cta{ margin-top:0; width:auto; flex:1; }
+  /* détail = secondaire sur fond coloré → outline (DS) */
   .hero .herobtns .cta.det{ flex:0 0 auto; background:transparent; border:1.6px solid var(--deep); color:var(--deep); }
+  /* heros à fond pâle (relance, pause, vide) : le blanc ne contrasterait pas → primaire foncé plein */
+  .hero.neglige .cta:not(.det), .hero.empty .cta{ background:var(--deep); color:#fff; }
   /* News */
   .lnk2{ font-size:13px; font-weight:700; color:var(--deep); }
   .news{ display:flex; gap:12px; padding:4px 16px 0; overflow-x:auto; scrollbar-width:none; }
@@ -93,7 +110,8 @@
   .tfline .pc{ color:var(--deep); font-weight:700; }
   .tfline .lnk{ font-size:13px; font-weight:700; color:var(--deep); white-space:nowrap; }
   /* test fitness compact (accent + mini-radar + stateful) */
-  .tfcard{ margin:14px 16px 2px; border:1px solid var(--line2); border-radius:var(--rad); padding:13px 14px; display:flex; align-items:center; gap:12px; }
+  .tfcard{ margin:8px 16px 2px; background:var(--surface); border-radius:var(--rad); padding:13px 14px; display:flex; align-items:center; gap:12px; transition:transform .12s ease; cursor:pointer; }
+  .tfcard:active{ transform:scale(.99); }
   .tfcard .accent{ width:4px; align-self:stretch; min-height:46px; background:var(--lime); border-radius:3px; }
   .tfcard .tfbody{ flex:1; }
   .tfcard .tftitle{ font-size:15px; font-weight:700; }
@@ -102,26 +120,49 @@
   .tfcard .tfcta{ font-size:13px; font-weight:700; color:var(--deep); margin-top:7px; display:inline-block; }
   .tfcard .radar{ flex:0 0 auto; }
 
+  /* écran Profil */
+  .gearbtn{ width:38px; height:38px; border-radius:50%; background:var(--deep); color:#fff; display:flex; align-items:center; justify-content:center; margin-left:auto; }
+  /* flex-shrink:0 : .profhead est un enfant direct de .screen (flex column) ; combiné à overflow:hidden,
+     un flex-item peut sinon être comprimé sous la hauteur de son contenu (overflow:hidden désactive
+     la min-height automatique des flex items), ce qui rognait le haut du nom. */
+  .profhead{ margin:6px 16px 0; padding:18px 16px; border-radius:var(--rad-lg); position:relative; overflow:hidden; flex-shrink:0;
+             display:flex; align-items:center; gap:14px;
+             background:linear-gradient(105deg,#4b3db2,#6450f7); color:#fff; }
+  .profhead .avatar{ width:64px; height:64px; border-radius:50%; background:rgba(255,255,255,.18); border:2px solid rgba(255,255,255,.7);
+                      display:flex; align-items:center; justify-content:center; flex:0 0 auto; color:#fff; }
+  .profhead .pinfo{ flex:1; min-width:0; }
+  .profhead .pname{ font-size:19px; font-weight:700; }
+  .profhead .phandle{ font-size:13px; opacity:.8; margin-top:1px; }
+  .profhead .plink{ display:inline-block; margin-top:9px; font-size:13px; font-weight:700; color:#fff; border-bottom:1.5px solid rgba(255,255,255,.55); padding-bottom:1px; }
+  .pr-empty{ margin:8px 16px 2px; padding:20px 16px; border-radius:var(--rad); background:var(--surface); text-align:center; }
+  .pr-empty .pr-ic{ width:44px; height:44px; margin:0 auto 8px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; color:var(--gray); }
+  .pr-empty .pr-t{ font-size:14px; font-weight:700; color:var(--ink); }
+  .pr-empty .pr-add{ margin-top:10px; width:32px; height:32px; border-radius:50%; background:var(--deep); color:#fff; display:inline-flex; align-items:center; justify-content:center; }
+  .pmenu{ margin:6px 16px 0; }
+  .pmenu .pm-h{ font-size:13px; font-weight:700; color:var(--gray); text-transform:uppercase; letter-spacing:.4px; padding:14px 2px 6px; }
+  .pmenu .pm-row{ display:flex; align-items:center; gap:12px; width:100%; padding:13px 2px; border-bottom:1px solid var(--line2); text-align:left; color:var(--ink); }
+  .pmenu .pm-row:last-child{ border-bottom:none; }
+  .pmenu .pm-row .ic{ color:var(--deep); }
+  .pmenu .pm-row .pm-lab{ flex:1; font-size:14.5px; font-weight:600; }
+  .pmenu .pm-row .chev{ color:var(--gray); }
+
   /* sessions / rituel */
   .secttitle{ display:flex; justify-content:space-between; align-items:baseline; padding:20px 18px 8px; }
   .secttitle b{ font-size:16px; font-weight:700; }
   .secttitle .date{ font-size:13px; color:var(--gray); }
-  .rituel{ margin:0 16px; display:flex; align-items:center; gap:12px; padding:14px; background:var(--lime-soft); border:1px solid #ECEFCF; border-radius:var(--rad);
-           transition:background .3s ease, border-color .3s ease; position:relative; overflow:visible; }
-  .rituel.done{ background:#EAF0D6; border-color:#D6E29A; }
+  .rituel{ margin:0 16px; display:flex; align-items:center; gap:12px; padding:14px; background:var(--lime-soft); border-radius:var(--rad);
+           transition:background .3s ease; position:relative; overflow:visible; }
+  .rituel.done{ background:#EAF0D6; }
   .rituel.pop{ animation:rsettle .4s ease; }
   @keyframes rsettle{ 0%{transform:scale(1)} 30%{transform:scale(.985)} 100%{transform:scale(1)} }
   .rituel .b{ color:var(--deep); transition:transform .3s ease; }
   .rituel.done .b{ transform:rotate(-8deg) scale(1.05); }
   .rituel .t{ flex:1; font-size:14px; font-weight:600; }
   .rituel .t small{ display:block; font-weight:400; color:var(--gray); font-size:12px; }
-  .rituel .streak{ font-size:12px; font-weight:700; color:var(--deep); background:#fff; border:1px solid #E1E7C2;
-                   border-radius:20px; padding:3px 9px; white-space:nowrap; }
-  .rituel .streak.bump{ animation:bump .42s cubic-bezier(.2,1.5,.35,1); }
   @keyframes bump{ 0%{transform:scale(1)} 40%{transform:scale(1.28)} 100%{transform:scale(1)} }
   .rituel .chk{ width:24px; height:24px; border-radius:7px; border:2px solid var(--deep); display:flex; align-items:center; justify-content:center;
                 color:transparent; flex:0 0 auto; position:relative; transition:background .2s ease, border-color .2s ease; }
-  .rituel.done .chk{ background:var(--deep); border-color:var(--deep); color:#fff; }
+  .rituel.done .chk{ background:linear-gradient(105deg,var(--lime),var(--lime2)); border-color:var(--lime); color:var(--deep); }
   .rituel.pop .chk{ animation:chkpop .44s cubic-bezier(.2,1.5,.35,1); }
   @keyframes chkpop{ 0%{transform:scale(.55)} 48%{transform:scale(1.22)} 100%{transform:scale(1)} }
   .rituel.pop .chk svg{ animation:chkdraw .3s .06s both; }
@@ -130,7 +171,18 @@
           animation:spark .55s ease-out forwards; }
   @keyframes spark{ 0%{transform:translate(-50%,-50%) scale(1); opacity:1}
                     100%{transform:translate(calc(-50% + var(--tx)),calc(-50% + var(--ty))) scale(.25); opacity:0} }
-  .emptybox{ margin:10px 16px 0; border:1px dashed #CFCFC9; border-radius:var(--rad); padding:18px; text-align:center; color:var(--gray); font-size:14px; }
+  .emptybox{ margin:10px 16px 0; background:var(--surface); border-radius:var(--rad); padding:18px; text-align:center; color:var(--gray); font-size:14px; }
+
+  /* onboarding progressif — strip Home (nudge discret, gris système) */
+  .ob-banner{ display:flex; align-items:center; gap:12px; width:calc(100% - 32px); margin:4px 16px 2px; padding:11px 14px;
+              text-align:left; background:var(--surface); border-radius:var(--rad); transition:transform .12s ease; }
+  .ob-banner:active{ transform:scale(.99); }
+  .ob-bn-prog{ display:flex; gap:4px; flex:0 0 auto; }
+  .ob-bn-seg{ width:7px; height:7px; border-radius:50%; background:#CFCFC9; }
+  .ob-bn-seg.on{ background:var(--deep); }
+  .ob-bn-t{ flex:1; font-size:13.5px; font-weight:700; color:var(--ink); line-height:1.2; }
+  .ob-bn-t small{ display:block; font-weight:500; font-size:12px; color:var(--muted); margin-top:1px; }
+  .ob-chev{ stroke:var(--muted); flex:0 0 auto; }
 
   /* objective screen */
   .nav{ display:flex; align-items:center; gap:12px; padding:8px 16px; }
@@ -142,6 +194,12 @@
   .objhead .bar > i{ background:var(--deep); }
   .objhead .meta{ font-size:13px; color:var(--muted); margin-top:11px; font-weight:600; }
   .objhead .countdown{ font-family:"Sora","Trenda",sans-serif; font-size:44px; font-weight:800; letter-spacing:-.02em; color:var(--deep); line-height:1; }
+  .objhead-row{ display:flex; align-items:center; gap:14px; }
+  .objhead-row .oh-txt{ flex:1; min-width:0; }
+  .donut{ flex:0 0 auto; }
+  /* micro-copie de proximité (chiffré proche de la cible) — token succès */
+  .prox{ display:inline-block; margin-top:10px; font-size:12.5px; font-weight:700; color:var(--pos-fg); background:var(--pos-bg); border-radius:var(--rad-sm); padding:4px 11px; }
+  .hero .prox{ position:relative; margin-top:10px; }
   .btn-primary{ margin:14px 16px 6px; width:calc(100% - 32px); border-radius:var(--rad-pill); padding:14px; font-size:15px; font-weight:700;
                 background:linear-gradient(135deg,var(--lime),var(--lime2)); color:var(--deep); }
   .btn-ghost{ background:#fff; color:var(--deep); border:1.5px solid var(--deep); }
@@ -167,7 +225,24 @@
   .jtitle2{ font-size:16px; font-weight:700; }
   .jlink{ font-size:13px; font-weight:700; color:var(--deep); }
   .atteint-link{ display:block; margin:6px auto 22px; font-size:14px; font-weight:700; color:var(--muted); text-decoration:underline; }
+  .rspill{ display:inline-block; font-size:11.5px; font-weight:700; padding:2px 9px; border-radius:16px; vertical-align:middle; }
+  /* DS Button variant=positiveSecondary : fond lightGreen-50 + texte lightGreen-650 (--pos-bg / --pos-fg) */
+  .btn-achieve{ display:flex; align-items:center; justify-content:center; gap:8px; width:calc(100% - 32px); margin:8px 16px 22px;
+                border-radius:var(--rad-pill); padding:13px; font-size:15px; font-weight:700; border:none;
+                background:var(--pos-bg); color:var(--pos-fg); transition:filter .15s ease; }
+  .btn-achieve:active{ filter:brightness(.97); }
+  .btn-achieve svg{ width:18px; height:18px; }
   .emptyj{ background:var(--surface); border-radius:var(--rad); padding:22px 16px; text-align:center; color:var(--gray); font-size:14px; }
+  /* pied de l'écran objectif : action terminale (atteinte) + lien discret vers le parcours */
+  .obj-foot{ margin:18px 16px 0; padding-top:16px; border-top:1px solid var(--line2); }
+  .obj-foot .btn-achieve{ margin:0; width:100%; }
+  .obj-foot .atteint-link{ margin:16px auto 24px; }
+  /* journal : toggle Liste/Courbe + graphe ressenti */
+  .jtoggle{ display:inline-flex; background:var(--surface); border-radius:20px; padding:3px; gap:2px; }
+  .jt{ font-size:12px; font-weight:700; color:var(--muted); padding:6px 13px; border-radius:16px; }
+  .jt.on{ background:#fff; color:var(--deep); box-shadow:0 1px 3px rgba(0,0,0,.1); }
+  .rgraph{ margin:8px 16px 2px; background:var(--surface); border-radius:var(--rad); padding:12px 10px 8px; }
+  .rgraph .cap{ font-size:11px; color:var(--gray); font-weight:600; margin:0 6px 4px; }
 
   /* bottom nav */
   .tabbar{ position:absolute; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--line2);
@@ -180,24 +255,94 @@
   .overlay{ position:absolute; inset:0; background:rgba(19,19,19,.42); display:none; z-index:30; }
   .overlay.show{ display:block; }
   .sheet{ position:absolute; left:0; right:0; bottom:0; background:#fff; border-radius:24px 24px 0 0; padding:10px 20px 26px;
-          transform:translateY(110%); transition:transform .32s cubic-bezier(.2,.8,.2,1); z-index:40; }
+          transform:translateY(110%); transition:transform .32s cubic-bezier(.2,.8,.2,1); z-index:40; max-height:92vh; overflow-y:auto; scrollbar-width:none; }
+  .sheet::-webkit-scrollbar{ display:none; }
   .sheet.show{ transform:translateY(0); }
   .grip{ width:42px; height:5px; background:#DADAD6; border-radius:3px; margin:4px auto 14px; }
   .sheet h3{ font-size:18px; font-weight:700; }
   .sheet .q{ font-size:13px; font-weight:700; color:var(--muted); margin:16px 0 8px; }
   .valrow{ display:flex; align-items:center; gap:10px; }
-  .valrow input{ width:88px; font-family:inherit; font-size:20px; font-weight:700; text-align:center; padding:11px; border:1.5px solid var(--line); border-radius:12px; color:var(--ink); }
+  .valrow input{ width:88px; font-family:inherit; font-size:20px; font-weight:700; text-align:center; padding:11px; border:1.5px solid var(--line); border-radius:var(--rad-sm); color:var(--ink); }
   .valrow .unit{ font-size:15px; font-weight:600; color:var(--muted); }
   .valrow .last{ margin-left:auto; font-size:12px; color:var(--gray); }
   .chips{ display:flex; flex-wrap:wrap; gap:8px; }
   .chip{ border:1.5px solid var(--line); background:#fff; border-radius:22px; padding:9px 13px; font-size:13px; font-weight:600; color:var(--muted); }
   .chip.sel{ background:linear-gradient(135deg,var(--lime),var(--lime2)); border-color:transparent; color:var(--deep); }
-  .noteinp{ width:100%; font-family:inherit; font-size:14px; padding:11px 12px; border:1.5px solid var(--line); border-radius:12px; }
+  .noteinp{ width:100%; font-family:inherit; font-size:14px; padding:11px 12px; border:1.5px solid var(--line); border-radius:var(--rad-sm); }
   .sheet .save{ margin-top:18px; width:100%; border-radius:var(--rad-pill); padding:14px; font-size:15px; font-weight:700;
                 background:linear-gradient(135deg,var(--lime),var(--lime2)); color:var(--deep); }
+  .sheet .save:disabled{ opacity:.4; cursor:not-allowed; }
   .sheet .save2{ margin-top:8px; width:100%; border-radius:var(--rad-pill); padding:13px; font-size:14px; font-weight:700; background:transparent; color:var(--deep); border:1.5px solid var(--deep); }
-  .edunite{ flex:1; font-family:inherit; font-size:15px; padding:11px 12px; border:1.5px solid var(--line); border-radius:12px; }
+  .q-opt{ color:var(--gray); font-weight:600; }
+  .edunite{ flex:1; font-family:inherit; font-size:15px; padding:11px 12px; border:1.5px solid var(--line); border-radius:var(--rad-sm); }
   .edhint{ font-size:12px; color:var(--gray); margin-top:14px; line-height:1.45; }
+
+  /* onboarding progressif — sheet */
+  .ob-headrow{ display:flex; align-items:center; gap:8px; }
+  .ob-backbtn{ width:32px; height:32px; border-radius:50%; background:var(--surface); display:flex; align-items:center; justify-content:center; color:var(--ink); flex:0 0 auto; margin-left:-4px; }
+  .ob-lead{ font-size:14px; color:var(--muted); margin:6px 0 0; line-height:1.45; }
+  .ob-prog{ display:flex; align-items:center; gap:10px; margin:18px 0 4px; position:relative; }
+  .ob-dots{ display:flex; gap:6px; flex:1; }
+  .ob-dot{ height:7px; flex:1; border-radius:4px; background:var(--surface); transform-origin:left center; transition:background .4s ease; }
+  .ob-dot.on{ background:var(--deep); }
+  .ob-dot.just{ animation:dotfill .55s ease; }
+  @keyframes dotfill{ 0%{transform:scaleX(.35); background:var(--lime-hi)} 70%{background:var(--lime-hi)} 100%{transform:scaleX(1); background:var(--deep)} }
+  .ob-frac{ font-size:13px; font-weight:700; color:var(--deep); flex:0 0 auto; }
+  .ob-frac.bump{ animation:bump .42s cubic-bezier(.2,1.5,.35,1); }
+  .ob-steps{ margin:10px 0 2px; }
+  .ob-step{ display:flex; align-items:center; gap:11px; padding:11px 0; border-bottom:1px solid var(--line2); }
+  .ob-step:last-child{ border-bottom:none; }
+  .ob-ic{ width:26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .ob-step.done .ob-ic{ background:var(--deep); color:#fff; }
+  .ob-step.todo .ob-ic{ background:var(--surface); color:var(--gray); border:1px dashed var(--line); }
+  .ob-step.next .ob-ic{ background:var(--lime); color:var(--deep); }
+  .ob-l{ flex:1; }
+  .ob-t{ font-size:14px; font-weight:600; color:var(--ink); }
+  .ob-step.done .ob-t{ color:var(--gray); }
+  .ob-s{ font-size:12px; color:var(--gray); margin-top:1px; }
+  .ob-badge{ font-size:11px; font-weight:700; color:var(--deep); background:var(--lime-pale); border-radius:20px; padding:3px 9px; flex:0 0 auto; }
+  .ob-badge.ob-edit{ background:transparent; color:var(--gray); padding:3px 4px; }
+
+  /* champ date tappable + date picker (repris de l'onboarding) */
+  .datefield{ display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; font-family:inherit; font-size:15px;
+              padding:11px 12px; border:1.5px solid var(--line); border-radius:var(--rad-sm); background:#fff; color:var(--ink); text-align:left; cursor:pointer; }
+  .datefield .df-ph{ color:var(--gray); }
+  .datefield svg{ color:var(--muted); flex:0 0 auto; }
+  .dp-overlay{ position:absolute; inset:0; background:rgba(18,18,18,.46); display:none; z-index:45; }
+  .dp-overlay.show{ display:block; }
+  .dp-sheet{ position:absolute; left:0; right:0; bottom:0; background:#fff; border-radius:24px 24px 0 0; padding:8px 18px 26px; z-index:55;
+             transform:translateY(110%); transition:transform .3s cubic-bezier(.22,1,.36,1); box-shadow:0 -16px 40px -10px rgba(0,0,0,.18); }
+  .dp-sheet.show{ transform:translateY(0); }
+  .dp-cap{ font-weight:400; font-size:13px; color:var(--gray); margin:0 6px 2px; }
+  .dp-head{ font-family:"Sora","Trenda",sans-serif; font-weight:700; font-size:24px; color:var(--ink); margin:0 6px 16px; }
+  .dp-nav{ display:flex; align-items:center; justify-content:space-between; margin:0 4px 10px; }
+  .dp-navbtn{ width:38px; height:38px; border-radius:50%; background:var(--surface); display:flex; align-items:center; justify-content:center; color:var(--ink); }
+  .dp-month{ font-weight:600; font-size:16px; color:var(--ink); }
+  .dp-wd{ display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:6px; }
+  .dp-wd span{ text-align:center; font-weight:600; font-size:12px; color:#A8A8A2; padding:4px 0; }
+  .dp-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+  .dp-cell{ height:40px; border:none; background:transparent; border-radius:50%; font-family:inherit; font-weight:600; font-size:15px;
+            color:var(--ink); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .dp-cell.past{ color:#CFCFCA; cursor:not-allowed; }
+  .dp-cell.sel{ background:var(--lime); color:var(--teal); }
+  .dp-cell.empty{ cursor:default; }
+
+  /* échéance dépassée — options de décision */
+  .ov-opts{ margin-top:14px; }
+  .ovopt{ display:flex; align-items:center; gap:12px; width:100%; text-align:left; padding:13px 12px; border-radius:var(--rad); background:var(--surface); margin-bottom:8px; transition:transform .12s ease; }
+  .ovopt:active{ transform:scale(.99); }
+  .ovopt .ovic{ width:34px; height:34px; border-radius:var(--rad-xs); background:#fff; display:flex; align-items:center; justify-content:center; color:var(--deep); flex:0 0 auto; }
+  .ovopt .ovt{ flex:1; }
+  .ovopt .ovt b{ font-size:14px; font-weight:700; color:var(--ink); display:block; }
+  .ovopt .ovt small{ font-size:12px; color:var(--gray); }
+  .ovopt .ovchev{ color:var(--gray); flex:0 0 auto; }
+  .ovopt.muted .ovic{ color:var(--gray); }
+  .ovopt.muted .ovt b{ color:var(--muted); }
+  /* hero négligé (relance douce) + en pause */
+  .hero.neglige{ background:linear-gradient(135deg,#EDF0DA,#F6F8EA); }
+  .hero.pause{ background:linear-gradient(135deg,#ECECE8,#F6F6F2); color:var(--muted); }
+  .hero.pause h2{ color:var(--ink); }
+  .hero.pause .cta{ background:var(--deep); }
 
   /* atteinte popup */
   .popup{ position:absolute; left:24px; right:24px; top:50%; transform:translateY(-50%) scale(.92); opacity:0; pointer-events:none;
@@ -220,24 +365,26 @@
   .pc-head{ padding:8px 18px 6px; }
   .pc-count{ font-size:13px; color:var(--gray); font-weight:600; }
   .pc-row{ display:flex; gap:12px; align-items:center; padding:13px 14px; border:1px solid var(--line2); border-radius:var(--rad); margin-bottom:10px; }
-  .pc-ic{ width:34px; height:34px; border-radius:10px; background:var(--lime-soft); display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .pc-ic{ width:34px; height:34px; border-radius:var(--rad-xs); background:var(--lime-soft); display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
   .pc-row.cur .pc-ic{ background:#EAF0D6; }
   .pc-title{ font-size:15px; font-weight:700; }
   .pc-meta{ font-size:12px; color:var(--gray); margin-top:2px; }
   .pc-badge{ margin-left:auto; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; background:var(--surface); color:var(--muted); white-space:nowrap; }
-  .pc-badge.done{ background:var(--lime-pale); color:var(--teal); }
+  .pc-badge.done{ background:var(--pos-bg); color:var(--pos-fg); }
 
-  .toast{ position:absolute; left:24px; right:24px; bottom:96px; background:var(--ink); color:#fff; border-radius:14px; padding:13px 16px; font-size:13px; text-align:center; z-index:60; opacity:0; transform:translateY(10px); transition:.25s; }
+  .toast{ position:absolute; left:24px; right:24px; bottom:96px; background:var(--ink); color:#fff; border-radius:14px; padding:13px 16px; font-size:13px; text-align:center; z-index:60; opacity:0; transform:translateY(10px); transition:.25s; pointer-events:none; }
   .toast.show{ opacity:1; transform:translateY(0); }
 
-  .demo{ position:absolute; top:8px; right:10px; z-index:80; }
-  .demo .btn{ background:var(--ink); color:#fff; font-size:11px; font-weight:700; border-radius:20px; padding:6px 11px; opacity:.5; }
-  .demo .panel{ display:none; position:absolute; right:0; top:34px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:8px; box-shadow:0 8px 28px rgba(0,0,0,.15); width:200px; }
+  .demo{ position:absolute; bottom:80px; right:12px; z-index:80; }
+  .demo .btn{ background:var(--ink); color:#fff; font-size:11px; font-weight:700; border-radius:20px; padding:7px 12px; opacity:.62; box-shadow:0 4px 14px rgba(0,0,0,.25); }
+  .demo.open .btn{ opacity:1; }
+  .demo .panel{ display:none; position:absolute; right:0; bottom:38px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:9px; box-shadow:0 10px 32px rgba(0,0,0,.22); width:212px; max-height:74vh; overflow-y:auto; }
   .demo.open .panel{ display:block; }
-  .demo .panel small{ display:block; font-size:10px; color:var(--gray); padding:2px 6px 6px; }
+  .demo .panel small{ display:block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--gray); padding:6px 6px 5px; }
   .demo .panel button{ display:block; width:100%; text-align:left; background:var(--surface); border-radius:9px; padding:9px 10px; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--ink); }
   .demo .panel button.on{ background:var(--lime-pale); color:var(--deep); }
 </style>
+<script>if(location.search.indexOf('from=onboarding')>-1)document.documentElement.classList.add('from-onboarding');</script>
 </head>
 <body>
 <!-- ===== ICÔNES SVG (sprite) ===== -->
@@ -251,6 +398,10 @@
   <g id="i-penta"><path d="M12 3.5l8.2 6-3.1 9.3H6.9L3.8 9.5Z"/></g>
   <g id="i-bolt"><path d="M13 2.5 4.5 14H10l-1 7.5L19 9.5h-5.5l1-7Z"/></g>
   <g id="i-search"><circle cx="11" cy="11" r="6.2"/><path d="M20 20l-4.2-4.2"/></g>
+  <g id="i-gear"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5c.1-.5.1-1 0-1.5l1.6-1.3-2-3.4-1.9.6a7.6 7.6 0 0 0-1.3-.75l-.3-2h-4l-.3 2c-.46.2-.9.45-1.3.75l-1.9-.6-2 3.4L4.6 12c-.1.5-.1 1 0 1.5l-1.6 1.3 2 3.4 1.9-.6c.4.3.84.55 1.3.75l.3 2h4l.3-2c.46-.2.9-.45 1.3-.75l1.9.6 2-3.4-1.6-1.3Z"/></g>
+  <g id="i-shield"><path d="M12 3.2 19 6v5.5c0 4.6-3 8-7 9.3-4-1.3-7-4.7-7-9.3V6Z"/></g>
+  <g id="i-biceps"><path d="M6 21c-1.5-2-2-4.5-1.2-8C5.6 9.5 7 7.5 9 7c1.6-.4 2.7.4 3 1.5"/><path d="M9 7c.3-1.6 1.6-3 3.4-3.3 2.4-.4 4.6 1.3 5 3.7.3 2 .1 4-1 6" /><path d="M14 19c2-1 3.4-2.7 3.9-5" /></g>
+  <g id="i-book"><path d="M4 5.5c2.3-1 5-1 7 0v13c-2-1-4.7-1-7 0Z"/><path d="M20 5.5c-2.3-1-5-1-7 0v13c2-1 4.7-1 7 0Z"/></g>
   <g id="i-box"><path d="M4 8l8-4 8 4v8l-8 4-8-4Z"/><path d="M4 8l8 4 8-4M12 12v8"/></g>
   <g id="i-person"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c0-3.5 3-5.8 6.5-5.8s6.5 2.3 6.5 5.8"/></g>
   <g id="i-back"><path d="M15 5l-7 7 7 7"/></g>
@@ -301,31 +452,17 @@
       <div class="qa"><div class="tile dark"><svg class="ic" viewBox="0 0 24 24"><use href="#i-records"/></svg></div><span class="lab">Records</span></div>
     </div>
 
-    <div id="home-objective"></div>
+    <div class="objective-mount"></div>
 
-    <div class="tfcard">
-      <div class="accent"></div>
-      <div class="tfbody">
-        <div class="tftitle">Test fitness</div>
-        <div class="tfscore">Forme générale · <b>72%</b></div>
-        <button class="tfcta">Re-teste-toi →</button>
-      </div>
-      <svg class="radar" viewBox="0 0 64 64" width="54" height="54" aria-hidden="true">
-        <g stroke="#E6E6E6" stroke-width=".8">
-          <line x1="32" y1="32" x2="32" y2="6"/><line x1="32" y1="32" x2="56.7" y2="24"/>
-          <line x1="32" y1="32" x2="47.3" y2="53"/><line x1="32" y1="32" x2="16.7" y2="53"/>
-          <line x1="32" y1="32" x2="7.3" y2="24"/>
-        </g>
-        <polygon points="32,6 56.7,24 47.3,53 16.7,53 7.3,24" fill="none" stroke="#D1D1D1" stroke-width="1"/>
-        <polygon points="32,11.7 47.3,27 42.4,46.3 18.9,50.1 17.2,27.2" fill="rgba(221,242,71,.55)" stroke="var(--deep)" stroke-width="1.6" stroke-linejoin="round"/>
-      </svg>
-    </div>
+    <div class="secttitle"><b>Ton profil</b></div>
+    <div class="onboarding-mount"></div>
+
+    <div class="tfcard-mount"></div>
 
     <div class="secttitle"><b>Mes séances du jour</b><span class="date">lun. 29 juin</span></div>
     <div class="rituel" id="rituel" onclick="toggleRituel(this)">
       <svg class="ic b" viewBox="0 0 24 24"><use href="#i-bolt"/></svg>
       <div class="t">Rituel : 10 pompes<small>après le réveil</small></div>
-      <div class="streak" id="rituel-streak" data-base="4">🔥 4 j</div>
       <div class="chk"><svg class="ic sm" viewBox="0 0 24 24" style="width:16px;height:16px"><use href="#i-check"/></svg></div>
     </div>
     <div class="emptybox">Rien d'autre de prévu aujourd'hui</div>
@@ -349,22 +486,66 @@
 
   <!-- ====================== MON OBJECTIF ====================== -->
   <section class="screen" id="screen-objectif">
-    <div class="nav"><button class="back" onclick="showScreen('home')"><svg class="ic" viewBox="0 0 24 24"><use href="#i-back"/></svg></button><span class="t">Mon objectif</span><button class="navedit" onclick="openEdit()" aria-label="Modifier l'objectif"><svg class="ic" viewBox="0 0 24 24"><use href="#i-edit"/></svg></button></div>
+    <div class="nav"><button class="back" onclick="showScreen('home')" aria-label="Retour"><svg class="ic" viewBox="0 0 24 24"><use href="#i-back"/></svg></button><span class="t">Mon objectif</span><button class="navedit" onclick="openEdit()" aria-label="Modifier l'objectif"><svg class="ic" viewBox="0 0 24 24"><use href="#i-edit"/></svg></button></div>
     <div id="obj-content"></div>
     <div class="tabbar"></div>
   </section>
 
   <!-- ====================== MON PARCOURS ====================== -->
   <section class="screen" id="screen-parcours">
-    <div class="nav"><button class="back" onclick="showScreen('objectif')"><svg class="ic" viewBox="0 0 24 24"><use href="#i-back"/></svg></button><span class="t">Mon parcours</span></div>
+    <div class="nav"><button class="back" onclick="showScreen('objectif')" aria-label="Retour"><svg class="ic" viewBox="0 0 24 24"><use href="#i-back"/></svg></button><span class="t">Mon parcours</span></div>
     <div class="pc-head"><span class="pc-count" id="pc-count">2 objectifs atteints</span></div>
     <div id="parcours-list" style="padding:0 16px"></div>
     <div class="tabbar"></div>
   </section>
 
+  <!-- ====================== PROFIL ====================== -->
+  <section class="screen" id="screen-profil">
+    <div class="nav"><span class="t" style="flex:1">Profil</span><button class="gearbtn" onclick="toast('Ouvrirait les réglages')" aria-label="Réglages"><svg class="ic sm" viewBox="0 0 24 24"><use href="#i-gear"/></svg></button></div>
+
+    <div class="profhead">
+      <div class="avatar"><svg class="ic" viewBox="0 0 24 24" style="width:30px;height:30px"><use href="#i-person"/></svg></div>
+      <div class="pinfo">
+        <div class="pname">Théo Moreau</div>
+        <div class="phandle">@tmoreau</div>
+        <button class="plink" onclick="toast('Ouvrirait la fiche profil détaillée')">Voir mon profil (50% rempli)</button>
+      </div>
+    </div>
+
+    <div class="onboarding-mount" style="margin-top:8px"></div>
+
+    <div class="objective-mount"></div>
+    <button class="atteint-link" style="margin:14px auto 4px" onclick="showScreen('parcours')">Voir mon parcours</button>
+
+    <div class="secttitle"><b>Fitness check</b></div>
+    <div class="tfcard-mount"></div>
+
+    <div class="secttitle"><b>Records personnels</b></div>
+    <div class="pr-empty">
+      <div class="pr-ic"><svg class="ic sm" viewBox="0 0 24 24"><use href="#i-shield"/></svg></div>
+      <div class="pr-t">Ajoute tes records personnels</div>
+      <button class="pr-add" onclick="toast('Ouvrirait l\'ajout de records')" aria-label="Ajouter un record"><svg class="ic sm" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    </div>
+
+    <div class="pmenu">
+      <div class="pm-h">Training</div>
+      <button class="pm-row" onclick="toast('Ouvrirait tes programmes suivis')"><svg class="ic sm" viewBox="0 0 24 24"><use href="#i-dumbbell"/></svg><span class="pm-lab">Programmes suivis</span><svg class="ic sm chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      <button class="pm-row" onclick="toast('Ouvrirait ton activité')"><svg class="ic sm" viewBox="0 0 24 24"><use href="#i-biceps"/></svg><span class="pm-lab">Mon activité</span><svg class="ic sm chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      <button class="pm-row" onclick="toast('Ouvrirait tes activités')"><svg class="ic sm" viewBox="0 0 24 24"><use href="#i-book"/></svg><span class="pm-lab">Activités</span><svg class="ic sm chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      <button class="pm-row" onclick="toast('Ouvrirait tes packs de programmes')"><svg class="ic sm" viewBox="0 0 24 24"><use href="#i-box"/></svg><span class="pm-lab">Packs de programmes suivis</span><svg class="ic sm chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      <div class="pm-h">Coaching</div>
+      <button class="pm-row" onclick="toast('Ouvrirait tes programmes')"><svg class="ic sm" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span class="pm-lab">Mes programmes</span><svg class="ic sm chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      <button class="pm-row" onclick="toast('Ouvrirait le coaching partagé')"><svg class="ic sm" viewBox="0 0 24 24"><use href="#i-dumbbell"/></svg><span class="pm-lab">Coaching partagé</span><svg class="ic sm chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      <button class="pm-row" onclick="toast('Ouvrirait tes activités partagées')"><svg class="ic sm" viewBox="0 0 24 24"><use href="#i-biceps"/></svg><span class="pm-lab">Activités partagées</span><svg class="ic sm chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      <button class="pm-row" onclick="toast('Ouvrirait tes packs de programmes')"><svg class="ic sm" viewBox="0 0 24 24"><use href="#i-box"/></svg><span class="pm-lab">Mes packs de programmes</span><svg class="ic sm chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+
+    <div class="tabbar"></div>
+  </section>
+
   <!-- ====================== CELEBRATION ====================== -->
   <section class="screen" id="screen-celebration">
-    <div class="star"><svg class="ic" viewBox="0 0 24 24" style="width:40px;height:40px;stroke-width:1.6"><path d="M12 3l2.3 5.8L20 9l-4.5 3.6L17 19l-5-3.2L7 19l1.5-6.4L4 9l5.7-.2Z"/></svg></div>
+    <div class="star"><svg class="ic" viewBox="0 0 24 24" style="width:40px;height:40px"><path d="M12 3l2.3 5.8L20 9l-4.5 3.6L17 19l-5-3.2L7 19l1.5-6.4L4 9l5.7-.2Z"/></svg></div>
     <h1>Objectif atteint.</h1>
     <p id="cel-sub">Bravo, tu y es arrivé.</p>
     <div class="recap" id="cel-recap"></div>
@@ -373,7 +554,7 @@
   </section>
 
   <!-- ====================== OVERLAYS ====================== -->
-  <div class="overlay" id="overlay" onclick="closeCheckin();closeEdit()"></div>
+  <div class="overlay" id="overlay" onclick="closeCheckin();closeEdit();closeOnboarding(false);closeOverdue();closeRelance()"></div>
 
   <div class="sheet" id="sheet">
     <div class="grip"></div>
@@ -408,10 +589,109 @@
       <div class="valrow"><input id="ed-cible" type="number" inputmode="numeric" /><input id="ed-unite" class="edunite" placeholder="unité" /></div>
     </div>
     <div class="q">Échéance</div>
-    <input class="noteinp" id="ed-date" type="date" />
+    <button class="datefield" id="ed-date-field" onclick="openDatePicker()">
+      <span id="ed-date-label" class="df-ph">Choisis une date</span>
+      <svg class="ic sm" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>
+    </button>
+    <input type="hidden" id="ed-date" />
     <div class="edhint">Petite retouche (formulation, cible, date) : ton journal est conservé. Si c'est un objectif différent, repars à neuf.</div>
     <button class="save" onclick="saveEdit()">Enregistrer</button>
     <button class="save2" onclick="newObjectiveFromEdit()">C'est un nouvel objectif</button>
+  </div>
+
+  <div class="sheet" id="sheet-onboarding">
+    <div class="grip"></div>
+    <div class="ob-headrow">
+      <button class="ob-backbtn" id="ob-back" onclick="obShowList()" aria-label="Retour aux étapes" style="display:none"><svg class="ic sm" viewBox="0 0 24 24"><use href="#i-back"/></svg></button>
+      <h3 id="ob-title">Complète ton profil sportif</h3>
+    </div>
+    <p class="ob-lead" id="ob-lead">Encore 2 étapes pour un plan vraiment taillé pour toi.</p>
+    <div class="ob-prog">
+      <div class="ob-dots" id="ob-dots"></div>
+      <span class="ob-frac" id="ob-frac">3/5</span>
+    </div>
+    <!-- vue liste des étapes -->
+    <div id="ob-list-view">
+      <div class="ob-steps" id="ob-steps"></div>
+      <button class="save" id="ob-cta" onclick="obPrimary()">Reprendre l'étape</button>
+      <button class="save2" onclick="closeOnboarding(true)">Plus tard</button>
+    </div>
+    <!-- vue formulaire d'une étape (wizard mono-sheet) -->
+    <div id="ob-form-view" style="display:none">
+      <div id="ob-form-fields"></div>
+      <button class="save" id="ob-form-save" onclick="saveStepSheet()">Enregistrer</button>
+      <button class="save2" onclick="obShowList()">Passer pour l'instant</button>
+    </div>
+  </div>
+
+  <div class="sheet" id="sheet-overdue">
+    <div class="grip"></div>
+    <h3>Échéance dépassée</h3>
+    <p class="ob-lead" id="ov-lead">L'échéance est passée. Pas de pression, on fait le point ensemble.</p>
+    <div class="ov-opts">
+      <button class="ovopt" onclick="overdueProlonger()">
+        <div class="ovic"><svg class="ic sm" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></div>
+        <div class="ovt"><b>Prolonger</b><small>nouvelle échéance, ton journal continue</small></div>
+        <svg class="ic sm ovchev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <button class="ovopt" onclick="overdueAjuster()">
+        <div class="ovic"><svg class="ic sm" viewBox="0 0 24 24"><use href="#i-edit"/></svg></div>
+        <div class="ovt"><b>Ajuster la cible</b><small>plus réaliste, journal conservé</small></div>
+        <svg class="ic sm ovchev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <button class="ovopt" onclick="overdueRedefinir()">
+        <div class="ovic"><svg class="ic sm" viewBox="0 0 24 24"><use href="#i-bolt"/></svg></div>
+        <div class="ovt"><b>Redéfinir un objectif</b><small>l'ancien part dans ton parcours</small></div>
+        <svg class="ic sm ovchev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <button class="ovopt muted" onclick="overdueCloturer()">
+        <div class="ovic"><svg class="ic sm" viewBox="0 0 24 24"><use href="#i-box"/></svg></div>
+        <div class="ovt"><b>Clôturer</b><small>ranger dans le parcours, non atteint</small></div>
+        <svg class="ic sm ovchev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="sheet" id="sheet-relance">
+    <div class="grip"></div>
+    <h3>On fait le point ?</h3>
+    <p class="ob-lead" id="rl-lead">Ça fait un moment sans relevé. Aucune pression, qu'est-ce qu'on fait ?</p>
+    <div class="ov-opts">
+      <button class="ovopt" onclick="relanceContinuer()">
+        <div class="ovic"><svg class="ic sm" viewBox="0 0 24 24"><use href="#i-bolt"/></svg></div>
+        <div class="ovt"><b>Je continue</b><small>je garde cet objectif, je m'y remets</small></div>
+        <svg class="ic sm ovchev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <button class="ovopt" onclick="relancePause()">
+        <div class="ovic"><svg class="ic sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></svg></div>
+        <div class="ovt"><b>Mettre en pause</b><small>tu pourras le reprendre plus tard</small></div>
+        <svg class="ic sm ovchev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <button class="ovopt" onclick="relanceAjuster()">
+        <div class="ovic"><svg class="ic sm" viewBox="0 0 24 24"><use href="#i-edit"/></svg></div>
+        <div class="ovt"><b>Ajuster la cible</b><small>plus réaliste, journal conservé</small></div>
+        <svg class="ic sm ovchev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <button class="ovopt muted" onclick="relanceRedefinir()">
+        <div class="ovic"><svg class="ic sm" viewBox="0 0 24 24"><use href="#i-box"/></svg></div>
+        <div class="ovt"><b>Redéfinir un objectif</b><small>plus adapté à là où tu en es</small></div>
+        <svg class="ic sm ovchev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="dp-overlay" id="dp-overlay" onclick="closeDatePicker()"></div>
+  <div class="dp-sheet" id="dp-sheet">
+    <div class="grip"></div>
+    <div class="dp-cap">Sélectionne ta date</div>
+    <div class="dp-head" id="dp-head">Choisis une date</div>
+    <div class="dp-nav">
+      <button class="dp-navbtn" onclick="dpShiftMonth(-1)" aria-label="Mois précédent"><svg class="ic sm" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="dp-month" id="dp-month"></span>
+      <button class="dp-navbtn" onclick="dpShiftMonth(1)" aria-label="Mois suivant"><svg class="ic sm" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+    </div>
+    <div class="dp-wd"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+    <div class="dp-grid" id="dp-grid"></div>
   </div>
 
   <div class="popup" id="popup">
@@ -423,8 +703,29 @@
     </div>
   </div>
 
+  <div class="demo" id="demo">
+    <button class="btn" onclick="document.getElementById('demo').classList.toggle('open')">⚙ cas</button>
+    <div class="panel">
+      <small>Type d'objectif</small>
+      <button data-sc="chiffre" onclick="loadScenario('chiffre')">Chiffré · valeur/cible</button>
+      <button data-sc="evenement" onclick="loadScenario('evenement')">Événement · J-x</button>
+      <button data-sc="qualitatif" onclick="loadScenario('qualitatif')">Qualitatif · ressenti</button>
+      <button data-sc="vide" onclick="loadScenario('vide')">Aucun objectif</button>
+      <small>Cycle de vie</small>
+      <button data-sc="neglige" onclick="loadScenario('neglige')">Négligé ~14 j · relance</button>
+      <button data-sc="neglige30" onclick="loadScenario('neglige30')">Négligé ~35 j · porte de sortie</button>
+      <button data-sc="depasse" onclick="loadScenario('depasse')">Échéance dépassée</button>
+      <small>Vues / overlays</small>
+      <button onclick="showScreen('objectif')">Écran « Mon objectif »</button>
+      <button onclick="showScreen('parcours')">Mon parcours</button>
+      <button onclick="openOnboarding()">Sheet onboarding (3/5)</button>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 </div>
+
+<div id="page-cover"></div>
 
 <script>
 const TODAY = new Date('2026-06-29');
@@ -463,18 +764,76 @@ const SCENARIOS = {
       { date:"2026-06-20", valeur:null, ressenti:"en_voie", note:"plus de marche" },
     ],
   },
+  depasse: {
+    objectif:{ phrase:"Courir 5 km sans m'arrêter", type:"endurance", kind:"chiffre", cible:5, unite:"km",
+               echeance:"2026-06-20", cree:"2026-04-10", depart:1, statut:"actif" },
+    releves:[
+      { date:"2026-04-10", valeur:1, ressenti:"loin",    note:"", depart:true },
+      { date:"2026-05-02", valeur:2, ressenti:"loin",    note:"essoufflé" },
+      { date:"2026-05-20", valeur:3, ressenti:"en_voie", note:"ça vient" },
+    ],
+  },
+  neglige: {   // relance douce palier 1 : ~14 j sans relevé, échéance encore loin
+    objectif:{ phrase:"Faire 30 tractions", type:"force", kind:"chiffre", cible:30, unite:"tractions",
+               echeance:"2026-12-31", cree:"2026-05-01", depart:8, statut:"actif" },
+    releves:[
+      { date:"2026-05-01", valeur:8,  ressenti:"loin",    note:"", depart:true },
+      { date:"2026-06-15", valeur:15, ressenti:"en_voie", note:"" },
+    ],
+  },
+  neglige30: { // relance douce palier 3 : ~35 j sans relevé, porte de sortie
+    objectif:{ phrase:"Faire 30 tractions", type:"force", kind:"chiffre", cible:30, unite:"tractions",
+               echeance:"2026-12-31", cree:"2026-04-01", depart:8, statut:"actif" },
+    releves:[
+      { date:"2026-04-01", valeur:8,  ressenti:"loin",    note:"", depart:true },
+      { date:"2026-05-25", valeur:16, ressenti:"en_voie", note:"" },
+    ],
+  },
   vide: { objectif:null, releves:[] },
 };
 
 let state = S(SCENARIOS.chiffre);
 let pendingRessenti = null;
 
-const TABBAR = `
-  <div class="tab active"><svg class="ic" viewBox="0 0 24 24"><use href="#i-bolt"/></svg>Aujourd'hui<span class="pip"></span></div>
-  <div class="tab"><svg class="ic" viewBox="0 0 24 24"><use href="#i-search"/></svg>Explorer</div>
-  <div class="tab"><svg class="ic" viewBox="0 0 24 24"><use href="#i-dumbbell"/></svg>Training</div>
-  <div class="tab"><svg class="ic" viewBox="0 0 24 24"><use href="#i-box"/></svg>Box</div>
-  <div class="tab"><svg class="ic" viewBox="0 0 24 24"><use href="#i-person"/></svg>Profil</div>`;
+// Onboarding progressif : reprend les 5 étapes du vrai onboarding du projet.
+// Étapes 2, 4, 5 sont « passables » → ici 1, 3, 5 faites, 2 et 4 à compléter.
+let onboarding = {
+  steps:[
+    { id:'amene',    label:"Ce qui t'amène",       sub:'devenir plus fort',                done:true  },
+    { id:'situation',label:'Où tu en es',          sub:'fréquence, lieu, niveau',          done:false },
+    { id:'objectif', label:'Ton objectif principal',sub:"30 tractions d'ici déc.",         done:true  },
+    { id:'aider',    label:'Pour mieux t\'aider',  sub:'tes freins, ton objet connecté',   done:false },
+    { id:'habitude', label:'Ta première habitude', sub:'10 pompes après le réveil',        done:true  },
+  ],
+};
+// Étapes réellement remplissables dans le proto (reprend les sélecteurs du vrai onboarding).
+const STEP_LEAD={ situation:"Pour calibrer ton plan, dis-nous où tu en es aujourd'hui.",
+                  aider:"Deux infos de plus pour que ton coach t'aide mieux." };
+const STEP_FIELDS={
+  situation:[
+    { key:'freq',  label:"Tu t'entraînes combien ?", opts:[{v:'rare',l:'rarement'},{v:'1-2',l:'1 à 2 fois par semaine'},{v:'3-4',l:'3 à 4 fois par semaine'},{v:'5+',l:'5 fois et plus'}] },
+    { key:'place', label:"Où t'entraînes-tu ?",      opts:[{v:'home',l:'🏠 à la maison'},{v:'gym',l:'🏋️ en salle'},{v:'outdoor',l:'🌳 dehors'},{v:'mixed',l:'🔀 un peu partout'}] },
+    { key:'level', label:"Où en es-tu aujourd'hui ?",opts:[{v:'zero',l:'🌱 je pars de zéro'},{v:'stopped',l:"🔄 je m'y remets"},{v:'occasional',l:"🙂 je m'entraîne par moments"},{v:'regular',l:'💪 je suis régulier'},{v:'competitor',l:'🔥 je suis un compétiteur'}] },
+  ],
+  aider:[
+    { key:'blocker', label:"Qu'est-ce qui te freine ?", opts:[{v:'time',l:'le manque de temps'},{v:'motivation',l:'le manque de motivation'},{v:'know_how',l:'ne pas savoir quoi faire'},{v:'consistency',l:'tenir dans la durée'},{v:'injury_fatigue',l:'les blessures et la fatigue'}] },
+    { key:'device', label:"Quel objet connecté ?", optional:true, opts:[{v:'none',l:'aucun objet'},{v:'apple_watch',l:'⌚ Apple Watch'},{v:'garmin',l:'Garmin'},{v:'suunto',l:'Suunto'},{v:'whoop',l:'Whoop'},{v:'polar',l:'Polar'},{v:'fitbit',l:'Fitbit'},{v:'oura',l:'Oura'},{v:'other',l:'autre'}] },
+  ],
+};
+let currentStep=null;
+
+// Tabbar : 'home' actif pour Home + tous les écrans poussés depuis Home (objectif/parcours/étape/célébration) ;
+// 'profil' actif seulement sur l'écran Profil. Explorer/Training/Box restent des placeholders (toast).
+function tabbarHtml(active){
+  const tab=(key,icon,label,onclick)=>`<div class="tab${active===key?' active':''}" ${onclick?`onclick="${onclick}"`:''}>
+    <svg class="ic" viewBox="0 0 24 24"><use href="#${icon}"/></svg>${label}${active===key?'<span class="pip"></span>':''}</div>`;
+  return tab('home','i-bolt',"Aujourd'hui","showScreen('home')")
+       + tab('explorer','i-search','Explorer',"toast('Bientôt disponible')")
+       + tab('training','i-dumbbell','Training',"toast('Bientôt disponible')")
+       + tab('box','i-box','Box',"toast('Bientôt disponible')")
+       + tab('profil','i-person','Profil',"showScreen('profil')");
+}
+function activeTabFor(screenName){ return screenName==='profil'?'profil':'home'; }
 
 function daysBetween(a,b){ return Math.round((b-a)/86400000); }
 function fmtDate(iso){ return new Date(iso).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}); }
@@ -484,71 +843,353 @@ function valuePct(){ const o=state.objectif, cur=lastValue(); if(cur==null) retu
 function timePct(){ const o=state.objectif;
   return Math.max(0,Math.min(100,Math.round((TODAY-new Date(o.cree))/(new Date(o.echeance)-new Date(o.cree))*100))); }
 function daysLeft(){ return daysBetween(TODAY,new Date(state.objectif.echeance)); }
+// Micro-copie de proximité : « Plus que N » quand on est à >=80% de la cible (chiffré).
+function proximityMsg(){ const o=state.objectif; if(!o||o.kind!=='chiffre') return '';
+  const cur=lastValue(); if(cur==null) return ''; const rest=o.cible-cur;
+  if(rest>0 && cur/o.cible>=0.8) return `Plus que ${rest} ${o.unite} !`; return ''; }
+// Donut de proportion vers la cible (DS Donut) : anneau + valeur centrale. `track` = couleur de piste (par défaut pâle sur fond clair).
+function donutSvg(pct,center,sub,track){ track=track||'#E6E9CE'; const r=32, c=2*Math.PI*r, off=c*(1-Math.max(0,Math.min(100,pct))/100);
+  return `<svg class="donut" viewBox="0 0 78 78" width="78" height="78" aria-hidden="true">
+    <circle cx="39" cy="39" r="${r}" fill="none" stroke="${track}" stroke-width="8"/>
+    <circle cx="39" cy="39" r="${r}" fill="none" stroke="var(--deep)" stroke-width="8" stroke-linecap="round"
+      stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 39 39)"/>
+    <text x="39" y="37" text-anchor="middle" font-family="Sora,Trenda" font-size="18" font-weight="800" fill="var(--deep)">${center}</text>
+    <text x="39" y="51" text-anchor="middle" font-size="8.5" font-weight="600" fill="var(--muted)">${sub}</text>
+  </svg>`; }
+function isOverdue(){ return state.objectif && daysLeft()<0; }
+function dueLabel(){ const d=daysLeft(); return d<0?'échéance passée':'reste '+d+' j'; }
+function daysSinceLast(){ const real=state.releves.filter(r=>!r.stamp); if(!real.length) return 0;
+  return daysBetween(new Date(real[real.length-1].date),TODAY); }
+// Relance douce (6.4) : 0 = frais, 1 = négligé (~10-14 j), 3 = porte de sortie (~30 j+).
+function relanceLevel(){ if(!state.objectif||isOverdue()||state.objectif.statut==='en_pause') return 0;
+  const d=daysSinceLast(); return d>=30?3:(d>=10?1:0); }
+function anyOverlaySheet(){ return ['sheet','sheet-edit','sheet-onboarding','sheet-overdue','sheet-relance']
+  .some(id=>{ const e=document.getElementById(id); return e&&e.classList.contains('show'); }); }
 
-function render(){ renderHome(); renderObjectif(); renderParcours();
-  document.querySelectorAll('.tabbar').forEach(t=>t.innerHTML=TABBAR);
+function render(){ renderHome(); renderHomeOnboarding(); renderTfcards(); renderObjectif(); renderParcours();
+  renderTabbars();
   document.querySelectorAll('.demo .panel button').forEach(b=>b.classList.toggle('on', b.dataset.sc===state._name));
 }
+function renderTabbars(){
+  const cur=document.querySelector('.screen.active'), name=cur?cur.id.replace('screen-',''):'home';
+  document.querySelectorAll('.tabbar').forEach(t=>t.innerHTML=tabbarHtml(activeTabFor(name)));
+}
+
+function obDone(){ return onboarding.steps.filter(s=>s.done).length; }
+function obNext(){ return onboarding.steps.find(s=>!s.done); }
+
+function renderHomeOnboarding(){
+  const done=obDone(), tot=onboarding.steps.length, left=tot-done;
+  let html='';
+  if(left>0){
+    const segs=onboarding.steps.map(s=>`<span class="ob-bn-seg ${s.done?'on':''}"></span>`).join('');
+    html=`<button class="ob-banner" onclick="openOnboarding()">
+      <div class="ob-bn-prog">${segs}</div>
+      <div class="ob-bn-t">Encore ${left} étape${left>1?'s':''} · ${done}/${tot}<small>pour que ton coach personnalise ton plan</small></div>
+      <svg class="ic sm ob-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>`;
+  }
+  document.querySelectorAll('.onboarding-mount').forEach(box=>box.innerHTML=html);
+}
+// Carte « Test fitness » condensée (Home + Profil) : score + mini radar, contenu statique de démo.
+const TFCARD_HTML = `<div class="tfcard" onclick="toast('Ouvrirait ton test de forme')">
+  <div class="accent"></div>
+  <div class="tfbody">
+    <div class="tftitle">Test fitness</div>
+    <div class="tfscore">Forme générale · <b>72%</b></div>
+    <span class="tfcta">Re-teste-toi →</span>
+  </div>
+  <svg class="radar" viewBox="0 0 64 64" width="54" height="54" aria-hidden="true">
+    <g stroke="#E6E6E6" stroke-width=".8">
+      <line x1="32" y1="32" x2="32" y2="6"/><line x1="32" y1="32" x2="56.7" y2="24"/>
+      <line x1="32" y1="32" x2="47.3" y2="53"/><line x1="32" y1="32" x2="16.7" y2="53"/>
+      <line x1="32" y1="32" x2="7.3" y2="24"/>
+    </g>
+    <polygon points="32,6 56.7,24 47.3,53 16.7,53 7.3,24" fill="none" stroke="#D1D1D1" stroke-width="1"/>
+    <polygon points="32,11.7 47.3,27 42.4,46.3 18.9,50.1 17.2,27.2" fill="rgba(221,242,71,.55)" stroke="var(--deep)" stroke-width="1.6" stroke-linejoin="round"/>
+  </svg>
+</div>`;
+function renderTfcards(){ document.querySelectorAll('.tfcard-mount').forEach(box=>box.innerHTML=TFCARD_HTML); }
+
+function renderOnboardingSheet(){
+  const done=obDone(), tot=onboarding.steps.length, next=obNext();
+  document.getElementById('ob-dots').innerHTML=onboarding.steps.map((s,i)=>`<div class="ob-dot ${s.done?'on':''}" data-i="${i}"></div>`).join('');
+  document.getElementById('ob-frac').textContent=done+'/'+tot;
+  document.getElementById('ob-steps').innerHTML=onboarding.steps.map(s=>{
+    const cls=s.done?'done':(s===next?'next':'todo');
+    const ic=s.done?`<svg class="ic sm" viewBox="0 0 24 24" style="width:16px;height:16px"><use href="#i-check"/></svg>`
+                   :(s===next?`<svg class="ic sm" viewBox="0 0 24 24" style="width:15px;height:15px"><path d="M9 5l7 7-7 7"/></svg>`:'');
+    const fillable=!!STEP_FIELDS[s.id];
+    const badge=s.done?(fillable?`<span class="ob-badge ob-edit">modifier</span>`:'')
+                      :(s===next?`<span class="ob-badge">à faire</span>`:'');
+    const tap=fillable?` role="button" style="cursor:pointer" onclick="openStep('${s.id}')"`:'';
+    return `<div class="ob-step ${cls}"${tap}><div class="ob-ic">${ic}</div>
+      <div class="ob-l"><div class="ob-t">${s.label}</div><div class="ob-s">${s.sub}</div></div>${badge}</div>`;
+  }).join('');
+  const cta=document.getElementById('ob-cta'), lead=document.getElementById('ob-lead'), title=document.getElementById('ob-title');
+  if(!next){
+    title.textContent='Profil complété 🎉';
+    lead.textContent='Ton coach a tout en main pour personnaliser ton plan.';
+    cta.textContent='Voir mon profil'; cta.setAttribute('onclick','obFinish()');
+  } else {
+    title.textContent='Complète ton profil sportif';
+    lead.textContent=`Encore ${tot-done} étape${tot-done>1?'s':''} : ces infos aident ton coach à adapter ton plan.`;
+    cta.textContent='Reprendre : '+next.label; cta.setAttribute('onclick','obPrimary()');
+  }
+}
+
+function openOnboarding(){
+  document.getElementById('ob-back').style.display='none';
+  document.querySelector('#sheet-onboarding .ob-prog').style.display='';
+  document.getElementById('ob-form-view').style.display='none';
+  document.getElementById('ob-list-view').style.display='';
+  renderOnboardingSheet(); document.getElementById('overlay').classList.add('show'); document.getElementById('sheet-onboarding').classList.add('show'); }
+function closeOnboarding(dismissed){ document.getElementById('sheet-onboarding').classList.remove('show');
+  if(!anyOverlaySheet()) document.getElementById('overlay').classList.remove('show');
+  if(dismissed) toast('Pas de souci, on te le rappellera plus tard.'); }
+function obPrimary(){ const next=obNext(); if(!next){ obFinish(); return; } openStep(next.id); }
+function obFinish(){ closeOnboarding(false); render(); toast('Profil complété · ton plan est à jour 🎉'); }
+
+// Étape onboarding : wizard mono-sheet — la saisie vit DANS sheet-onboarding (vue formulaire),
+// pas dans un écran plein. La barre de progression 3/5 reste visible au-dessus.
+function openStep(id){
+  if(!STEP_FIELDS[id]){ toast('Cette étape se modifie dans l\'objectif ou le rituel'); return; }
+  currentStep=id;
+  if(!document.getElementById('sheet-onboarding').classList.contains('show')) openOnboarding();
+  const step=onboarding.steps.find(s=>s.id===id);
+  document.getElementById('ob-title').textContent=step.label;
+  document.getElementById('ob-lead').textContent=STEP_LEAD[id]||'';
+  document.getElementById('ob-back').style.display='';
+  document.querySelector('#sheet-onboarding .ob-prog').style.display='none'; // stepper déjà vu sur la liste
+  document.getElementById('ob-list-view').style.display='none';
+  document.getElementById('ob-form-view').style.display='';
+  renderStepFields();
+  document.getElementById('sheet-onboarding').scrollTop=0;
+}
+// Une étape est complète quand tous ses champs requis (non `optional`) ont une réponse.
+function stepComplete(id){ const a=(onboarding.steps.find(s=>s.id===id)||{}).answers||{};
+  return STEP_FIELDS[id].every(f=>f.optional||a[f.key]); }
+function renderStepFields(){
+  const step=onboarding.steps.find(s=>s.id===currentStep); step.answers=step.answers||{};
+  document.getElementById('ob-form-fields').innerHTML=STEP_FIELDS[currentStep].map(f=>{
+    const chips=f.opts.map(o=>`<button class="chip ${step.answers[f.key]===o.v?'sel':''}" onclick="selectStepChip('${f.key}','${o.v}')">${o.l}</button>`).join('');
+    const opt=f.optional?` <span class="q-opt">· optionnel</span>`:'';
+    return `<div class="q">${f.label}${opt}</div><div class="chips">${chips}</div>`;
+  }).join('');
+  const btn=document.getElementById('ob-form-save'); if(btn) btn.disabled=!stepComplete(currentStep);
+}
+function selectStepChip(key,v){ const step=onboarding.steps.find(s=>s.id===currentStep); step.answers=step.answers||{}; step.answers[key]=v; renderStepFields(); }
+function stepSummary(step){ const fs=STEP_FIELDS[step.id]; if(!fs||!step.answers) return step.sub;
+  const vals=fs.map(f=>{ const o=f.opts.find(x=>x.v===step.answers[f.key]); return o?o.l:null; }).filter(Boolean);
+  return vals.length?vals.join(' · '):step.sub; }
+// Revenir à la liste des étapes (dans la même sheet).
+function obShowList(){
+  currentStep=null;
+  document.getElementById('ob-back').style.display='none';
+  document.querySelector('#sheet-onboarding .ob-prog').style.display='';
+  document.getElementById('ob-form-view').style.display='none';
+  document.getElementById('ob-list-view').style.display='';
+  renderOnboardingSheet();
+}
+function saveStepSheet(){
+  if(!stepComplete(currentStep)){ toast('Complète les champs requis pour enregistrer'); return; }
+  const step=onboarding.steps.find(s=>s.id===currentStep), wasNot=!step.done, idx=onboarding.steps.indexOf(step);
+  step.done=true; step.sub=stepSummary(step);
+  render(); obShowList();
+  if(wasNot){
+    const dot=document.querySelector(`.ob-dot[data-i="${idx}"]`); if(dot){ dot.classList.add('just'); }
+    const fr=document.getElementById('ob-frac'); if(fr){ fr.classList.remove('bump'); void fr.offsetWidth; fr.classList.add('bump'); }
+    if(!obNext()) fireSparks(document.querySelector('.ob-prog'));
+  }
+  toast('Étape enregistrée ✓');
+}
+
+// Cycle de fin : échéance dépassée (6.3) — bottom sheet à la réouverture, 4 décisions.
+function openOverdue(){
+  const o=state.objectif; if(!o) return;
+  document.getElementById('ov-lead').innerHTML=`« ${o.phrase} » devait se terminer le ${fmtDate(o.echeance)}. Pas de pression, on fait le point ensemble.`;
+  document.getElementById('overlay').classList.add('show'); document.getElementById('sheet-overdue').classList.add('show');
+}
+function closeOverdue(){ document.getElementById('sheet-overdue').classList.remove('show');
+  if(!anyOverlaySheet()) document.getElementById('overlay').classList.remove('show'); }
+function overdueProlonger(){ closeOverdue(); openEdit(); openDatePicker(); }
+function overdueAjuster(){ closeOverdue(); openEdit(); }
+function overdueRedefinir(){ closeOverdue(); openEdit(); toast('Modifie, puis « C\'est un nouvel objectif »'); }
+function overdueCloturer(){
+  const o=state.objectif;
+  (state.history=state.history||[]).unshift({ phrase:o.phrase, meta:'clôturé · non atteint', issue:'non_atteint' });
+  state.objectif=null; state.releves=[];
+  closeOverdue(); render(); showScreen('home');
+  toast('Objectif clôturé · rangé dans ton parcours');
+}
+
+// Relance douce palier 3 (6.4) : porte de sortie sans culpabilité.
+function openRelance(){
+  const o=state.objectif; if(!o) return;
+  document.getElementById('rl-lead').innerHTML=`« ${o.phrase} » : ${daysSinceLast()} jours sans relevé. Aucune pression, qu'est-ce qu'on fait ?`;
+  document.getElementById('overlay').classList.add('show'); document.getElementById('sheet-relance').classList.add('show');
+}
+function closeRelance(){ document.getElementById('sheet-relance').classList.remove('show');
+  if(!anyOverlaySheet()) document.getElementById('overlay').classList.remove('show'); }
+function relanceContinuer(){ closeRelance(); toast('On continue · pose un point quand tu veux'); }
+function relancePause(){ state.objectif.statut='en_pause'; closeRelance(); render(); showScreen('home'); toast('Objectif mis en pause · reprends quand tu veux'); }
+function relanceAjuster(){ closeRelance(); openEdit(); }
+function relanceRedefinir(){ closeRelance(); openEdit(); toast('Modifie, puis « C\'est un nouvel objectif »'); }
 
 function renderHome(){
-  const box=document.getElementById('home-objective'), o=state.objectif;
+  const o=state.objectif;
+  let html;
   if(!o){
-    box.innerHTML=`<div class="hero" style="background:linear-gradient(135deg,#F3FAC3,#FAFBF1)">
+    html=`<div class="hero empty" style="background:linear-gradient(135deg,#F3FAC3,#FAFBF1)">
       <div class="kick">Ton objectif</div><h2>Fixe ton objectif</h2>
       <div class="sub">Débloque ta carte de suivi sur l'accueil.</div>
       <button class="cta" onclick="toast('Lancerait l\\'étape « objectif » de l\\'onboarding')">Définir mon objectif</button></div>`;
+    document.querySelectorAll('.objective-mount').forEach(box=>box.innerHTML=html);
+    return;
+  }
+  if(o.statut==='en_pause'){
+    html=`<div class="hero pause"><div class="kick">En pause</div><h2>${o.phrase}</h2>
+      <div class="sub">Objectif en pause. Reprends quand tu te sens prêt.</div>
+      <button class="cta" onclick="resumeObjectif()">Reprendre l'objectif</button></div>`;
+    document.querySelectorAll('.objective-mount').forEach(box=>box.innerHTML=html);
     return;
   }
   const real=state.releves.filter(r=>!r.stamp), last=real[real.length-1];
   const rsLabel=last?RESSENTI[last.ressenti].label:'à démarrer';
-  let mid='';
-  if(o.kind==='chiffre'){
-    const cur=lastValue();
-    mid=`<div class="barrow"><div class="bar"><i style="width:${valuePct()}%"></i></div><div class="pct">${valuePct()}%</div></div>
-         <div class="sub">${cur!=null?cur:'—'} / ${o.cible} ${o.unite} · reste ${daysLeft()} j · <b>${rsLabel}</b></div>`;
-  } else if(o.kind==='evenement'){
-    mid=`<div class="countdown">J-${daysLeft()}</div><div class="sub">jusqu'au jour J · <b>${rsLabel}</b></div>`;
-  } else {
-    mid=`<div class="barrow"><div class="bar"><i style="width:${timePct()}%"></i></div><div class="pct">${timePct()}%</div></div>
-         <div class="sub">reste ${daysLeft()} j · <b>${rsLabel}</b></div>`;
+  let bar='';
+  // chiffré → pas de barre dans le hero : un donut à droite, cohérent avec l'écran « Mon objectif »
+  if(o.kind==='evenement'){
+    bar=`<div class="countdown">J-${daysLeft()}</div>`;
+  } else if(o.kind!=='chiffre'){
+    bar=`<div class="countdown">${daysLeft()} j</div>`;
   }
-  box.innerHTML=`<div class="hero"><div class="glow"></div>
-      <div class="kick">Mon objectif</div><h2>${o.phrase}</h2>${mid}
+  let sub='';
+  if(o.kind==='chiffre'){ const cur=lastValue(); sub=`${cur!=null?cur:'—'} / ${o.cible} ${o.unite} · ${dueLabel()} · <b>${rsLabel}</b>`; }
+  else if(o.kind==='evenement'){ sub=`jusqu'au jour J · <b>${rsLabel}</b>`; }
+  else { sub=`restants · échéance ${fmtDate(o.echeance)} · <b>${rsLabel}</b>`; }
+
+  const lvl=relanceLevel(), neg=lvl>=1;
+  const kick = neg?'On fait le point ?':'Mon objectif';
+  const subHtml = neg?`Ça fait ${daysSinceLast()} jours sans relevé. Où en es-tu ?`:sub;
+  const barHtml = neg?`<div style="opacity:.4">${bar}</div>`:bar;
+  const prox=proximityMsg(); const proxHtml=(!neg&&prox)?`<div class="prox">${prox}</div>`:'';
+  const cur=lastValue()!=null?lastValue():'—';
+  const heroDonut=(o.kind==='chiffre'&&!neg)?donutSvg(valuePct(),cur+'','sur '+o.cible,'rgba(255,255,255,.55)'):'';
+  const glow=heroDonut?'':'<div class="glow"></div>';
+  const detBtn = lvl>=3?`<button class="cta det" onclick="openRelance()">Options</button>`
+                       :`<button class="cta det" onclick="showScreen('objectif')">Détail</button>`;
+  html=`<div class="hero${neg?' neglige':''}">${glow}
+      <div class="hero-top"><div class="hero-main">
+        <div class="kick">${kick}</div><h2>${o.phrase}</h2>${barHtml}<div class="sub">${subHtml}</div>${proxHtml}
+      </div>${heroDonut}</div>
       <div class="herobtns">
         <button class="cta" onclick="openCheckin()">Faire mon point</button>
-        <button class="cta det" onclick="showScreen('objectif')">Détail</button>
+        ${detBtn}
       </div></div>`;
+  document.querySelectorAll('.objective-mount').forEach(box=>box.innerHTML=html);
 }
+function resumeObjectif(){ state.objectif.statut='actif'; render(); toast('Objectif repris ✓'); }
 
 function renderObjectif(){
   const box=document.getElementById('obj-content'), o=state.objectif;
   if(!o){ box.innerHTML=`<div class="emptybox" style="margin-top:30px">Aucun objectif défini.</div>`; return; }
   let head='';
   if(o.kind==='chiffre'){
-    head=`<h2>${o.phrase}</h2><div class="bar"><i style="width:${valuePct()}%"></i></div>
-      <div class="meta">${lastValue()!=null?lastValue():'—'} / ${o.cible} ${o.unite} · ${valuePct()}% · reste ${daysLeft()} j (échéance ${fmtDate(o.echeance)})</div>`;
+    const cur=lastValue()!=null?lastValue():'—', prox=proximityMsg();
+    head=`<div class="objhead-row"><div class="oh-txt"><h2>${o.phrase}</h2>
+        <div class="meta">${cur} / ${o.cible} ${o.unite} · ${dueLabel()} (échéance ${fmtDate(o.echeance)})</div>
+        ${prox?`<div class="prox">${prox}</div>`:''}</div>
+      ${donutSvg(valuePct(), cur+'', 'sur '+o.cible)}</div>`;
   } else if(o.kind==='evenement'){
     head=`<h2>${o.phrase}</h2><div class="countdown">J-${daysLeft()}</div><div class="meta">jour J le ${fmtDate(o.echeance)}</div>`;
   } else {
-    head=`<h2>${o.phrase}</h2><div class="bar"><i style="width:${timePct()}%"></i></div>
-      <div class="meta">${timePct()}% du temps écoulé · reste ${daysLeft()} j (échéance ${fmtDate(o.echeance)})</div>`;
+    head=`<h2>${o.phrase}</h2><div class="countdown">${daysLeft()} j</div>
+      <div class="meta">restants · échéance ${fmtDate(o.echeance)}</div>`;
   }
   let rows='';
   [...state.releves].reverse().forEach(r=>{
     if(r.stamp){ rows+=`<div class="entry stamp"><div class="stampic">✎</div><div class="stamptxt">${r.note}</div></div>`; return; }
     const rs=RESSENTI[r.ressenti];
     const val=r.valeur!=null?`<b>${r.valeur} ${o.unite||''}</b> · `:'';
-    const tag=r.depart?`<span class="tag">Départ</span>`:'';
     const note=r.note?`<div class="note">« ${r.note} »</div>`:'';
     rows+=`<div class="entry"><div class="dot" style="background:${rs.color}"></div><div>
-        <div class="l1"><span class="when">${fmtDate(r.date)}</span> · ${val}<span class="rs" style="color:${rs.color}">${rs.label}</span>${tag}</div>${note}
+        <div class="l1"><span class="when">${fmtDate(r.date)}</span> · ${val}<span class="rspill" style="background:color-mix(in srgb, ${rs.color} 16%, #fff); color:${rs.color}">${rs.label}</span></div>${note}
       </div></div>`;
   });
+  const view=state.journalView||'liste';
+  const liste=`<div class="timeline">${rows||`<div class="emptyj">${o.kind==='chiffre'?'Ajoute ton premier point : tu pars de combien ?':'Ajoute ta première entrée pour démarrer ton suivi.'}</div>`}</div>`;
+  const body=view==='courbe'?renderProgressGraph(o):liste;
   box.innerHTML=`<div class="objhead">${head}</div>
     <button class="btn-primary" onclick="openCheckin()">Faire mon point</button>
-    <div class="jrow"><div class="jtitle2">Mon journal</div><button class="jlink" onclick="showScreen('parcours')">Mon parcours →</button></div>
-    <div class="timeline">${rows||`<div class="emptyj">${o.kind==='chiffre'?'Ajoute ton premier point : tu pars de combien ?':'Ajoute ta première entrée pour démarrer ton suivi.'}</div>`}</div>
-    <button class="atteint-link" onclick="openAtteinte()">${o.kind==='evenement'?"C'est fait, j'y suis allé ✓":"J'ai atteint cet objectif ✓"}</button>`;
+    <div class="jrow"><div class="jtitle2">Mon journal</div>
+      <div class="jtoggle">
+        <button class="jt ${view==='liste'?'on':''}" onclick="setJournalView('liste')">Liste</button>
+        <button class="jt ${view==='courbe'?'on':''}" onclick="setJournalView('courbe')">Courbe</button>
+      </div></div>
+    ${body}
+    <div class="obj-foot">
+      <button class="btn-achieve" onclick="openAtteinte()"><svg class="ic" viewBox="0 0 24 24"><use href="#i-check"/></svg>${o.kind==='evenement'?"C'est fait, j'y suis allé":"J'ai atteint cet objectif"}</button>
+      <button class="atteint-link" onclick="showScreen('parcours')">Voir mon parcours</button>
+    </div>`;
+}
+function setJournalView(v){ state.journalView=v; renderObjectif(); }
+// Chiffré → courbe de valeur (métrique) ; sinon → courbe de ressenti.
+function renderProgressGraph(o){ return o.kind==='chiffre' ? renderValueGraph(o) : renderRessentiGraph(o); }
+// Marqueurs auj. + échéance, gère l'échéance future (à droite) ou passée (à sa vraie place, en orange).
+function graphMarkers(o,xFor,dataR,R,T,B){
+  const today=new Date(TODAY_ISO).getTime(), echFuture=new Date(o.echeance).getTime()>today;
+  let s=`<line x1="${dataR}" y1="${T-2}" x2="${dataR}" y2="${B}" stroke="#C9C9C4" stroke-width="1" stroke-dasharray="2 3"/>`
+       +`<text x="${dataR}" y="${B+13}" text-anchor="middle" font-size="9" fill="#A8A8A2" font-weight="600">auj.</text>`;
+  if(echFuture){
+    s+=`<line x1="${dataR}" y1="${B}" x2="${R}" y2="${B}" stroke="#CFCFC9" stroke-width="1" stroke-dasharray="1.5 3"/>`
+      +`<line x1="${R}" y1="${T-2}" x2="${R}" y2="${B}" stroke="var(--deep)" stroke-width="1.3" stroke-dasharray="3 3"/>`
+      +`<text x="${R}" y="${B+13}" text-anchor="end" font-size="9" fill="var(--deep)" font-weight="700">échéance</text>`;
+  } else {
+    const ex=xFor(o.echeance);
+    s+=`<line x1="${ex}" y1="${T-2}" x2="${ex}" y2="${B}" stroke="#D98A5B" stroke-width="1.3" stroke-dasharray="3 3"/>`
+      +`<text x="${ex}" y="${T+6}" text-anchor="middle" font-size="9" fill="#D98A5B" font-weight="700">échéance</text>`;
+  }
+  return s;
+}
+function renderValueGraph(o){
+  const pts=state.releves.filter(r=>r.valeur!=null).sort((a,b)=>a.date<b.date?-1:1);
+  if(pts.length<1) return `<div class="emptyj" style="margin:8px 16px 2px">Ajoute ton premier point pour voir ta progression.</div>`;
+  const W=343,H=158, L=40, R=W-16, T=20, B=116, dataR=R-54;
+  const cible=o.cible, ymax=cible, ymin=0;
+  const yFor=v=>B-((v-ymin)/Math.max(1,(ymax-ymin)))*(B-T);
+  const cree=new Date(o.cree).getTime(), today=new Date(TODAY_ISO).getTime(), span=Math.max(1,today-cree);
+  const xFor=iso=>L+Math.max(0,Math.min(1,(new Date(iso).getTime()-cree)/span))*(dataR-L);
+  const yc=yFor(cible);
+  let grid=`<line x1="${L}" y1="${yc}" x2="${R}" y2="${yc}" stroke="var(--deep)" stroke-width="1.2" stroke-dasharray="4 3"/>`
+    +`<text x="${L}" y="${yc-5}" font-size="9.5" fill="var(--deep)" font-weight="700">cible ${cible}</text>`
+    +`<line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#E2E2DD" stroke-width="1"/>`;
+  let mark=graphMarkers(o,xFor,dataR,R,T,B);
+  const xy=pts.map(r=>[xFor(r.date),yFor(r.valeur)]);
+  const line=pts.length>1?`<polyline points="${xy.map(p=>p.map(n=>n.toFixed(1)).join(',')).join(' ')}" fill="none" stroke="var(--deep)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`:'';
+  const dots=xy.map(p=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4.5" fill="var(--deep)" stroke="#fff" stroke-width="1.6"/>`).join('');
+  const last=pts[pts.length-1], lx=xFor(last.date), ly=yFor(last.valeur);
+  const lab=`<text x="${lx.toFixed(1)}" y="${(ly-9).toFixed(1)}" text-anchor="middle" font-size="10.5" fill="var(--deep)" font-weight="700">${last.valeur}</text>`;
+  return `<div class="rgraph"><div class="cap">Ta progression vers la cible · ${o.unite}</div>
+    <svg viewBox="0 0 ${W} ${H}" width="100%">${grid}${mark}${line}${dots}${lab}</svg></div>`;
+}
+function renderRessentiGraph(o){
+  const pts=state.releves.filter(r=>r.ressenti);
+  if(pts.length<1) return `<div class="emptyj" style="margin:8px 16px 2px">Ajoute des points pour voir ta courbe de ressenti.</div>`;
+  const W=343,H=158, L=66, R=W-16, T=14, B=116, dataR=R-54;
+  const levels=['loin','en_voie','presque','jy_suis'];
+  const SHORT={loin:'loin',en_voie:'en voie',presque:'presque',jy_suis:"j'y suis"};
+  const yFor=rs=>B-(levels.indexOf(rs)/3)*(B-T);
+  const cree=new Date(o.cree).getTime(), today=new Date(TODAY_ISO).getTime(), span=Math.max(1,today-cree);
+  const xFor=iso=>L+Math.max(0,Math.min(1,(new Date(iso).getTime()-cree)/span))*(dataR-L);
+  let grid='';
+  levels.forEach(lv=>{ const y=yFor(lv);
+    grid+=`<line x1="${L}" y1="${y}" x2="${R}" y2="${y}" stroke="#E2E2DD" stroke-width="1"/>`
+        +`<text x="${L-7}" y="${y+3.5}" text-anchor="end" font-size="9.5" fill="#8A8B86" font-weight="600">${SHORT[lv]}</text>`; });
+  let mark=graphMarkers(o,xFor,dataR,R,T,B);
+  let dots='';
+  [...pts].sort((a,b)=>a.date<b.date?-1:1).forEach(r=>{ const x=xFor(r.date), y=yFor(r.ressenti), c=RESSENTI[r.ressenti].color;
+    dots+=`<circle cx="${x}" cy="${y}" r="5" fill="${c}" stroke="#fff" stroke-width="1.6"/>`; });
+  return `<div class="rgraph"><div class="cap">Ton ressenti au fil du temps</div>
+    <svg viewBox="0 0 ${W} ${H}" width="100%">${grid}${mark}${dots}</svg></div>`;
 }
 
 const PARCOURS_PAST=[
@@ -556,10 +1197,14 @@ const PARCOURS_PAST=[
   { phrase:"Faire 50 pompes d'affilée", meta:"atteint · 90 jours", issue:"atteint" },
 ];
 function pcRow(phrase,meta,issue){
-  const done=issue==='atteint', repl=issue==='remplace';
-  const ic=done?'#i-check':(repl?'#i-edit':'#i-timer');
-  const badge=done?`<span class="pc-badge done">atteint</span>`:(repl?`<span class="pc-badge">remplacé</span>`:`<span class="pc-badge">en cours</span>`);
-  return `<div class="pc-row ${done||repl?'':'cur'}"><div class="pc-ic" style="color:${done?'var(--r-presque)':'var(--deep)'}"><svg class="ic sm" viewBox="0 0 24 24"><use href="${ic}"/></svg></div>`
+  const done=issue==='atteint', repl=issue==='remplace', miss=issue==='non_atteint', cur=issue==='en_cours';
+  const ic=done?'#i-check':(repl?'#i-edit':(miss?'#i-box':'#i-timer'));
+  const col=done?'var(--pos-fg)':(miss?'var(--gray)':'var(--deep)');
+  const badge=done?`<span class="pc-badge done">atteint</span>`
+    :(repl?`<span class="pc-badge">remplacé</span>`
+    :(miss?`<span class="pc-badge">non atteint</span>`
+    :`<span class="pc-badge">en cours</span>`));
+  return `<div class="pc-row ${cur?'cur':''}"><div class="pc-ic" style="color:${col}"><svg class="ic sm" viewBox="0 0 24 24"><use href="${ic}"/></svg></div>`
     +`<div><div class="pc-title">${phrase}</div><div class="pc-meta">${meta}</div></div>${badge}</div>`;
 }
 function renderParcours(){
@@ -573,9 +1218,11 @@ function showScreen(name){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
   document.querySelector('.screen.active').scrollTop=0;
+  renderTabbars();
 }
 function loadScenario(name){ state=S(SCENARIOS[name]); state._name=name;
-  const d=document.getElementById('demo'); if(d) d.classList.remove('open'); render(); showScreen('home'); }
+  const d=document.getElementById('demo'); if(d) d.classList.remove('open'); render(); showScreen('home');
+  if(isOverdue()) openOverdue(); }
 
 function openCheckin(){
   const o=state.objectif; if(!o) return; pendingRessenti=null;
@@ -603,10 +1250,42 @@ function submitCheckin(){
   if(reached) setTimeout(openAtteinte,350); else toast('Point ajouté à ton journal ✓');
 }
 
+// Date picker (repris de l'onboarding, pour cohérence graphique)
+const MOIS_LONG=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const MOIS_COURT=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+const TODAY_ISO='2026-06-29';
+let dpView='';
+function formatDateFr(iso){ if(!iso) return ''; const p=iso.split('-'); if(p.length!==3) return iso;
+  return parseInt(p[2],10)+' '+(MOIS_COURT[parseInt(p[1],10)-1]||'')+' '+p[0]; }
+function setDateLabel(iso){ const lab=document.getElementById('ed-date-label');
+  lab.textContent=iso?formatDateFr(iso):'Choisis une date'; lab.classList.toggle('df-ph',!iso); }
+function openDatePicker(){ const cur=document.getElementById('ed-date').value;
+  dpView=(cur||TODAY_ISO).slice(0,7); renderDatePicker();
+  document.getElementById('dp-overlay').classList.add('show'); document.getElementById('dp-sheet').classList.add('show'); }
+function closeDatePicker(){ document.getElementById('dp-overlay').classList.remove('show'); document.getElementById('dp-sheet').classList.remove('show'); }
+function dpShiftMonth(delta){ const [y,m]=dpView.split('-').map(Number); const d=new Date(y,(m-1)+delta,1);
+  dpView=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); renderDatePicker(); }
+function dpPick(iso){ document.getElementById('ed-date').value=iso; setDateLabel(iso); closeDatePicker(); }
+function renderDatePicker(){
+  const sel=document.getElementById('ed-date').value;
+  document.getElementById('dp-head').textContent=sel?formatDateFr(sel):'Choisis une date';
+  const [vy,vm]=dpView.split('-').map(Number);
+  document.getElementById('dp-month').textContent=MOIS_LONG[vm-1]+' '+vy;
+  const first=new Date(vy,vm-1,1), lead=(first.getDay()+6)%7, dim=new Date(vy,vm,0).getDate();
+  let cells='';
+  for(let i=0;i<lead;i++) cells+=`<div class="dp-cell empty"></div>`;
+  for(let d=1;d<=dim;d++){
+    const iso=vy+'-'+String(vm).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const cls='dp-cell'+(iso===sel?' sel':'')+(iso<=TODAY_ISO?' past':'');
+    cells+=iso<=TODAY_ISO?`<div class="${cls}">${d}</div>`:`<button class="${cls}" onclick="dpPick('${iso}')">${d}</button>`;
+  }
+  document.getElementById('dp-grid').innerHTML=cells;
+}
+
 function openEdit(){
   const o=state.objectif; if(!o) return;
   document.getElementById('ed-phrase').value=o.phrase;
-  document.getElementById('ed-date').value=o.echeance;
+  document.getElementById('ed-date').value=o.echeance; setDateLabel(o.echeance);
   const ch=document.getElementById('ed-chiffre');
   if(o.kind==='chiffre'){ ch.style.display='block'; document.getElementById('ed-cible').value=o.cible; document.getElementById('ed-unite').value=o.unite; }
   else ch.style.display='none';
@@ -660,21 +1339,13 @@ function fireSparks(host){
     host.appendChild(s); setTimeout(()=>s.remove(),600);
   }
 }
-function bumpStreak(el){
-  const st=el.querySelector('.streak'); if(!st) return;
-  const base=parseInt(st.dataset.base)||4;
-  st.textContent='🔥 '+(base+1)+' j';
-  st.classList.remove('bump'); void st.offsetWidth; st.classList.add('bump');
-}
 function toggleRituel(el){
   const wasDone=el.classList.contains('done');
   el.classList.toggle('done');
   if(!wasDone){
     el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
-    fireSparks(el.querySelector('.chk')); bumpStreak(el);
+    fireSparks(el.querySelector('.chk'));
     if(navigator.vibrate) navigator.vibrate(12);
-  } else {
-    const st=el.querySelector('.streak'); if(st){ st.classList.remove('bump'); st.textContent='🔥 '+(parseInt(st.dataset.base)||4)+' j'; }
   }
 }
 
@@ -686,11 +1357,21 @@ function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg
   const q=new URLSearchParams(location.search), sc=q.get('scenario');
   if(sc&&SCENARIOS[sc]) state=S(SCENARIOS[sc]);
   state._name=(sc&&SCENARIOS[sc])?sc:'chiffre';
+  if(q.get('jview')) state.journalView=q.get('jview');
+  if(q.get('from')==='onboarding'){ const ph=document.querySelector('.phone'); if(ph) ph.classList.add('enter-right');
+    setTimeout(()=>document.documentElement.classList.remove('from-onboarding'), 240); }
   render();
   const scr=q.get('screen'); if(scr) showScreen(scr);
   if(q.get('sheet')==='1') openCheckin();
+  if(q.get('onboarding')==='1') openOnboarding();
   if(q.get('celebrate')==='1') atteinteOui();
   if(q.get('edit')==='1') openEdit();
+  if(q.get('dp')==='1'){ openEdit(); openDatePicker(); if(q.get('m')){ dpView=q.get('m'); renderDatePicker(); } }
+  if(q.get('relance')==='1') openRelance();
+  if(q.get('step')) openStep(q.get('step'));
+  if(q.get('panel')==='1') document.getElementById('demo').classList.add('open');
+  // Échéance dépassée : sheet de décision à la réouverture (sauf si un autre sheet est déjà demandé).
+  if(isOverdue() && q.get('noov')!=='1' && !q.get('sheet') && !q.get('edit') && !q.get('dp') && !q.get('onboarding')) openOverdue();
 })();
 </script>
 </body>
